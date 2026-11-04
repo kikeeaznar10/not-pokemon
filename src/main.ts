@@ -13,6 +13,8 @@ import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
 import { ERROR_SCENE, type ErrorScene } from './scenes/error-scene';
 import { OVERWORLD_SCENE, type OverworldScene } from './scenes/overworld-scene';
 import { PRELOAD_SCENE, type PreloadScene } from './scenes/preload-scene';
+import type { ChoiceState } from './ui/choice-box';
+import type { DialogState } from './ui/dialog-box';
 
 const game = new Phaser.Game(createGameConfig('game'));
 
@@ -68,11 +70,23 @@ export interface E2EHooks {
   debugMode(): string | null;
   /** Sound key of the zone music playing (or fading in), or `null`. */
   currentMusic(): string | null;
-  /** True while the overworld ignores movement (warp fade or debug menu). */
+  /** True while the overworld ignores movement (warp fade, debug menu, dialogue or choice box). */
   overworldLocked(): boolean;
+  /** NPCs on the current map: id, tile (the step's start while moving), facing, moving, talking. `[]` outside the overworld. */
+  npcs(): { id: string; x: number; y: number; facing: Facing; moving: boolean; talking: boolean }[];
+  /** The open dialogue box (page, visible text, full text, typed, more, voicePlays), or `null`. */
+  dialogue(): DialogState | null;
+  /** Open a ChoiceBox in the overworld with these options (test helper). */
+  openChoice(options: string[]): void;
+  /** The open choice box (options, cursor), or `null`. */
+  choice(): ChoiceState | null;
+  /** Index chosen in the last `openChoice`, `null` if cancelled with B, `undefined` while none. */
+  choiceResult(): number | null | undefined;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
+  const overworld = (): OverworldScene | null =>
+    game.scene.isActive(OVERWORLD_SCENE) ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene) : null;
   const preload = (): PreloadScene => game.scene.getScene(PRELOAD_SCENE) as PreloadScene;
   const hooks: E2EHooks = {
     activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
@@ -111,6 +125,11 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     overworldLocked: () =>
       game.scene.isActive(OVERWORLD_SCENE) &&
       (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene).isLocked(),
+    npcs: () => overworld()?.npcList() ?? [],
+    dialogue: () => overworld()?.dialogState() ?? null,
+    openChoice: (options) => overworld()?.openChoice(options),
+    choice: () => overworld()?.choiceState() ?? null,
+    choiceResult: () => overworld()?.choiceResult(),
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

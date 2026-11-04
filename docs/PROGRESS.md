@@ -10,7 +10,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M2 — Battle and rules logic (no graphics)
 - [x] M3 — Overworld: one map, movement, input
 - [x] M4 — Maps, warps and interiors
-- [ ] M5 — Dialogue and talking NPCs
+- [x] M5 — Dialogue and talking NPCs
 - [ ] M6 — Battle scene
 - [ ] M7 — Wild encounters, catching and merging
 - [ ] M8 — Enemy NPCs
@@ -146,6 +146,26 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   walkable`; the interior is centred; music switches test → interior and stays on test → test_east; teleport menu.
   Music is only checked by key (headless browsers have no audible output); the crossfade is unit-tested.
 
+### M5
+
+- Built: `ui/dialog-box.ts` (512 × 80, types at `TEXT_CPS` 30/s, A reveals then advances, blinking arrow when more
+  follows, word wrap, voice every `VOICE_EVERY_CHARS` 3 chars), `ui/choice-box.ts` (+ `ui/cursor.ts`), `world/npc.ts`
+  (NPCs of the current zone spawn, wander, block), talking in `OverworldScene` (NPC turns to the player, stops,
+  says its lines; player frozen until the last box). Rules are pure and tested: `logic/dialogue.ts`,
+  `logic/npc-wander.ts`, `logic/talk.ts` (healer `[curar]` before its dialogue, storage `[caja]` after, until M9).
+- Hooks: `npcs()`, `dialogue()`, `openChoice()`, `choice()`, `choiceResult()`; `overworldLocked()` now also covers an
+  open box (`tests/README.md`). Files outside the M5 list: the three `src/logic/` files, `constants.ts`
+  (`TEXT_CPS`, `VOICE_EVERY_CHARS`), `movement.ts` (`renderPosition`/`walkFrame` accept NPC state), `ui/cursor.ts`,
+  `main.ts` (hooks), `es.json` (`npc.healer_placeholder`, `npc.storage_placeholder`), READMEs.
+- Rules chosen (Open questions › Raised in M5): NPCs never step on warp tiles; both tiles of a step in progress are
+  taken (player and NPCs), so nobody can share a tile; A talks to an NPC standing on, or arriving at, the faced tile;
+  NPCs take priority over `action` warps; enemy NPCs only talk for now (sight and battles are M8).
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m5-dialogue.spec.ts`): a talker injected
+  into `npcs.json` (route interception, no code change) appears, blocks, turns and talks; long text wraps and
+  continues on further boxes with every word kept; healer/storage placeholders; choice box; three wanderers + a
+  randomly walking player never leave the rectangle or share a tile, watched 20 s per profile and once for 2 minutes
+  (desktop). For M6/M7: reuse `DialogBox`/`ChoiceBox` (one per scene, call `update` each frame while open).
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -157,6 +177,18 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M5 (safe assumptions in brackets)
+
+- [ ] The plan asks for a pixel font, but no font asset exists. [Browser monospace at 14 px in the dialogue and
+  choice boxes; swap in a pixel font with the real art.]
+- [ ] NPC sprites are single 32 × 32 placeholders, so facing cannot be seen. [`world/npc.ts` treats a 64 × 128 image
+  as a sheet with the player's layout and shows facing/walk frames; other sizes are drawn still. Real NPC art should
+  use the sheet layout.]
+- [ ] What happens to a dialogue string too long for one box? [It continues on extra boxes; no text is cut.]
+- [ ] May wandering NPCs stand on warp tiles (doors, edges)? [No, they could block a door.]
+- [ ] Does B advance dialogue? [No, only A, as the plan says; B cancels a ChoiceBox.]
+- [ ] Talking to an enemy NPC before M8. [It says its `dialogue`; no sight check or battle yet.]
 
 ### Raised in M4 (safe assumptions in brackets)
 

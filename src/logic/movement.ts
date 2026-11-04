@@ -111,8 +111,8 @@ export function updateMovement(
   return { state: next.step ? { ...next, hold: null } : next, events };
 }
 
-/** Position in tiles (fractional while stepping), for drawing. */
-export function renderPosition(state: MoveState): { x: number; y: number } {
+/** Position in tiles (fractional while stepping), for drawing. Also used for NPCs (M5). */
+export function renderPosition(state: Pick<MoveState, 'x' | 'y' | 'step'>): { x: number; y: number } {
   if (!state.step) return { x: state.x, y: state.y };
   const t = Math.min(1, state.step.elapsed / WALK_MS);
   const { from, to } = state.step;
@@ -120,6 +120,6 @@ export function renderPosition(state: MoveState): { x: number; y: number } {
 }
 
 /** Walk frame to show: 1 (stride) during the first half of a step, else 0 (standing). */
-export function walkFrame(state: MoveState): 0 | 1 {
+export function walkFrame(state: Pick<MoveState, 'step'>): 0 | 1 {
   return state.step && state.step.elapsed < WALK_MS / 2 ? 1 : 0;
 }

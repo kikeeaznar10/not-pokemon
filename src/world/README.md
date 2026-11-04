@@ -6,5 +6,7 @@
 | `camera.ts` | `cameraBounds` (M4): map bounds, or a screen-sized range centred on maps smaller than the screen. |
 | `player.ts` | `Player`: the player sprite, driven by `src/logic/movement.ts` (grid steps, tap-to-turn). Sheet `assets/sprites/player.png`: 32 × 32 frames, columns stand/stride, rows down/left/right/up. |
 
-Planned: `npc.ts` (M5), encounter zones (M7). Warp rules are pure and live in `src/logic/warp.ts`. Map reading (solid cells, spawn points) is
+| `npc.ts` | `NpcActor` (M5): one NPC from `npcs.json` on the current map, driven by `src/logic/npc-wander.ts`; `npcsOnMap`. A 64 × 128 sprite is used as a sheet (player layout: columns stand/stride, rows down/left/right/up); any other size is drawn as one still image. |
+
+Planned: encounter zones (M7). Warp rules are pure and live in `src/logic/warp.ts`. Map reading (solid cells, spawn points) is
 pure and lives in `src/data/tiled.ts`.

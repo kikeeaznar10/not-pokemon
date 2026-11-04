@@ -7,5 +7,7 @@
   "debug.map": "Mapa: {map}",
   "debug.tile": "Casilla: {x}, {y}",
   "debug.fps": "FPS: {fps}",
-  "debug.teleport_title": "Teletransporte (A: ir, B: cerrar)"
+  "debug.teleport_title": "Teletransporte (A: ir, B: cerrar)",
+  "npc.healer_placeholder": "[curar]",
+  "npc.storage_placeholder": "[caja]"
 }

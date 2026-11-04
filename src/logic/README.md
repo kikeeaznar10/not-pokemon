@@ -8,7 +8,7 @@ caller's job (e.g. `parseSave` returns `warnings[]`). Tunable numbers: `constant
 
 | Module | Rules (docs/PLAN.md › Game rules) |
 | --- | --- |
-| `constants.ts` | `DAMAGE_SCALE`, `DAMAGE_ROLL`, `MOD_MIN`, `MOD_MAX`, `MERGE_PERCENT`, `MERGE_CAP`, `TEAM_MAX`, `NPC_COOLDOWN_DISTANCE`, `SAFE_STEPS`, `EUROS_MAX`, `NPC_LOW_HP`, `ITEM_COUNT_MAX`, `SAVE_VERSION`. |
+| `constants.ts` | `DAMAGE_SCALE`, `DAMAGE_ROLL`, `MOD_MIN`, `MOD_MAX`, `MERGE_PERCENT`, `MERGE_CAP`, `TEAM_MAX`, `NPC_COOLDOWN_DISTANCE`, `SAFE_STEPS`, `EUROS_MAX`, `NPC_LOW_HP`, `ITEM_COUNT_MAX`, `SAVE_VERSION`; M3–M5 add `WALK_MS`, `TURN_TAP_MS`, `WARP_FADE_MS`, `MUSIC_FADE_MS`, `TEXT_CPS`, `VOICE_EVERY_CHARS`. |
 | `instance.ts` | Owned flexymon `{ uid, speciesId, bonus, currentHp }`: create, stat value, max HP, heal, full heal, revive, damage, fainted. |
 | `modifiers.ts` | Buff/debuff list per active flexymon: effective stat (clamp 25–250 %, floor, min 1), same source replaces, tick per round. |
 | `damage.ts` | Hit roll, damage roll and formula, heal-attack amount. |
@@ -22,6 +22,9 @@ caller's job (e.g. `parseSave` returns `warnings[]`). Tunable numbers: `constant
 | `npc-state.ts` | `ready` / `cooldown`, sight line with blockers, approach path, cooldown end (Manhattan > 6 or other map), reset all. |
 | `save.ts` | `GameState`, zod `saveSchema`, `serializeSave`, `parseSave` (validate + migrate; never throws). |
 | `names.ts` | Name normalisation for secret names (M1). |
+| `dialogue.ts` | Dialogue box rules (M5): word wrap, strings → pages (a string too long for one box continues on the next), typing at `TEXT_CPS`, voice every `VOICE_EVERY_CHARS` characters (1st, 4th, 7th…), A = reveal / next. |
+| `npc-wander.ts` | NPC movement (M5): random wait in `stepEveryMs`, one random tile inside the wander rectangle, never onto a blocked tile; both tiles count as taken during a step; talking pauses the NPC and turns it to the player. RNG order documented in the file. |
+| `talk.ts` | What an NPC says by type (M5): dialogue; healer = `[curar]` then dialogue; storage = dialogue then `[caja]` (placeholders until M9). |
 
 ## Battle events (`battle.ts`)
 

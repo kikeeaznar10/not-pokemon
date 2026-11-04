@@ -54,3 +54,9 @@ export const WARP_FADE_MS = 200;
 
 /** Zone music crossfade (and first fade-in) duration (ms, M4). */
 export const MUSIC_FADE_MS = 500;
+
+/** Dialogue text types out at this many characters per second (M5). */
+export const TEXT_CPS = 30;
+
+/** The speaking NPC's `voice` plays once every this many typed characters (M5). */
+export const VOICE_EVERY_CHARS = 3;

@@ -16,6 +16,14 @@
  *   target, fades in and unlocks. Safe steps are reset on every map entry.
  * - Debug teleport (M4): `debug:teleport` moves the player to a zone's `default` spawn the same way;
  *   while `debug:menu` is open the player does not move.
+ * - NPCs (M5): every `npcs.json` entry whose `map` is this zone appears on its spawn tile and wanders
+ *   (`src/world/npc.ts`, rules in `src/logic/npc-wander.ts`). NPCs never step onto solid tiles, warp
+ *   tiles, the player or another NPC; the player can never step onto an NPC. While a step is in progress
+ *   both its tiles count as taken, for the player and for NPCs.
+ * - Talking (M5): standing still, A while facing an NPC (one standing on, or arriving at, the tile in
+ *   front) makes it turn to the player and stop; its lines (`src/logic/talk.ts`) show in the DialogBox
+ *   with its `voice`. The player cannot move until the last box closes. NPCs take priority over
+ *   `action` warps.
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
  *   the player and after every step.
  */
@@ -24,14 +32,20 @@ import { TILE_SIZE } from '../config/game';
 import { events } from '../core/events';
 import { input } from '../core/input';
 import { log } from '../core/log';
+import { rng } from '../core/rng';
 import { getGameData } from '../data/game-data';
 import type { Facing, Zone } from '../data/schemas';
 import { findSpawn, isBlocked, type MapInfo } from '../data/tiled';
+import { t } from '../i18n';
 import { WARP_FADE_MS } from '../logic/constants';
 import { resetSafeSteps } from '../logic/encounter';
 import { FACING_DELTA } from '../logic/npc-state';
-import { blockedWithWarps, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
+import { talkLines } from '../logic/talk';
+import { blockedWithWarps, insideWarp, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
+import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
+import { DialogBox, type DialogState } from '../ui/dialog-box';
 import { cameraBounds } from '../world/camera';
+import { NpcActor, npcsOnMap } from '../world/npc';
 import { Player } from '../world/player';
 
 /** Scene key of {@link OverworldScene}. */
@@ -62,7 +76,13 @@ export class OverworldScene extends Phaser.Scene {
   private zone!: Zone;
   private info!: MapInfo;
   private player: Player | null = null;
+  /** Solid tiles and map edges for the player (warp tiles outside the map are open). */
   private blocked: (x: number, y: number) => boolean = () => true;
+  private npcs: NpcActor[] = [];
+  private dialog: DialogBox | null = null;
+  private choice: ChoiceBox | null = null;
+  /** Result of the last {@link openChoice} (`undefined` = none chosen yet). For the E2E hooks. */
+  private lastChoice: number | null | undefined = undefined;
   /** True during a warp fade: the player cannot move. */
   private locked = false;
   private debugMenuOpen = false;
@@ -76,6 +96,9 @@ export class OverworldScene extends Phaser.Scene {
   init(data: OverworldData): void {
     this.target = data;
     this.player = null;
+    this.npcs = [];
+    this.dialog = null;
+    this.choice = null;
     this.locked = false;
     const zone = getGameData().zones.get(data.map);
     if (!zone) throw new Error(`Overworld: unknown zone "${data.map}"`);
@@ -109,6 +132,9 @@ export class OverworldScene extends Phaser.Scene {
     const x = this.target.x ?? spawn.x;
     const y = this.target.y ?? spawn.y;
     this.player = new Player(this, x, y, this.target.facing ?? 'down');
+    this.npcs = npcsOnMap(getGameData().npcs.values(), this.zone.id).map((n) => new NpcActor(this, n, rng));
+    this.dialog = new DialogBox(this);
+    this.choice = new ChoiceBox(this);
     this.safeSteps = resetSafeSteps();
 
     const cam = this.cameras.main;
@@ -140,10 +166,16 @@ export class OverworldScene extends Phaser.Scene {
   override update(_time: number, delta: number): void {
     const player = this.player;
     if (!player) return;
-    const frozen = this.locked || this.debugMenuOpen;
+    const dt = Math.min(delta, MAX_FRAME_MS);
+    const talking = this.isTalking();
+    if (this.dialog?.isOpen) this.dialog.update(dt);
+    else if (this.choice?.isOpen) this.choice.update();
+    for (const npc of this.npcs) npc.update(dt, (nx, ny) => this.blockedForNpc(npc, nx, ny), rng);
+
+    const frozen = this.locked || this.debugMenuOpen || talking;
     const dir = frozen ? null : input.direction();
     const fresh = dir !== null && input.justPressed(dir);
-    const moves = player.update(dir, Math.min(delta, MAX_FRAME_MS), this.blocked, fresh);
+    const moves = player.update(dir, dt, (px, py) => this.blockedForPlayer(px, py), fresh);
     if (moves.some((m) => m.type === 'step_end')) {
       this.emitMoved();
       const s = player.state;
@@ -156,6 +188,14 @@ export class OverworldScene extends Phaser.Scene {
     if (!frozen && input.justPressed('a') && !player.state.step) {
       const s = player.state;
       const d = FACING_DELTA[s.facing];
+      const npc = this.npcs.find((n) => {
+        const at = n.arrival();
+        return at.x === s.x + d.x && at.y === s.y + d.y;
+      });
+      if (npc) {
+        this.talkTo(npc);
+        return;
+      }
       const warp = warpAt(this.info.warps, s.x + d.x, s.y + d.y, 'action');
       if (warp) this.warpTo(warpDestination(warp, s));
     }
@@ -173,6 +213,73 @@ export class OverworldScene extends Phaser.Scene {
     });
   }
 
+  /** Start a conversation with `npc`; the player is frozen until the last box closes. */
+  private talkTo(npc: NpcActor): void {
+    const player = this.player;
+    if (!player || !this.dialog) return;
+    npc.beginTalk(player.state.facing);
+    log(`Overworld: talking to ${npc.npc.id}`);
+    this.dialog.open(talkLines(npc.npc, t), {
+      voice: npc.npc.voice,
+      onClose: () => npc.finishTalk(rng),
+    });
+  }
+
+  /** Player blocking: solid tiles, map edges (except warp tiles) and any tile an NPC occupies. */
+  private blockedForPlayer(x: number, y: number): boolean {
+    return this.blocked(x, y) || this.npcs.some((n) => n.occupies(x, y));
+  }
+
+  /** NPC blocking: solid tiles, map edges, warp tiles, the player's tiles and the other NPCs' tiles. */
+  private blockedForNpc(self: NpcActor, x: number, y: number): boolean {
+    if (isBlocked(this.info, x, y)) return true;
+    if (this.info.warps.some((w) => insideWarp(w, x, y))) return true;
+    const p = this.player?.state;
+    if (p && ((p.x === x && p.y === y) || (p.step && p.step.to.x === x && p.step.to.y === y))) return true;
+    return this.npcs.some((n) => n !== self && n.occupies(x, y));
+  }
+
+  /** True while a dialogue or choice box is open. */
+  isTalking(): boolean {
+    return !!(this.dialog?.isOpen || this.choice?.isOpen);
+  }
+
+  /** The NPCs on this map with their tile and state (for hooks and tests). */
+  npcList(): { id: string; x: number; y: number; facing: Facing; moving: boolean; talking: boolean }[] {
+    return this.npcs.map((n) => {
+      const s = n.state;
+      return { id: n.npc.id, x: s.x, y: s.y, facing: s.facing, moving: s.step !== null, talking: s.talking };
+    });
+  }
+
+  /** The open dialogue box, or `null`. */
+  dialogState(): DialogState | null {
+    return this.dialog?.state() ?? null;
+  }
+
+  /** The open choice box, or `null`. */
+  choiceState(): ChoiceState | null {
+    return this.choice?.state() ?? null;
+  }
+
+  /**
+   * Open a ChoiceBox with `options` (test hook; real uses arrive with M7/M9). The player is frozen until
+   * it closes; the result is read with {@link choiceResult}.
+   */
+  openChoice(options: string[]): void {
+    this.lastChoice = undefined;
+    this.choice?.open(options, {
+      onChoose: (i) => {
+        this.lastChoice = i;
+      },
+    });
+  }
+
+  /** Index chosen in the last {@link openChoice}, `null` if cancelled, `undefined` if none yet. */
+  choiceResult(): number | null | undefined {
+    return this.lastChoice;
+  }
+
   /** Debug: go to a zone's `default` spawn (tile 0, 0 if the map has none). */
   private teleport(zoneId: string): void {
     const loaded = getGameData().maps.get(zoneId);
@@ -188,9 +295,9 @@ export class OverworldScene extends Phaser.Scene {
     return { map: this.zone.id, x: s.x, y: s.y, facing: s.facing, moving: s.step !== null };
   }
 
-  /** True while input is locked (warp fade) or the debug menu is open. */
+  /** True while the player cannot move: warp fade, debug menu, or a dialogue/choice box is open. */
   isLocked(): boolean {
-    return this.locked || this.debugMenuOpen;
+    return this.locked || this.debugMenuOpen || this.isTalking();
   }
 
   private emitMoved(): void {

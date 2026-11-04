@@ -1,4 +1,4 @@
-## Milestone
+## Milestone (optional PR — milestones are pushed to `main` directly, see CLAUDE.md rule 10)
 
 M<number> — <name> (see `docs/PLAN.md`)
 

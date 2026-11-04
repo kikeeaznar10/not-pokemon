@@ -4,19 +4,20 @@ Flexymon is a browser game (desktop + mobile, landscape) in the style of the Gam
 monster-collecting RPGs, set in a cartoon Valencia region. It is built milestone by milestone
 (M0–M15) by separate, unrelated Claude Code sessions.
 
-**`docs/PLAN.md` is the source of truth.** If anything in this file disagrees with the plan,
-the plan wins; record the disagreement under "Open questions" in `docs/PROGRESS.md`.
+**`docs/PLAN.md` is the source of truth for the game** (rules, content format, milestones). If
+anything in this file disagrees with the plan, the plan wins; record the disagreement under
+"Open questions" in `docs/PROGRESS.md`. **Exception:** the workflow rules in "How to work" below
+(testing, documentation, pushing to `main`) replace the plan's branch/PR rules.
 
 ## How to work (every session)
 
 1. Before writing any code, read this file, `docs/PLAN.md` and `docs/PROGRESS.md`.
 2. Work on **exactly one milestone**: the first unticked one in `docs/PROGRESS.md` (or the one
    the user names). Do not start the next one, even if there is time left.
-3. Branch: `m<number>-<short-name>` (e.g. `m4-dialogue`), PR into `main`. If the session was
-   assigned a different branch name by the harness, use that branch and put the milestone in the
-   PR title (`M4 — Dialogue and talking NPCs`).
+3. Branch: develop on `m<number>-<short-name>` (e.g. `m4-dialogue`), or on the branch the
+   harness assigned to the session. Commit there while working.
 4. Only change files listed in the milestone, plus tests. If you must touch another file,
-   explain why in the PR description.
+   explain why in the milestone summary in `docs/PROGRESS.md`.
 5. Never hard-code game content (creature names, numbers, dialogue, prices) in TypeScript.
    Content lives in `public/data/*.json`; UI strings live in `src/i18n/es.json`. Code reads them.
    Tunable rule numbers live in `src/logic/constants.ts`.
@@ -24,17 +25,34 @@ the plan wins; record the disagreement under "Open questions" in `docs/PROGRESS.
    "Open questions", and finish the milestone with the safest assumption. Never silently invent rules.
 7. When finished, tick the milestone in `docs/PROGRESS.md` and add a 3–5 line summary: what was
    built, any deviation, anything the next session must know.
+8. **Document everything.** Every feature ships with its documentation in the same commit:
+   - a short doc comment (`/** ... */`) on every exported function, class, type and scene,
+     saying what it does and any non-obvious rule it follows;
+   - every new JSON field, map property, debug command, `__E2E__` helper or npm script described
+     in the relevant doc (`docs/PROGRESS.md` summary, the folder's `README.md`, and from M15
+     `docs/CONTENT.md`);
+   - any decision or deviation from the plan written in `docs/PROGRESS.md`.
+   Undocumented work is not done.
+9. **Test before pushing to `main`.** A milestone may only reach `main` when every check of the
+   Definition of done below passes: lint, typecheck, unit tests, build, Playwright, and every
+   "Done when" item verified in the running game. If anything fails, fix it first; never push a
+   red build to `main`, and never skip, disable or weaken a test to get green.
+10. **When a feature (milestone) is finished and tested, push it to `main`.** Bring the branch
+    up to date with `origin/main` first (`git fetch origin main` then rebase or merge), re-run the
+    checks if anything changed, then push: `git push origin HEAD:main`. Also push the working
+    branch. `main` must always contain only finished, tested, documented milestones.
 
 ### Definition of done (every milestone)
 
 - `npm run lint`, `npm run typecheck`, `npm test` and `npm run build` pass with zero errors.
 - Every item of the milestone's "Done when" list was checked in the running game. In a cloud
   session with no human at the browser, check it with Playwright (via the `window.__E2E__` hooks)
-  and look at screenshots; say in the PR which items were verified that way.
+  and look at screenshots; say in the milestone summary which items were verified that way.
 - `npx playwright test` passes (from M0 on, at least the smoke test).
 - No `console.log` except through `log()` in `src/core/log.ts`.
 - No new hard-coded content; no Spanish text inside `.ts` files.
-- `docs/PROGRESS.md` updated; PR opened.
+- Everything documented (rule 8); `docs/PROGRESS.md` updated.
+- Pushed to `main` (rule 10).
 
 ## Locked decisions (summary — full table in `docs/PLAN.md`)
 
@@ -121,7 +139,7 @@ playwright.config.ts       Playwright projects: desktop, android, android-landsc
 - Files `kebab-case.ts`, classes `PascalCase`, functions/variables `camelCase`, content ids
   `snake_case` (`portatil`, `bar_pacos`).
 - Commits in English, imperative, small and focused ("Add dialogue box").
-- Do not add dependencies beyond the plan's stack without saying why in the PR.
+- Do not add dependencies beyond the plan's stack without saying why in the milestone summary.
 
 ## Commands (scripts are created in M0)
 

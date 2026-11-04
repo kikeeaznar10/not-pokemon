@@ -68,14 +68,14 @@ anything in this file disagrees with the plan, the plan wins; record the disagre
 
 | Tool | Notes |
 | --- | --- |
-| Node.js LTS + npm | Version in `.nvmrc` (M0). |
-| TypeScript, `strict: true` | No `any` without a comment explaining why. |
+| Node.js LTS + npm | Node 22 (`.nvmrc`). |
+| TypeScript 6.0, `strict: true` | No `any` without a comment explaining why. Stay on 6.0 until `typescript-eslint` supports 7. |
 | Vite | Vanilla TS template; output `dist/`, fully static. |
-| Phaser (latest stable, currently the 4.x line) | Pinned to an exact version, no `^`. |
+| Phaser | Pinned exactly (`4.2.1`, no `^`); all dependencies are pinned with `npm install -E`. |
 | Zod | One schema per JSON file in `src/data/schemas/`. |
 | Vitest | Unit tests; required for everything in `src/logic/`. |
-| Playwright | Browser tests in `tests/e2e/` (already set up, see below). |
-| ESLint + Prettier | `npm run lint`. |
+| Playwright (`@playwright/test` 1.64.1) | Browser tests in `tests/e2e/`. The version matches the browsers pre-installed in cloud sessions. |
+| ESLint (flat config, `eslint.config.js`) + Prettier | `npm run lint` runs both; `npm run format` fixes formatting. |
 | Tiled | Maps as `.tmj` (Tiled JSON, CSV layers, embedded tilesets). |
 
 Screen: base resolution **512 × 288** (16 × 9 tiles of 32 px), `pixelArt: true`,
@@ -144,14 +144,15 @@ playwright.config.ts       Playwright projects: desktop, android, android-landsc
 ## Commands (scripts are created in M0)
 
 - `npm run dev` — dev server
-- `npm run build` — production build to `dist/`
+- `npm run build` — typecheck + production build to `dist/`
 - `npm run preview` — serve `dist/`
-- `npm run lint` / `npm run typecheck` / `npm test` (Vitest, `vitest run`)
-- `npm run placeholders` — generate missing placeholder assets (never overwrites)
+- `npm run lint` (ESLint + `prettier --check`) / `npm run format` (Prettier write)
+- `npm run typecheck` / `npm test` (Vitest, `vitest run`) / `npm run coverage` (Vitest + v8 coverage)
+- `npm run placeholders` — generate missing placeholder assets (never overwrites; `-- --dry-run` lists them; see `tools/README.md`)
 - `npx playwright test` — browser tests (builds with `VITE_E2E=1` and serves `dist/` automatically)
 - `npx playwright test --project=iphone` — a single device profile
 
-Vitest must not pick up `tests/e2e/**` (configure `exclude` in M0).
+Vitest only runs `tests/**/*.test.ts` and excludes `tests/e2e/**` (in `vite.config.ts`).
 
 ## Test hooks and Playwright
 

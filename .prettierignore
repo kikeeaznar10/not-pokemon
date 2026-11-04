@@ -1,0 +1,9 @@
+dist/
+coverage/
+node_modules/
+test-results/
+playwright-report/
+package-lock.json
+public/assets/
+public/maps/
+*.md

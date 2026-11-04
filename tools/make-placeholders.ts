@@ -1,0 +1,258 @@
+/**
+ * `npm run placeholders` — generates placeholder art and sound for every asset path referenced by
+ * the content JSON in `public/data/`. It NEVER overwrites an existing file, so running it twice
+ * creates nothing the second time, and real assets dropped at the same paths are left alone.
+ *
+ * Rules:
+ * - Any JSON string value of the form `assets/….png|ogg|mp3` is an asset path (relative to `public/`).
+ * - PNG: a solid colour square (colour derived from the file name) with the name written on it
+ *   in a tiny pixel font. Size: `*_front` / `*_back` 64×64, `*_icon` and `sprites/items/` 16×16,
+ *   anything else 32×32.
+ * - Audio: an `.ogg` or `.mp3` path produces BOTH `<name>.ogg` and `<name>.mp3` (0.2 s beep made with
+ *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`).
+ *
+ * Flags: `--dry-run` lists what would be created without writing anything.
+ */
+import { spawnSync } from 'node:child_process';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { basename, dirname, extname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { PNG } from 'pngjs';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const PUBLIC_DIR = join(ROOT, 'public');
+const DATA_DIR = join(PUBLIC_DIR, 'data');
+const FALLBACK_DIR = join(ROOT, 'tools', 'fallback');
+
+const ASSET_PATH = /^assets\/.+\.(png|ogg|mp3)$/i;
+const AUDIO_EXTS = ['.ogg', '.mp3'] as const;
+
+/** 3×5 pixel font: each glyph is 5 rows of 3 bits (MSB = left column). */
+const FONT: Record<string, number[]> = {
+  A: [2, 5, 7, 5, 5],
+  B: [6, 5, 6, 5, 6],
+  C: [3, 4, 4, 4, 3],
+  D: [6, 5, 5, 5, 6],
+  E: [7, 4, 6, 4, 7],
+  F: [7, 4, 6, 4, 4],
+  G: [3, 4, 5, 5, 3],
+  H: [5, 5, 7, 5, 5],
+  I: [7, 2, 2, 2, 7],
+  J: [1, 1, 1, 5, 2],
+  K: [5, 5, 6, 5, 5],
+  L: [4, 4, 4, 4, 7],
+  M: [5, 7, 7, 5, 5],
+  N: [6, 5, 5, 5, 5],
+  O: [2, 5, 5, 5, 2],
+  P: [6, 5, 6, 4, 4],
+  Q: [2, 5, 5, 6, 3],
+  R: [6, 5, 6, 5, 5],
+  S: [3, 4, 2, 1, 6],
+  T: [7, 2, 2, 2, 2],
+  U: [5, 5, 5, 5, 7],
+  V: [5, 5, 5, 5, 2],
+  W: [5, 5, 7, 7, 5],
+  X: [5, 5, 2, 5, 5],
+  Y: [5, 5, 2, 2, 2],
+  Z: [7, 1, 2, 4, 7],
+  '0': [7, 5, 5, 5, 7],
+  '1': [2, 6, 2, 2, 7],
+  '2': [6, 1, 2, 4, 7],
+  '3': [6, 1, 2, 1, 6],
+  '4': [5, 5, 7, 1, 1],
+  '5': [7, 4, 6, 1, 6],
+  '6': [3, 4, 7, 5, 7],
+  '7': [7, 1, 2, 2, 2],
+  '8': [7, 5, 7, 5, 7],
+  '9': [7, 5, 7, 1, 6],
+  _: [0, 0, 0, 0, 7],
+  '-': [0, 0, 7, 0, 0],
+  ' ': [0, 0, 0, 0, 0],
+};
+
+/** Collect every asset path string found anywhere inside a parsed JSON value. */
+export function collectAssetPaths(value: unknown, out: Set<string> = new Set()): Set<string> {
+  if (typeof value === 'string') {
+    if (ASSET_PATH.test(value)) out.add(value);
+  } else if (Array.isArray(value)) {
+    for (const v of value) collectAssetPaths(v, out);
+  } else if (value !== null && typeof value === 'object') {
+    for (const v of Object.values(value)) collectAssetPaths(v, out);
+  }
+  return out;
+}
+
+/** Placeholder size in pixels for a PNG asset path (see file header for the rules). */
+export function pngSize(assetPath: string): number {
+  const name = basename(assetPath, extname(assetPath));
+  if (/_(front|back)$/.test(name)) return 64;
+  if (/_icon$/.test(name) || assetPath.includes('sprites/items/')) return 16;
+  return 32;
+}
+
+/** Stable RGB colour derived from a string. */
+function colourFor(text: string): [number, number, number] {
+  let h = 0;
+  for (const ch of text) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const hue = (h % 360) / 60;
+  const c = 160;
+  const x = Math.round(c * (1 - Math.abs((hue % 2) - 1)));
+  const table: [number, number, number][] = [
+    [c, x, 0],
+    [x, c, 0],
+    [0, c, x],
+    [0, x, c],
+    [x, 0, c],
+    [c, 0, x],
+  ];
+  const [r, g, b] = table[Math.floor(hue) % 6] ?? [c, c, c];
+  return [r + 60, g + 60, b + 60];
+}
+
+/** Greedy word wrap on `_`; words longer than a line are hard-split. */
+export function wrapLabel(text: string, perLine: number): string[] {
+  const lines: string[] = [];
+  let current = '';
+  for (const word of text.split('_')) {
+    const joined = current ? `${current}_${word}` : word;
+    if (joined.length <= perLine) {
+      current = joined;
+      continue;
+    }
+    if (current) lines.push(current);
+    let rest = word;
+    while (rest.length > perLine) {
+      lines.push(rest.slice(0, perLine));
+      rest = rest.slice(perLine);
+    }
+    current = rest;
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+/** Build a placeholder PNG: solid colour, darker 1 px border, name written in the pixel font. */
+export function makePng(label: string, size: number): Buffer {
+  const png = new PNG({ width: size, height: size });
+  const [r, g, b] = colourFor(label);
+  const set = (x: number, y: number, rgb: [number, number, number]): void => {
+    if (x < 0 || y < 0 || x >= size || y >= size) return;
+    const i = (y * size + x) * 4;
+    png.data[i] = rgb[0];
+    png.data[i + 1] = rgb[1];
+    png.data[i + 2] = rgb[2];
+    png.data[i + 3] = 255;
+  };
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const edge = x === 0 || y === 0 || x === size - 1 || y === size - 1;
+      set(x, y, edge ? [r >> 1, g >> 1, b >> 1] : [r, g, b]);
+    }
+  }
+
+  // Text: scale 2 on 64 px images, 1 otherwise; wrap to the width, drop lines that do not fit.
+  const scale = size >= 64 ? 2 : 1;
+  const charW = 4 * scale;
+  const lineH = 6 * scale;
+  const perLine = Math.max(1, Math.floor((size - 2) / charW));
+  const maxLines = Math.max(1, Math.floor((size - 2) / lineH));
+  const lines = wrapLabel(label.toUpperCase(), perLine).slice(0, maxLines);
+  const ink: [number, number, number] = r * 0.3 + g * 0.59 + b * 0.11 > 140 ? [0, 0, 0] : [255, 255, 255];
+  const top = Math.floor((size - lines.length * lineH + scale) / 2);
+  lines.forEach((line, row) => {
+    const left = Math.floor((size - line.length * charW + scale) / 2);
+    [...line].forEach((ch, col) => {
+      const glyph = FONT[ch] ?? FONT['-'] ?? [];
+      glyph.forEach((bits, gy) => {
+        for (let gx = 0; gx < 3; gx++) {
+          if (!(bits & (4 >> gx))) continue;
+          for (let sy = 0; sy < scale; sy++)
+            for (let sx = 0; sx < scale; sx++)
+              set(left + col * charW + gx * scale + sx, top + row * lineH + gy * scale + sy, ink);
+        }
+      });
+    });
+  });
+  return PNG.sync.write(png);
+}
+
+let ffmpegAvailable: boolean | undefined;
+
+/** Write a 0.2 s beep with ffmpeg; on any failure copy the silent fallback. Returns how it was made. */
+function writeAudio(file: string, ext: (typeof AUDIO_EXTS)[number]): 'beep' | 'silent' {
+  if (ffmpegAvailable === undefined) {
+    ffmpegAvailable = spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).status === 0;
+  }
+  if (ffmpegAvailable) {
+    const codec = ext === '.ogg' ? ['-c:a', 'libvorbis'] : ['-c:a', 'libmp3lame', '-b:a', '32k'];
+    const res = spawnSync(
+      'ffmpeg',
+      [
+        '-loglevel',
+        'error',
+        '-n',
+        '-f',
+        'lavfi',
+        '-i',
+        'sine=frequency=880:duration=0.2',
+        '-ac',
+        '1',
+        ...codec,
+        file,
+      ],
+      { stdio: 'ignore' },
+    );
+    if (res.status === 0 && existsSync(file)) return 'beep';
+  }
+  copyFileSync(join(FALLBACK_DIR, `silent${ext}`), file);
+  return 'silent';
+}
+
+/** Read every JSON file in `public/data/` and return the sorted, de-duplicated asset paths. */
+export function readAssetPaths(dataDir: string = DATA_DIR): string[] {
+  const paths = new Set<string>();
+  for (const name of readdirSync(dataDir)
+    .filter((n) => n.endsWith('.json'))
+    .sort()) {
+    const json: unknown = JSON.parse(readFileSync(join(dataDir, name), 'utf8'));
+    collectAssetPaths(json, paths);
+  }
+  return [...paths].sort();
+}
+
+function main(): void {
+  const dryRun = process.argv.includes('--dry-run');
+  const created: string[] = [];
+  let silent = 0;
+
+  for (const assetPath of readAssetPaths()) {
+    const ext = extname(assetPath).toLowerCase();
+    if (ext === '.png') {
+      const file = join(PUBLIC_DIR, assetPath);
+      if (existsSync(file)) continue;
+      created.push(assetPath);
+      if (dryRun) continue;
+      mkdirSync(dirname(file), { recursive: true });
+      writeFileSync(file, makePng(basename(assetPath, ext), pngSize(assetPath)));
+    } else {
+      const stem = assetPath.slice(0, -ext.length);
+      for (const audioExt of AUDIO_EXTS) {
+        const rel = stem + audioExt;
+        const file = join(PUBLIC_DIR, rel);
+        if (existsSync(file)) continue;
+        created.push(rel);
+        if (dryRun) continue;
+        mkdirSync(dirname(file), { recursive: true });
+        if (writeAudio(file, audioExt) === 'silent') silent++;
+      }
+    }
+  }
+
+  const out = process.stdout;
+  for (const rel of created) out.write(`${dryRun ? 'would create' : 'created'} public/${rel}\n`);
+  out.write(`${created.length} placeholder file(s) ${dryRun ? 'missing' : 'created'}.\n`);
+  if (silent > 0) out.write(`${silent} audio file(s) are silent (ffmpeg not found).\n`);
+}
+
+// Run only when executed directly (not when imported by tests).
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

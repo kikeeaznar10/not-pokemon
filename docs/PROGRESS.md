@@ -5,7 +5,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 
 ## Milestones
 
-- [ ] M0 — Project skeleton and placeholders
+- [x] M0 — Project skeleton and placeholders
 - [ ] M1 — Config loading and validation
 - [ ] M2 — Battle and rules logic (no graphics)
 - [ ] M3 — Overworld: one map, movement, input
@@ -38,7 +38,25 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 
 ### M0
 
-_(not started)_
+- Built: Vite + TS strict + Phaser 4.2.1 skeleton (`Boot` → `Preload`, which shows "Flexymon" from `t('app.title')`
+  centred on a black 512×288 canvas, `FIT` + `CENTER_BOTH`, `pixelArt`/`roundPixels`); `src/core/log.ts`
+  (output only in dev or `VITE_E2E=1` builds), `rng.ts` (mulberry32: `seed/next/int/float/chance/pick/weighted/id`),
+  `events.ts` (typed `EventBus` + shared `events`, first event `game:ready`); `src/i18n` (`t`, `createT`);
+  every folder with a `README.md`; nine data files as empty `[]` / `{}`; `npm run placeholders` (see `tools/README.md`).
+- Hooks: `window.__GAME__` and `window.__E2E__.{activeScenes,currentScene}` (table in `tests/README.md`).
+  New e2e test `tests/e2e/m0-title.spec.ts`. Unit tests for rng, events, `t()` and the placeholder tool.
+- Deviations: `eslint.config.js` (flat config) instead of `.eslintrc.cjs`; scenes live in `src/scenes/boot-scene.ts`
+  and `preload-scene.ts` (not listed in the M0 files, but required by the folder layout); extra files
+  `src/vite-env.d.ts`, `.prettierignore`, `tools/fallback/silent.{ogg,mp3}`, extra scripts `format` and `coverage`;
+  extra dev deps `typescript-eslint`, `@eslint/js`, `eslint-config-prettier`, `globals` (ESLint flat config),
+  `pngjs` + `@types/pngjs` (placeholder PNGs), `@vitest/coverage-v8` (needed by M2), `@playwright/test` 1.64.1.
+  TypeScript is 6.0.3, not 7.x: `typescript-eslint` 8.72 only supports `<6.1`.
+- Audio placeholders: `ffmpeg` (present in the cloud container) makes a real 0.2 s beep; without it the tool
+  copies silent files and reports it. `.prettierignore` skips `*.md` so the plan text is never reformatted.
+- Verified with Playwright (desktop, android, android-landscape, iphone/WebKit) + screenshots: title centred
+  at (256,144), 16:9 canvas filling one axis and centred, rescales on window resize, `antialias` off (no blur);
+  `npm run dev` boots with no console errors; `npm run placeholders` run twice with sample data created 7 files,
+  then 0. Next (M1): fill `public/data/`, add zod schemas, Boot loads data, add `ErrorScene`.
 
 ## Open questions
 
@@ -54,13 +72,13 @@ _(not started)_
 
 ### Raised during repo preparation (safe assumptions in brackets)
 
-- [ ] The plan names `.eslintrc.cjs`, but current ESLint (v9+) uses flat config. [M0 may use
-  `eslint.config.js` instead; note the deviation in the M0 summary.]
-- [ ] The plan puts unit tests in `tests/` mirroring `src/logic`, and the repo already has
-  Playwright tests in `tests/e2e/`. [Unit tests go in `tests/logic/`, `tests/core/`,
-  `tests/data/`…; Vitest excludes `tests/e2e/**`.]
-- [ ] M2 asks for `vitest --coverage` above 90%. [Add `@vitest/coverage-v8` as a dev dependency
-  in M2, or in M0 together with Vitest.]
+- [x] The plan names `.eslintrc.cjs`, but current ESLint (v9+) uses flat config. **Resolved in M0:**
+  `eslint.config.js`.
+- [x] The plan puts unit tests in `tests/` mirroring `src/logic`, and the repo already has
+  Playwright tests in `tests/e2e/`. **Resolved in M0:** unit tests go in `tests/core/`, `tests/i18n/`,
+  `tests/logic/`…; Vitest runs `tests/**/*.test.ts` and excludes `tests/e2e/**`.
+- [x] M2 asks for `vitest --coverage` above 90%. **Resolved in M0:** `@vitest/coverage-v8` installed;
+  `npm run coverage`.
 - [ ] The plan's folder tree is rooted at `flexymon/`; this repo is `not-pokemon`. [The repo root
   plays the role of `flexymon/`; no extra nesting.]
 - [ ] "Checked by hand in the browser" is not possible in an unattended cloud session.

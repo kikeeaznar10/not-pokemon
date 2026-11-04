@@ -48,9 +48,9 @@ export const KEY_BINDINGS: Readonly<Record<string, Action>> = {
 export class Input {
   /** Source ids (`key:KeyW`, `touch:a`…) currently down, per action. */
   private readonly sources = new Map<Action, Set<string>>();
-  /** Actions that went down since the last frame began. */
+  /** Actions that went down since the last frame began (in press order). */
   private pending = new Set<Action>();
-  /** Actions that are "just pressed" during the current frame. */
+  /** Actions that are "just pressed" during the current frame (in press order). */
   private current = new Set<Action>();
   /** Held directions, most recent last. */
   private dirOrder: Direction[] = [];
@@ -72,7 +72,11 @@ export class Input {
   direction(): Direction | null {
     const held = this.dirOrder[this.dirOrder.length - 1];
     if (held) return held;
-    return DIRECTIONS.find((d) => this.current.has(d)) ?? null;
+    // Sets keep insertion order: the last direction pressed this frame wins.
+    const tapped = [...this.current].filter((a): a is Direction =>
+      (DIRECTIONS as readonly string[]).includes(a),
+    );
+    return tapped[tapped.length - 1] ?? null;
   }
 
   /** Start a new frame: presses since the previous frame become `justPressed`. */

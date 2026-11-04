@@ -82,6 +82,16 @@ describe('Input service', () => {
     expect(i.direction()).toBeNull();
   });
 
+  it('two taps in one frame: the last one wins', () => {
+    const i = new Input();
+    i.keyDown('ArrowLeft');
+    i.keyUp('ArrowLeft');
+    i.keyDown('ArrowRight');
+    i.keyUp('ArrowRight');
+    i.beginFrame();
+    expect(i.direction()).toBe('right');
+  });
+
   it('releaseAll clears everything', () => {
     const i = new Input();
     i.keyDown('ArrowUp');

@@ -93,7 +93,10 @@ test('house door: in, then out puts the player outside the door facing down', as
   // Walls inside block.
   await tap(page, 'ArrowLeft', { facing: 'left' });
   await walk(page, 'ArrowLeft', 'x', 1);
-  await tap(page, 'ArrowLeft', { x: 1 });
+  // Pressing into the wall changes nothing, so there is no new state to wait for: wait, then check.
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(400);
+  await standing(page, { x: 1, facing: 'left' });
   await tap(page, 'ArrowRight', { facing: 'right' });
   await walk(page, 'ArrowRight', 'x', 4);
 

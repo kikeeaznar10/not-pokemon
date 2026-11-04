@@ -8,7 +8,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M0 — Project skeleton and placeholders
 - [x] M1 — Config loading and validation
 - [x] M2 — Battle and rules logic (no graphics)
-- [ ] M3 — Overworld: one map, movement, input
+- [x] M3 — Overworld: one map, movement, input
 - [ ] M4 — Maps, warps and interiors
 - [ ] M5 — Dialogue and talking NPCs
 - [ ] M6 — Battle scene
@@ -101,6 +101,29 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   drive the HP bar. For M10: `parseSave` returns `warnings[]` to log and a failure reason; the store copies broken
   saves. No e2e test added (no visible change); the existing Playwright suite was run.
 
+### M3
+
+- Built: `src/core/input.ts` (Input service; keyboard via DOM listeners, Phaser keyboard turned off so no scene
+  reads keys; F2 = `debug`), pure grid movement `src/logic/movement.ts` (`WALK_MS` 200, `TURN_TAP_MS` 100 in
+  constants), Tiled reading `src/data/tiled.ts` (solid / encounter cells, spawn points, tileset paths),
+  `world/player.ts`, `OverworldScene`, `DebugScene` (dev or `?debug=1`, F2: map, tile, FPS). Test map
+  `public/maps/test.tmj` (30 × 20, layout in `public/maps/README.md`) + zone `test` in `zones.json`;
+  `start.json` spawn/respawn now on `test`. ErrorScene now scrolls through the Input service.
+- Rules chosen (see Open questions › Raised in M3): pressing the faced direction walks at once; a NEW direction
+  turns first and walks if held ≥ 100 ms; a tap shorter than one frame still counts. A cell is solid if any
+  tile layer has a `solid` tile there (so the hidden `collision` layer and solid wall/water tiles both block).
+- Files outside the M3 list: `tools/make-test-map.ts` + `npm run test-map` (generates the map, the placeholder
+  tileset and player sheet, since Tiled cannot be used in a cloud session; never overwrites without `--force`),
+  `src/data/tiled.ts`, `src/core/events.ts` (`zone:entered`, `player:moved`), `src/config/game.ts` (scenes,
+  keyboard off), `src/main.ts` (input wiring, hooks `playerTile`, `debugLines`), `preload-scene.ts` (title now
+  says "Pulsa START" and Start/A/tap enters the overworld), `es.json`, READMEs. Tests updated for the new data:
+  zone count 2, 13 sounds, duplicate-zone index, title hint text.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m3-overworld.spec.ts`): tap turns,
+  each press moves exactly one tile and stops on the grid, the wall and the map edge block (also while holding),
+  holding walks without pausing between tiles, WASD works, F2 shows `Mapa: test` / `Casilla: 15, 10` at the
+  spawn object Tiled places at (15, 10). For M4: the `valencia` zone still has no `.tmj` (NPCs and car point to it);
+  M4's walkable-spawn checks need it drawn or those references moved to the test maps.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -112,6 +135,18 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M3 (safe assumptions in brackets)
+
+- [ ] "Turn in place on a short tap (< 100 ms)": does that apply when tapping the direction already faced?
+  [No: the faced direction walks at once (one tile per press); only a new direction turns first.]
+- [ ] Does `solid = true` block only in the `collision` layer, or in any layer? [Any tile layer.]
+- [ ] What is the `spawns` object layer for? [Named spawn points; `default` is the zone spawn, used when no
+  position is given (and by M4's debug teleport). New games still use `start.json › spawn`.]
+- [ ] Until the Title scene (M11), how does the player get from the title to the game? [The Preload screen says
+  "Pulsa START"; Start, A or a tap enters the overworld at `start.json › spawn`.]
+- [ ] The player sprite path (`assets/sprites/player.png`) is not in any content file. [Constant in
+  `src/world/player.ts`; move it to config if the plan wants several player sprites.]
 
 ### Raised in M2 (safe assumptions in brackets)
 

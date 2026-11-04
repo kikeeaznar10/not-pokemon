@@ -13,6 +13,10 @@ export interface GameEvents {
   'data:error': string[];
   /** Preload finished; all assets are in the cache. */
   'game:ready': void;
+  /** The overworld finished building a zone's map (M3). */
+  'zone:entered': { zone: string };
+  /** The player finished a step or was placed on a map (M3). Tile coordinates match Tiled. */
+  'player:moved': { map: string; x: number; y: number; facing: 'up' | 'down' | 'left' | 'right' };
 }
 
 type Handler<P> = P extends void ? () => void : (payload: P) => void;

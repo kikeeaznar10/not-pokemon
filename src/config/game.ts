@@ -4,7 +4,9 @@
  */
 import Phaser from 'phaser';
 import { BootScene } from '../scenes/boot-scene';
+import { DebugScene } from '../scenes/debug-scene';
 import { ErrorScene } from '../scenes/error-scene';
+import { OverworldScene } from '../scenes/overworld-scene';
 import { PreloadScene } from '../scenes/preload-scene';
 
 /** Size of one map tile in base pixels. */
@@ -28,7 +30,10 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
+    // Scenes never read the keyboard: the Input service (src/core/input.ts) does. Pointer/touch stay on.
+    input: { keyboard: false },
     // No physics: movement is grid-based and handled by the game rules.
-    scene: [BootScene, PreloadScene, ErrorScene],
+    // DebugScene is last so it draws on top of everything.
+    scene: [BootScene, PreloadScene, ErrorScene, OverworldScene, DebugScene],
   };
 }

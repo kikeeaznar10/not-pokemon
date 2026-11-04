@@ -10,11 +10,34 @@
       "jardin_turia": {
         "rate": 10,
         "flexymon": [
-          { "id": "raton", "weight": 60 },
-          { "id": "teclado", "weight": 40 }
+          {
+            "id": "raton",
+            "weight": 60
+          },
+          {
+            "id": "teclado",
+            "weight": 40
+          }
         ]
       },
-      "plaza_ayuntamiento": { "rate": 6, "flexymon": [{ "id": "raton", "weight": 100 }] }
+      "plaza_ayuntamiento": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "raton",
+            "weight": 100
+          }
+        ]
+      }
     }
+  },
+  {
+    "id": "test",
+    "name": "Mapa de prueba",
+    "file": "maps/test.tmj",
+    "region": "test",
+    "music": "assets/audio/music/test.ogg",
+    "indoor": false,
+    "encounters": {}
   }
 ]

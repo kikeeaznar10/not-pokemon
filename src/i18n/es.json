@@ -2,5 +2,9 @@
   "app.title": "Flexymon",
   "boot.loading": "Cargando…",
   "error.data_title": "Error en los datos del juego ({count})",
-  "error.data_hint": "Corrige los archivos y recarga la página. Flechas: desplazar."
+  "error.data_hint": "Corrige los archivos y recarga la página. Flechas: desplazar.",
+  "title.press_start": "Pulsa START",
+  "debug.map": "Mapa: {map}",
+  "debug.tile": "Casilla: {x}, {y}",
+  "debug.fps": "FPS: {fps}"
 }

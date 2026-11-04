@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "placeholders": "tsx tools/make-placeholders.ts"
+    "placeholders": "tsx tools/make-placeholders.ts",
+    "test-map": "tsx tools/make-test-map.ts"
   },
   "dependencies": {
     "phaser": "4.2.1",

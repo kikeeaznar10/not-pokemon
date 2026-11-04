@@ -1,12 +1,11 @@
 /**
  * ErrorScene — red screen listing content errors, one per line (`file › path › message`; long
- * lines wrap). Scroll with the up/down arrows, the mouse wheel or a touch drag. The game stops here.
- *
- * Note: it reads the arrow keys through Phaser directly because the shared Input service
- * (`src/core/input.ts`) only arrives in M3; M3 should switch this scene to it.
+ * lines wrap). Scroll with up/down (Input service: arrows/WASD; one step per press, smooth after
+ * holding 300 ms), the mouse wheel or a touch drag. The game stops here.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
+import { input } from '../core/input';
 import { t } from '../i18n';
 
 /** Scene key of {@link ErrorScene}. */
@@ -29,7 +28,8 @@ export class ErrorScene extends Phaser.Scene {
   private body!: Phaser.GameObjects.Text;
   private scrollY = 0;
   private maxScroll = 0;
-  private keys?: Phaser.Types.Input.Keyboard.CursorKeys;
+  /** How long up/down has been held (ms). */
+  private heldMs = 0;
   /** The lines being shown (read by the E2E hooks). */
   lines: string[] = [];
 
@@ -68,9 +68,6 @@ export class ErrorScene extends Phaser.Scene {
     const viewH = GAME_HEIGHT - HEADER_H - MARGIN;
     this.maxScroll = Math.max(0, this.body.height - viewH);
 
-    this.keys = this.input.keyboard?.createCursorKeys();
-    this.keys?.up.on('down', () => this.scrollBy(-SCROLL_STEP));
-    this.keys?.down.on('down', () => this.scrollBy(SCROLL_STEP));
     this.input.on('wheel', (_p: unknown, _o: unknown, _dx: number, dy: number) =>
       this.scrollBy(Math.sign(dy) * SCROLL_STEP),
     );
@@ -79,12 +76,13 @@ export class ErrorScene extends Phaser.Scene {
     });
   }
 
-  override update(): void {
-    const keys = this.keys;
-    if (!keys) return;
+  override update(_time: number, delta: number): void {
+    if (input.justPressed('up')) this.scrollBy(-SCROLL_STEP);
+    if (input.justPressed('down')) this.scrollBy(SCROLL_STEP);
+    const dir = input.isDown('up') ? -1 : input.isDown('down') ? 1 : 0;
+    this.heldMs = dir === 0 ? 0 : this.heldMs + delta;
     // Hold to keep scrolling.
-    if (keys.up.isDown && keys.up.getDuration() > 300) this.scrollBy(-2);
-    if (keys.down.isDown && keys.down.getDuration() > 300) this.scrollBy(2);
+    if (dir !== 0 && this.heldMs > 300) this.scrollBy(dir * 2);
   }
 
   /** Scroll the error list by `dy` pixels, clamped to the content. */

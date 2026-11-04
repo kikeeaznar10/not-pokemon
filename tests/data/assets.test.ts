@@ -13,8 +13,8 @@ describe('collectAssets', () => {
     expect(images).toContain('assets/sprites/flexymon/portatil_icon.png');
     expect(images).toContain('assets/sprites/items/lata.png');
     expect(images).toContain('assets/sprites/npcs/becario.png');
-    // 3 cries + 6 attack sounds + 2 voices + 1 music.
-    expect(sounds).toHaveLength(12);
+    // 3 cries + 6 attack sounds + 2 voices + 2 music (valencia, test).
+    expect(sounds).toHaveLength(13);
     expect(sounds).toContainEqual({
       key: 'assets/audio/music/valencia.ogg',
       urls: ['assets/audio/music/valencia.ogg', 'assets/audio/music/valencia.mp3'],

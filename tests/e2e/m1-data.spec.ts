@@ -50,7 +50,7 @@ test('valid data loads every asset and reaches Preload complete with no errors',
     attacks: 6,
     items: 6,
     npcs: 2,
-    zones: 1,
+    zones: 2,
     shops: 1,
     secretNames: 1,
   });

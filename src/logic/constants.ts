@@ -42,3 +42,9 @@ export const NPC_LOW_HP = 0.25;
 
 /** Current save format version (`flexymon.save.v1`). */
 export const SAVE_VERSION = 1;
+
+/** Time for the player to walk one tile, in ms (M3). */
+export const WALK_MS = 200;
+
+/** Standing still, a press in a NEW direction shorter than this only turns the player (ms, M3). */
+export const TURN_TAP_MS = 100;

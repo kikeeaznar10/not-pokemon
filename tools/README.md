@@ -11,3 +11,13 @@ dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-ru
 - Audio: an `.ogg` or `.mp3` path creates both `<name>.ogg` and `<name>.mp3`, a 0.2 s 880 Hz beep made with
   `ffmpeg` (libvorbis / libmp3lame). If `ffmpeg` is not on the PATH, it copies the silent files in
   `tools/fallback/` instead and says how many audio files are silent.
+
+## `npm run test-map` (`make-test-map.ts`)
+
+Writes the M3 test map and the art it needs (no one can draw in Tiled in a cloud session):
+`public/maps/test.tmj` (layout in `public/maps/README.md`), the placeholder tileset `public/assets/tilesets/test.png`
+(8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties) and the placeholder player sheet
+`public/assets/sprites/player.png` (2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).
+Never overwrites existing files (so maps edited in Tiled are safe); `npm run test-map -- --force` regenerates all
+three. A unit test checks that the shipped `test.tmj` still equals the generator's output — after editing the map
+in Tiled, update the generator too or drop that test.

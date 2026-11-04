@@ -50,7 +50,11 @@ test('shows "Flexymon" centred on a 16:9 canvas that scales with the window', as
   // pixelArt: true turns antialiasing off (nearest-neighbour scaling, no blur).
   expect(state.antialias).toBe(false);
   expect(state.roundPixels).toBe(true);
-  expect(state.texts).toEqual([{ text: 'Flexymon', x: 256, y: 144 }]);
+  // Since M3 the title also shows the "Pulsa START" hint below it (Start enters the overworld).
+  expect(state.texts).toEqual([
+    { text: 'Flexymon', x: 256, y: 144 },
+    { text: 'Pulsa START', x: 256, y: 192 },
+  ]);
 
   const checkCanvas = async () => {
     const vp = page.viewportSize()!;

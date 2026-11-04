@@ -1,21 +1,42 @@
 /**
- * BootScene — the first scene. Sets up anything needed before loading assets, then starts Preload.
- * From M1 it loads and validates the JSON content and shows ErrorScene on failure.
+ * BootScene — the first scene. Loads and validates every content JSON (`src/data/loader.ts`).
+ * On success it stores the {@link GameData} and launches Preload (which stops Boot once loaded, so
+ * some scene is always active); on any error it starts the ErrorScene
+ * with one `file › path › message` line per problem.
  */
 import Phaser from 'phaser';
-import { log } from '../core/log';
+import { events } from '../core/events';
+import { error, log } from '../core/log';
+import { formatDataError } from '../data/errors';
+import { setGameData } from '../data/game-data';
+import { loadGameData } from '../data/loader';
+import { ERROR_SCENE, type ErrorSceneData } from './error-scene';
+import { PRELOAD_SCENE } from './preload-scene';
 
 /** Scene key of {@link BootScene}. */
 export const BOOT_SCENE = 'Boot';
 
-/** First scene: boot-time setup, then hands over to Preload. */
+/** First scene: loads and validates content, then hands over to Preload (or Error). */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super(BOOT_SCENE);
   }
 
   create(): void {
-    log('Boot');
-    this.scene.start('Preload');
+    log('Boot: loading data');
+    void loadGameData(`${import.meta.env.BASE_URL}data/`).then((result) => {
+      if (result.ok) {
+        setGameData(result.data);
+        events.emit('data:loaded');
+        // Launch (not start) so Boot stays active while Preload loads; Preload stops Boot when done.
+        this.scene.launch(PRELOAD_SCENE);
+        return;
+      }
+      const lines = result.errors.map(formatDataError);
+      for (const line of lines) error(line);
+      events.emit('data:error', lines);
+      const data: ErrorSceneData = { lines };
+      this.scene.start(ERROR_SCENE, data);
+    });
   }
 }

@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "camarero_pacos",
+    "type": "talker",
+    "name": "Camarero",
+    "sprite": "assets/sprites/npcs/camarero.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": { "x": 5, "y": 3 },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["¿Lo de siempre?", "Hoy hay bravas."]
+  },
+  {
+    "id": "becario_rio",
+    "type": "enemy",
+    "name": "Becario",
+    "sprite": "assets/sprites/npcs/becario.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": { "x": 40, "y": 22 },
+    "facing": "left",
+    "wander": { "x": 36, "y": 20, "width": 8, "height": 5, "stepEveryMs": [1200, 3000] },
+    "sight": 4,
+    "dialogue": ["¡Eh! ¿Tú también eres nuevo?", "¡Vamos a ver quién despliega antes!"],
+    "defeatDialogue": ["Vale, vale... me vuelvo a mi tarea de Jira."],
+    "team": ["raton", "teclado"],
+    "reward": { "min": 80, "max": 140 }
+  }
+]

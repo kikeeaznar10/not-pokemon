@@ -4,6 +4,7 @@
  */
 import Phaser from 'phaser';
 import { BootScene } from '../scenes/boot-scene';
+import { ErrorScene } from '../scenes/error-scene';
 import { PreloadScene } from '../scenes/preload-scene';
 
 /** Size of one map tile in base pixels. */
@@ -28,6 +29,6 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
     // No physics: movement is grid-based and handled by the game rules.
-    scene: [BootScene, PreloadScene],
+    scene: [BootScene, PreloadScene, ErrorScene],
   };
 }

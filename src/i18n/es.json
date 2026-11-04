@@ -1,3 +1,6 @@
 {
-  "app.title": "Flexymon"
+  "app.title": "Flexymon",
+  "boot.loading": "Cargando…",
+  "error.data_title": "Error en los datos del juego ({count})",
+  "error.data_hint": "Corrige los archivos y recarga la página. Flechas: desplazar."
 }

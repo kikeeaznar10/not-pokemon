@@ -7,6 +7,10 @@
 
 /** Every game-wide event and its payload. Milestones add entries here. */
 export interface GameEvents {
+  /** Content JSON loaded and validated; `getGameData()` is available. */
+  'data:loaded': void;
+  /** Content failed validation; payload = formatted `file › path › message` lines. */
+  'data:error': string[];
   /** Preload finished; all assets are in the cache. */
   'game:ready': void;
 }

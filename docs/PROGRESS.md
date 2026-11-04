@@ -6,7 +6,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 ## Milestones
 
 - [x] M0 — Project skeleton and placeholders
-- [ ] M1 — Config loading and validation
+- [x] M1 — Config loading and validation
 - [ ] M2 — Battle and rules logic (no graphics)
 - [ ] M3 — Overworld: one map, movement, input
 - [ ] M4 — Maps, warps and interiors
@@ -58,6 +58,32 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   `npm run dev` boots with no console errors; `npm run placeholders` run twice with sample data created 7 files,
   then 0. Next (M1): fill `public/data/`, add zod schemas, Boot loads data, add `ErrorScene`.
 
+### M1
+
+- Built: zod schemas for all nine files (`src/data/schemas/`, strict objects), `src/data/loader.ts`
+  (fetch → parse → schema → cross-refs → frozen `GameData` with lookup maps, `getGameData()`), `ErrorScene`
+  (red, one `file › path › message` line per error, scroll with arrows/wheel/drag), Preload loading every
+  sprite and sound by its JSON path (OGG, MP3 fallback), minimal valid content + placeholder assets (committed).
+  Details: `src/data/README.md`, `public/data/README.md`. New hooks: `dataSummary`, `dataErrors`,
+  `preloadComplete`, `failedAssets`, `hasTexture`, `hasSound` (`tests/README.md`).
+- Deviations / decisions: only one zone exists, so every map reference (NPCs, start, car) points to
+  `valencia` (the camarero is in `valencia`, not `bar_pacos`); encounter lists use `raton`/`teclado` instead of
+  the plan's `monitor`/`movil`. Items: the 4 examples **plus `carnet` and `cafe_doble`** (key items, price null) so
+  the plan's `car.json` example validates. Strict objects, unique ids, shops may only sell priced items, and
+  secret names may not collide are extra checks (written up in `public/data/README.md`). "ñ" is not treated as an
+  accent when matching names (`src/logic/names.ts`, used later by M11).
+- Files outside the M1 list: `src/logic/constants.ts` (started with `TEAM_MAX`, `EUROS_MAX`, `ITEM_COUNT_MAX`,
+  used by the schemas; M2 adds the rest), `src/logic/names.ts`, `src/core/events.ts` (`data:loaded`, `data:error`),
+  `src/main.ts` (hooks), `src/i18n/es.json`, `vite.config.ts` (coverage includes `src/data`), `tests/e2e/m0-title.spec.ts`
+  (waits for `preloadComplete()` since Preload now loads assets first). Boot now *launches* Preload and Preload
+  stops Boot when done, so a scene is always active (the smoke test caught the gap).
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m1-data.spec.ts`): valid data reaches
+  Preload-complete with every asset loaded and no console errors; `"compilarr"` shows the red screen with
+  `flexymon.json › [0].attacks[0] › unknown attack "compilarr"`; 40 errors scroll with the arrows. Unit tests cover
+  every schema rule and every cross-reference rule. Note for M3: ErrorScene reads the arrow keys through Phaser
+  directly (no Input service yet); switch it to `src/core/input.ts`. Phaser 4 geometry masks did not clip text, so
+  the ErrorScene uses an opaque header strip instead.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -69,6 +95,13 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M1 (safe assumptions in brackets)
+
+- [ ] The plan does not say what a "Preload-complete screen" looks like. [It still shows the "Flexymon" title
+  until the Title scene exists (M11).]
+- [ ] Should key items be allowed a price, or should `key` imply `price: null`? [Not enforced; only shops are
+  checked.]
 
 ### Raised during repo preparation (safe assumptions in brackets)
 

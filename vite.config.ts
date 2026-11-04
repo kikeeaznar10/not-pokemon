@@ -20,7 +20,7 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      include: ['src/logic/**/*.ts', 'src/core/**/*.ts', 'src/i18n/**/*.ts'],
+      include: ['src/logic/**/*.ts', 'src/core/**/*.ts', 'src/data/**/*.ts', 'src/i18n/**/*.ts'],
     },
   },
 });

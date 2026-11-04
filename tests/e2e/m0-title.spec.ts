@@ -38,10 +38,10 @@ const readState = (page: Page) =>
 
 test('shows "Flexymon" centred on a 16:9 canvas that scales with the window', async ({ page }, testInfo) => {
   await page.goto('/');
+  // Since M1 Preload first loads every asset; the title shows once it is complete.
   await page.waitForFunction(
     () =>
-      (window as unknown as { __E2E__?: { currentScene(): string | null } }).__E2E__?.currentScene() ===
-      'Preload',
+      (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
 
   const state = await readState(page);

@@ -1,1 +1,8 @@
-{}
+{
+  "starter": "portatil",
+  "euros": 200,
+  "teamSlots": 2,
+  "spawn": { "map": "valencia", "x": 6, "y": 9, "facing": "up" },
+  "respawn": { "map": "valencia", "x": 6, "y": 7, "facing": "down" },
+  "items": { "cafe": 3 }
+}

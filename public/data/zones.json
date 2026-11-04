@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "valencia",
+    "name": "Valencia",
+    "file": "maps/valencia.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/valencia.ogg",
+    "indoor": false,
+    "encounters": {
+      "jardin_turia": {
+        "rate": 10,
+        "flexymon": [
+          { "id": "raton", "weight": 60 },
+          { "id": "teclado", "weight": 40 }
+        ]
+      },
+      "plaza_ayuntamiento": { "rate": 6, "flexymon": [{ "id": "raton", "weight": 100 }] }
+    }
+  }
+]

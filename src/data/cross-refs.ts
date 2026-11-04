@@ -1,7 +1,7 @@
 /**
  * Cross-reference checks run after every file passed its schema: every id used somewhere exists,
  * ids are unique, shops sell only buyable items, secret names do not collide.
- * Map-dependent checks (walkable spawns, warps) are added in M4.
+ * Map-dependent checks (walkable spawns, warps) live in `map-checks.ts` (M4).
  */
 import { normalizeName } from '../logic/names';
 import type { DataError } from './errors';

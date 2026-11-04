@@ -96,6 +96,18 @@ describe('grid movement', () => {
     expect(r.state).toMatchObject({ x: 5, y: 5, facing: 'left', step: null });
   });
 
+  it('a fresh press always counts as a new press (a quick second tap is not one long hold)', () => {
+    // Tap 1 turns; its release and tap 2 happen between frames, so `dir` looks held throughout.
+    let s = updateMovement(createMoveState(5, 5, 'down'), 'up', 16, open).state;
+    expect(s.facing).toBe('up');
+    const held = updateMovement(s, 'up', 16, open);
+    expect(held.state.step).toBeNull(); // without freshPress: still the turn-hold
+    s = updateMovement(s, 'up', 16, open, true).state;
+    expect(s.step?.to).toEqual({ x: 5, y: 4 });
+    // While stepping, freshPress changes nothing.
+    expect(updateMovement(s, 'up', 16, open, true).state.step?.elapsed).toBe(16);
+  });
+
   it('render position interpolates between tiles; frame 1 in the first half of a step', () => {
     let s = updateMovement(createMoveState(2, 3, 'right'), 'right', 0, open).state;
     expect(walkFrame(s)).toBe(1);

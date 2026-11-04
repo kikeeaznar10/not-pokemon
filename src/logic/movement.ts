@@ -65,16 +65,20 @@ function tryStep(
 
 /**
  * Advance movement by `dtMs` with `dir` held (or `null`). Returns the new state and the events.
- * Pass `blocked` for the CURRENT map (it is called when a step would start).
+ * Pass `blocked` for the CURRENT map (it is called when a step would start), and `freshPress = true`
+ * when `dir` was pressed during this frame.
  */
 export function updateMovement(
   state: MoveState,
   dir: Facing | null,
   dtMs: number,
   blocked: BlockedFn,
+  freshPress = false,
 ): { state: MoveState; events: MoveEvent[] } {
   const events: MoveEvent[] = [];
-  let s = state;
+  // A new key press while standing is always a new press, even if the previous tap's release and this
+  // press happened between two frames (otherwise a quick second tap would be taken as one long hold).
+  let s = freshPress && !state.step ? { ...state, hold: null } : state;
 
   if (s.step) {
     const elapsed = s.step.elapsed + dtMs;

@@ -48,3 +48,9 @@ export const WALK_MS = 200;
 
 /** Standing still, a press in a NEW direction shorter than this only turns the player (ms, M3). */
 export const TURN_TAP_MS = 100;
+
+/** Warp transition: fade out, then fade in, each this long (ms, M4). */
+export const WARP_FADE_MS = 200;
+
+/** Zone music crossfade (and first fade-in) duration (ms, M4). */
+export const MUSIC_FADE_MS = 500;

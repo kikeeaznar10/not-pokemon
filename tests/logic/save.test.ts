@@ -5,7 +5,7 @@ import { gameData, inst } from './helpers';
 const data = gameData();
 
 const state = (): GameState => ({
-  player: { name: 'Rogelio', map: 'valencia', x: 4, y: 6, facing: 'down' },
+  player: { name: 'Rogelio', map: 'test', x: 4, y: 6, facing: 'down' },
   euros: 340,
   teamSlots: 2,
   team: [inst('portatil', 'a1', { bonus: { hp: 4, attack: 0, defense: 1, speed: 0 }, currentHp: 31 })],

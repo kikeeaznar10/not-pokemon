@@ -1,12 +1,14 @@
 /**
  * PreloadScene — loads every sprite and sound listed in the content data, using its JSON path as the
- * Phaser key (`this.textures.exists('assets/sprites/items/cafe.png')`). Sounds load the OGG, falling
+ * Phaser key (`this.textures.exists('assets/sprites/items/cafe.png')`), plus every map's tileset images
+ * and the player sheet. Sounds load the OGG, falling
  * back to the MP3 with the same name. When done it shows the title with "Pulsa START", emits
  * `game:ready`, and launches the DebugScene when debugging is enabled. Start or A (or a tap) then starts
  * the OverworldScene at `start.json › spawn`. (The Title scene replaces this screen in M11.)
  */
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
+import { GAME_HEIGHT, GAME_WIDTH, TILE_SIZE } from '../config/game';
+import { PLAYER_SPRITE } from '../world/player';
 import { BOOT_SCENE } from './boot-scene';
 import { DEBUG_SCENE, debugEnabled } from './debug-scene';
 import { OVERWORLD_SCENE, type OverworldData } from './overworld-scene';
@@ -35,6 +37,11 @@ export class PreloadScene extends Phaser.Scene {
     const assets = collectAssets(getGameData());
     for (const path of assets.images) this.load.image(path, path);
     for (const s of assets.sounds) this.load.audio(s.key, s.urls);
+    // Map art (M4): every tileset image used by a zone map, plus the player sheet.
+    const tilesets = new Set<string>();
+    for (const m of getGameData().maps.values()) for (const ts of m.info.tilesetImages) tilesets.add(ts.path);
+    for (const path of tilesets) this.load.image(path, path);
+    this.load.spritesheet(PLAYER_SPRITE, PLAYER_SPRITE, { frameWidth: TILE_SIZE, frameHeight: TILE_SIZE });
 
     const barW = GAME_WIDTH / 2;
     const x = (GAME_WIDTH - barW) / 2;

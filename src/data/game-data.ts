@@ -3,6 +3,14 @@
  * (`data.flexymon.get('portatil')`). Built once at boot by the loader; read anywhere via {@link getGameData}.
  */
 import type { Attack, Car, Item, Npc, SecretName, Species, Start, Zone } from './schemas';
+import type { MapInfo } from './tiled';
+
+/** A zone's map: what the rules need (`info`, frozen) and the raw Tiled JSON (for Phaser to draw). */
+export interface LoadedMap {
+  readonly info: Readonly<MapInfo>;
+  /** The parsed `.tmj` JSON. Not frozen; give Phaser a copy. */
+  readonly json: unknown;
+}
 
 /** All game content after validation. Every collection is read-only and deeply frozen. */
 export interface GameData {
@@ -16,6 +24,8 @@ export interface GameData {
   readonly start: Readonly<Start>;
   readonly secretNames: readonly Readonly<SecretName>[];
   readonly car: Readonly<Car>;
+  /** Zone id → its loaded map (M4). Empty when only the JSON content was validated (unit tests). */
+  readonly maps: ReadonlyMap<string, LoadedMap>;
 }
 
 /** The parsed (schema-valid) contents of the nine files, before lookup maps are built. */
@@ -68,7 +78,17 @@ export function buildGameData(raw: RawGameData): GameData {
     start: frozen.start,
     secretNames: frozen.secretNames,
     car: frozen.car,
+    maps: frozenMap<LoadedMap>([]),
   });
+}
+
+/** A copy of `data` with its maps set (`info` is deep-frozen, `json` is left as is). */
+export function withMaps(data: GameData, maps: Iterable<[string, LoadedMap]>): GameData {
+  const entries = [...maps].map(([id, m]): [string, LoadedMap] => [
+    id,
+    Object.freeze({ info: deepFreeze(m.info), json: m.json }),
+  ]);
+  return Object.freeze({ ...data, maps: frozenMap(entries) });
 }
 
 let current: GameData | null = null;

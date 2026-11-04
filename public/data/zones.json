@@ -1,10 +1,10 @@
 [
   {
-    "id": "valencia",
-    "name": "Valencia",
-    "file": "maps/valencia.tmj",
-    "region": "valencia",
-    "music": "assets/audio/music/valencia.ogg",
+    "id": "test",
+    "name": "Mapa de prueba",
+    "file": "maps/test.tmj",
+    "region": "test",
+    "music": "assets/audio/music/test.ogg",
     "indoor": false,
     "encounters": {
       "jardin_turia": {
@@ -32,9 +32,18 @@
     }
   },
   {
-    "id": "test",
-    "name": "Mapa de prueba",
-    "file": "maps/test.tmj",
+    "id": "test_house",
+    "name": "Casa de prueba",
+    "file": "maps/test_house.tmj",
+    "region": "test",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "test_east",
+    "name": "Este de prueba",
+    "file": "maps/test_east.tmj",
     "region": "test",
     "music": "assets/audio/music/test.ogg",
     "indoor": false,

@@ -6,5 +6,6 @@
   "title.press_start": "Pulsa START",
   "debug.map": "Mapa: {map}",
   "debug.tile": "Casilla: {x}, {y}",
-  "debug.fps": "FPS: {fps}"
+  "debug.fps": "FPS: {fps}",
+  "debug.teleport_title": "Teletransporte (A: ir, B: cerrar)"
 }

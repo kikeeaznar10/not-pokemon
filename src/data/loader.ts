@@ -1,12 +1,16 @@
 /**
  * Content loader: fetches the nine JSON files from `public/data/`, parses them, validates each with
- * its zod schema, runs the cross-reference checks and builds the frozen {@link GameData}.
+ * its zod schema, runs the cross-reference checks and builds the frozen {@link GameData}. With
+ * `mapsBaseUrl` it then fetches every zone's Tiled map, parses it (`src/data/tiled.ts`) and runs the
+ * map checks (`src/data/map-checks.ts`).
  * Any problem is returned as a list of {@link DataError}s for the ErrorScene; nothing throws.
  */
 import type { z } from 'zod';
 import { checkCrossRefs } from './cross-refs';
 import type { DataError } from './errors';
-import { buildGameData, type GameData, type RawGameData } from './game-data';
+import { buildGameData, withMaps, type GameData, type LoadedMap, type RawGameData } from './game-data';
+import { checkMaps } from './map-checks';
+import { parseTiledMap, type MapInfo } from './tiled';
 import { DATA_FILES, FILE_SCHEMAS, type DataFileName } from './schemas';
 
 /** Result of loading or validating content. */
@@ -72,10 +76,55 @@ export const fetchText: TextFetcher = async (url) => {
 };
 
 /**
- * Fetch, parse and validate every content file from `baseUrl` (e.g. `./data/`).
- * Fetch and JSON errors become `file › (root) › …` errors.
+ * Fetch and parse every zone's map from `baseUrl` + `zone.file` (e.g. `./` + `maps/test.tmj`), then run
+ * the map checks. A map that cannot be fetched, parsed or read is reported as `maps/x.tmj › (root) › …`.
  */
-export async function loadGameData(baseUrl: string, fetcher: TextFetcher = fetchText): Promise<LoadResult> {
+export async function loadMaps(
+  data: GameData,
+  baseUrl: string,
+  fetcher: TextFetcher = fetchText,
+): Promise<LoadResult> {
+  const errors: DataError[] = [];
+  const loaded = await Promise.all(
+    [...data.zones.values()].map(async (zone): Promise<[string, LoadedMap] | null> => {
+      try {
+        const json = JSON.parse(await fetcher(`${baseUrl}${zone.file}`)) as unknown;
+        return [zone.id, { info: parseTiledMap(json, zone.file), json }];
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        errors.push({
+          file: zone.file,
+          path: [],
+          message: msg.startsWith(`${zone.file}: `)
+            ? msg.slice(zone.file.length + 2)
+            : `could not load map (${msg})`,
+        });
+        return null;
+      }
+    }),
+  );
+  const maps = new Map(loaded.filter((m): m is [string, LoadedMap] => m !== null));
+  const infos = new Map<string, MapInfo>([...maps].map(([id, m]) => [id, m.info]));
+  errors.push(...checkMaps(data, infos));
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, data: withMaps(data, maps) };
+}
+
+/** Options for {@link loadGameData}. */
+export interface LoadOptions {
+  /** Where `zones.json › file` paths are relative to (the `public/` root URL). Omit to skip maps. */
+  mapsBaseUrl?: string;
+}
+
+/**
+ * Fetch, parse and validate every content file from `baseUrl` (e.g. `./data/`), then (with
+ * `options.mapsBaseUrl`) the maps. Fetch and JSON errors become `file › (root) › …` errors.
+ */
+export async function loadGameData(
+  baseUrl: string,
+  fetcher: TextFetcher = fetchText,
+  options: LoadOptions = {},
+): Promise<LoadResult> {
   const entries = await Promise.all(
     DATA_FILES.map(async (file): Promise<[DataFileName, unknown]> => {
       let text: string;
@@ -91,5 +140,7 @@ export async function loadGameData(baseUrl: string, fetcher: TextFetcher = fetch
       }
     }),
   );
-  return validateGameData(Object.fromEntries(entries) as RawFiles);
+  const result = validateGameData(Object.fromEntries(entries) as RawFiles);
+  if (!result.ok || options.mapsBaseUrl === undefined) return result;
+  return loadMaps(result.data, options.mapsBaseUrl, fetcher);
 }

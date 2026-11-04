@@ -9,7 +9,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M1 — Config loading and validation
 - [x] M2 — Battle and rules logic (no graphics)
 - [x] M3 — Overworld: one map, movement, input
-- [ ] M4 — Maps, warps and interiors
+- [x] M4 — Maps, warps and interiors
 - [ ] M5 — Dialogue and talking NPCs
 - [ ] M6 — Battle scene
 - [ ] M7 — Wild encounters, catching and merging
@@ -124,6 +124,28 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   spawn object Tiled places at (15, 10). For M4: the `valencia` zone still has no `.tmj` (NPCs and car point to it);
   M4's walkable-spawn checks need it drawn or those references moved to the test maps.
 
+### M4
+
+- Built: warps (`src/logic/warp.ts`, read from the `warps` layer by `src/data/tiled.ts`): `step` warps fire when a
+  step ends inside them, `action` warps on A while facing them (ready for the car); leaving out `toX`/`toY` keeps the
+  column/row (edges); a step warp one tile outside the map makes that off-map tile walkable. Overworld warp
+  sequence: lock, fade out 200 ms, restart on the target, fade in, unlock, safe steps reset. Three test maps
+  (`test`, `test_house` 10 × 8 indoor centred on black, `test_east`), boot-time map loading + checks
+  (`src/data/map-checks.ts`: NPC/start/car/map spawn points walkable, warp targets exist and are walkable),
+  zone music with 500 ms crossfade (`src/world/music.ts`), debug teleport menu (F2 cycles hidden → info → menu).
+- Content change: the `valencia` zone (no map yet) is gone from `zones.json`; its encounter groups moved to `test`,
+  the camarero to `test_house`, the becario to `test_east`, the car endpoints to the test maps, and the unused
+  `valencia.ogg/.mp3` placeholders were deleted. M14 brings the real zones back.
+- Fixes/decisions: a direction pressed during the frame always counts as a new press (`updateMovement(…, freshPress)`),
+  otherwise a quick second tap after a turn could be swallowed. Files outside the list: `src/world/camera.ts`,
+  `game-data.ts` (`maps`, `withMaps`), loader, Preload (loads tilesets + player sheet), `main.ts` (music, hooks
+  `currentMusic`, `overworldLocked`, `debugMode`), events, es.json, READMEs; data tests updated for the new zones.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m4-warps.spec.ts`): door in/out lands at
+  (6, 7) facing down; walking off the east edge on row 12 arrives at `test_east` (0, 12) and back at `test` (29, 12);
+  a warp aimed at a wall shows `maps/test.tmj › warps.house_door › target tile (0, 0) on map "test_house" is not
+  walkable`; the interior is centred; music switches test → interior and stays on test → test_east; teleport menu.
+  Music is only checked by key (headless browsers have no audible output); the crossfade is unit-tested.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -135,6 +157,15 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M4 (safe assumptions in brackets)
+
+- [ ] How are map-edge warps drawn in Tiled? [A step-warp rectangle one tile outside the map, with `toX` (or
+  `toY`) set and the other left out so the row (or column) is kept. Documented in `public/maps/README.md`.]
+- [ ] `valencia` had no map. [Removed from `zones.json` until M14; everything that pointed at it now points at the
+  test maps.]
+- [ ] The debug teleport needs a menu but only the game keys exist. [F2 cycles info → menu; in the menu the arrows,
+  A and B drive the list and the player does not move.]
 
 ### Raised in M3 (safe assumptions in brackets)
 

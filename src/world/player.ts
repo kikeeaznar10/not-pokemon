@@ -47,9 +47,9 @@ export class Player {
     return this.move;
   }
 
-  /** Advance by `dtMs` with `dir` held; returns what happened. */
-  update(dir: Direction | null, dtMs: number, blocked: BlockedFn): MoveEvent[] {
-    const result = updateMovement(this.move, dir, dtMs, blocked);
+  /** Advance by `dtMs` with `dir` held (`fresh` = pressed this frame); returns what happened. */
+  update(dir: Direction | null, dtMs: number, blocked: BlockedFn, fresh = false): MoveEvent[] {
+    const result = updateMovement(this.move, dir, dtMs, blocked, fresh);
     this.move = result.state;
     this.draw();
     return result.events;

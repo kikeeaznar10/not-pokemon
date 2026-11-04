@@ -129,6 +129,9 @@ test('F2 (with ?debug=1) shows the map and tile coordinates, matching Tiled', as
   await expect.poll(lines).toEqual(expect.arrayContaining(['Casilla: 16, 10']));
   expect((await lines())!.some((l) => /^FPS: \d+$/.test(l))).toBe(true);
   await page.screenshot({ path: testInfo.outputPath(`debug-${testInfo.project.name}.png`) });
+  // Since M4, F2 cycles hidden → info → teleport menu → hidden.
+  await page.keyboard.press('F2');
+  await expect.poll(lines).toContain('Teletransporte (A: ir, B: cerrar)');
   await page.keyboard.press('F2');
   await expect.poll(lines).toBeNull();
 });

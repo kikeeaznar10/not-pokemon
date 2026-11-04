@@ -24,5 +24,6 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
 - `secret-names.json`: names may not collide after normalising (case, accents, spaces; ñ is kept).
 - `car.json`: at least one pair of two item ids.
 
-Current content (M1, minimal): 3 flexymon, 6 attacks, 6 items, 2 NPCs, 1 zone (`valencia`), 1 shop.
-All map references point to `valencia`, the only zone, until M3/M4 add maps.
+Current content (minimal): 3 flexymon, 6 attacks, 6 items, 2 NPCs, 3 zones (`test`, `test_house`, `test_east`;
+the M4 test maps), 1 shop. Since M4 every zone must have a loadable map and every map point (NPC spawns, start
+spawn/respawn, car endpoints, warp targets) must be a walkable tile; the real zones (`valencia`…) come in M14.

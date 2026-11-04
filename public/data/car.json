@@ -4,6 +4,16 @@
     ["llaves_audi", "cafe_doble"]
   ],
   "lockedDialogue": ["El Audi está cerrado. Te falta algo..."],
-  "toMurcia": { "map": "valencia", "x": 10, "y": 5, "facing": "down" },
-  "toValencia": { "map": "valencia", "x": 8, "y": 12, "facing": "down" }
+  "toMurcia": {
+    "map": "test_east",
+    "x": 2,
+    "y": 10,
+    "facing": "down"
+  },
+  "toValencia": {
+    "map": "test",
+    "x": 8,
+    "y": 12,
+    "facing": "down"
+  }
 }

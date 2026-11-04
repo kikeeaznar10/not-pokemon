@@ -4,7 +4,9 @@
  */
 import Phaser from 'phaser';
 import { createGameConfig } from './config/game';
+import { events } from './core/events';
 import { bindKeyboard, input } from './core/input';
+import { MusicPlayer, type Track } from './world/music';
 import { getGameData, hasGameData } from './data/game-data';
 import type { Facing } from './data/schemas';
 import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
@@ -19,6 +21,14 @@ bindKeyboard(window);
 game.events.on(Phaser.Core.Events.PRE_STEP, () => input.beginFrame());
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) input.releaseAll();
+});
+
+// Zone music (M4): crossfades run on the game loop, so they survive Overworld restarts on warps.
+const music = new MusicPlayer((key) => game.sound.add(key, { loop: true }) as unknown as Track);
+game.events.on(Phaser.Core.Events.STEP, (_time: number, delta: number) => music.update(delta));
+events.on('zone:entered', ({ zone }) => {
+  const z = getGameData().zones.get(zone);
+  if (z) music.play(z.music);
 });
 
 /** Number of entries in each content collection. */
@@ -54,6 +64,12 @@ export interface E2EHooks {
   playerTile(): { map: string; x: number; y: number; facing: Facing; moving: boolean } | null;
   /** The Debug overlay's lines while it is shown (F2), else `null` (also when debugging is disabled). */
   debugLines(): string[] | null;
+  /** Debug overlay mode: `hidden`, `info` or `menu` (teleport list); `null` when debugging is disabled. */
+  debugMode(): string | null;
+  /** Sound key of the zone music playing (or fading in), or `null`. */
+  currentMusic(): string | null;
+  /** True while the overworld ignores movement (warp fade or debug menu). */
+  overworldLocked(): boolean;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -89,6 +105,12 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
       game.scene.isActive(OVERWORLD_SCENE)
         ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene).playerTile()
         : null,
+    currentMusic: () => music.currentKey(),
+    debugMode: () =>
+      game.scene.isActive(DEBUG_SCENE) ? (game.scene.getScene(DEBUG_SCENE) as DebugScene).mode : null,
+    overworldLocked: () =>
+      game.scene.isActive(OVERWORLD_SCENE) &&
+      (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene).isLocked(),
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

@@ -22,9 +22,14 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.hasTexture(key)` / `hasSound(key)` | M1 | Whether an asset (key = its JSON path) is loaded. |
 | `window.__E2E__.playerTile()` | M3 | `{ map, x, y, facing, moving }` in the overworld (tiles as in Tiled), else `null`. |
 | `window.__E2E__.debugLines()` | M3 | The Debug overlay's lines while shown (F2; needs a dev build or `?debug=1`), else `null`. |
+| `window.__E2E__.debugMode()` | M4 | `'hidden'`, `'info'` or `'menu'` (teleport list); `null` when debugging is disabled. |
+| `window.__E2E__.currentMusic()` | M4 | Sound key of the zone music playing or fading in (e.g. `assets/audio/music/test.ogg`), or `null`. |
+| `window.__E2E__.overworldLocked()` | M4 | True while the overworld ignores movement (warp fade, debug menu). |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
 Keys pressed with Playwright are seen on the next game frame: poll for the expected state
-(`expect.poll(...)`) instead of reading it right after the key press (see `tests/e2e/m3-overworld.spec.ts`).
+(`expect.poll(...)`) instead of reading it right after the key press, and wait for one press to take effect
+before the next (two presses in one frame count once). After a warp, also wait for `overworldLocked()` to be false
+(see the `standing()` helper in `tests/e2e/m4-warps.spec.ts`).
 
 Add new helpers to the `E2EHooks` interface in `src/main.ts` and to this table.

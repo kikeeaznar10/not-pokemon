@@ -130,12 +130,12 @@ describe('schemas: one broken fixture per rule', () => {
   });
 
   it('npcs: spawn must be inside the wander rectangle', () => {
-    // Rectangle x 36..43, y 20..24.
-    expect(errorsAfter((f) => (f['npcs.json'][1].spawn = { x: 43, y: 24 }))).toEqual([]);
-    expect(errorsAfter((f) => (f['npcs.json'][1].spawn = { x: 44, y: 22 }))).toEqual([
+    // Rectangle x 7..14, y 12..16.
+    expect(errorsAfter((f) => (f['npcs.json'][1].spawn = { x: 14, y: 16 }))).toEqual([]);
+    expect(errorsAfter((f) => (f['npcs.json'][1].spawn = { x: 15, y: 14 }))).toEqual([
       'npcs.json › [1].spawn › spawn must be inside the wander rectangle',
     ]);
-    expect(errorsAfter((f) => (f['npcs.json'][1].spawn = { x: 40, y: 19 }))).toEqual([
+    expect(errorsAfter((f) => (f['npcs.json'][1].spawn = { x: 10, y: 11 }))).toEqual([
       'npcs.json › [1].spawn › spawn must be inside the wander rectangle',
     ]);
   });

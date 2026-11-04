@@ -19,7 +19,8 @@ describe('loader', () => {
     expect(data.attacks.size).toBe(6);
     expect(data.items.get('llaves_audi')?.price).toBeNull();
     expect(data.npcs.get('becario_rio')?.type).toBe('enemy');
-    expect(data.zones.get('valencia')?.indoor).toBe(false);
+    expect(data.zones.get('test')?.indoor).toBe(false);
+    expect(data.zones.get('test_house')?.indoor).toBe(true);
     expect(data.shops.get('tienda_alboraya')).toEqual(['cafe', 'redbull', 'regleta']);
     expect(data.start.starter).toBe('portatil');
     expect(data.secretNames[0]?.name).toBe('paco');

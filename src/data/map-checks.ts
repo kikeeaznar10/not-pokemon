@@ -1,0 +1,63 @@
+/**
+ * Map-dependent load checks (M4), run after the content passed its schemas and cross-references and
+ * every zone's map was loaded:
+ * - every NPC spawn, the start spawn/respawn and both car endpoints are walkable tiles of their map;
+ * - every named spawn point in a map's `spawns` layer is walkable;
+ * - every warp points at an existing zone, and every tile it can land on there is walkable (for edge
+ *   warps that keep the row/column, every tile of the rectangle is checked).
+ * "Walkable" = inside the map and not solid (`src/data/tiled.ts`). Errors use the usual
+ * `file › path › message` format; warp errors name the map file and the warp, e.g.
+ * `maps/test.tmj › warps.house_door › target (4, 7) on map "test_house" is not walkable`.
+ */
+import type { DataError } from './errors';
+import type { GameData } from './game-data';
+import type { MapPoint } from './schemas';
+import { isWalkable, type MapInfo } from './tiled';
+import { warpTargetTiles } from '../logic/warp';
+
+/** Why a tile on `mapId` is not a valid place to stand, or `null` if it is. */
+function tileProblem(maps: ReadonlyMap<string, MapInfo>, mapId: string, x: number, y: number): string | null {
+  const info = maps.get(mapId);
+  if (!info) return null; // Missing map is reported once by the loader.
+  if (x >= info.width || y >= info.height || x < 0 || y < 0)
+    return `tile (${x}, ${y}) is outside map "${mapId}" (${info.width} × ${info.height})`;
+  return isWalkable(info, x, y) ? null : `tile (${x}, ${y}) on map "${mapId}" is not walkable`;
+}
+
+/** Run every map-dependent check. `maps` holds the parsed map of every zone that loaded. */
+export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): DataError[] {
+  const errors: DataError[] = [];
+  const point = (file: string, path: PropertyKey[], p: MapPoint | { map: string; x: number; y: number }) => {
+    const problem = tileProblem(maps, p.map, p.x, p.y);
+    if (problem) errors.push({ file, path, message: problem });
+  };
+
+  [...data.npcs.values()].forEach((npc, i) =>
+    point('npcs.json', [i, 'spawn'], { map: npc.map, x: npc.spawn.x, y: npc.spawn.y }),
+  );
+  point('start.json', ['spawn'], data.start.spawn);
+  point('start.json', ['respawn'], data.start.respawn);
+  point('car.json', ['toMurcia'], data.car.toMurcia);
+  point('car.json', ['toValencia'], data.car.toValencia);
+
+  for (const zone of data.zones.values()) {
+    const info = maps.get(zone.id);
+    if (!info) continue;
+    for (const sp of info.spawns) {
+      const problem = tileProblem(maps, zone.id, sp.x, sp.y);
+      if (problem) errors.push({ file: zone.file, path: ['spawns', sp.name], message: problem });
+    }
+    for (const warp of info.warps) {
+      const path = ['warps', warp.name];
+      if (!data.zones.has(warp.toMap)) {
+        errors.push({ file: zone.file, path, message: `unknown map "${warp.toMap}"` });
+        continue;
+      }
+      for (const t of warpTargetTiles(warp)) {
+        const problem = tileProblem(maps, warp.toMap, t.x, t.y);
+        if (problem) errors.push({ file: zone.file, path, message: `target ${problem}` });
+      }
+    }
+  }
+  return errors;
+}

@@ -7,11 +7,16 @@
  * - Tile layers `ground`, `deco`, `above` (drawn over the player) and `collision` (hidden in game).
  * - A cell is solid if ANY tile layer has a tile there whose tileset tile has the bool property
  *   `solid = true`. Tiles with `encounter = true` mark grass/sand/vineyard (used from M7).
- * - Object layers `warps` (M4), `encounters` (M7) and `spawns`. Spawn points are point (or tile-sized)
+ * - Object layer `warps` (M4): rectangles with `toMap` (string), `toX` / `toY` (int, optional = keep
+ *   the player's column / row), `toFacing` (optional) and `trigger` (`step` or `action`); see
+ *   `src/logic/warp.ts`. Rectangles may lie one tile outside the map (edge warps).
+ * - Object layers `encounters` (M7) and `spawns`. Spawn points are point (or tile-sized)
  *   objects in `spawns`; their tile is `floor(x / tilewidth)`, `floor(y / tileheight)`. The one named
  *   `default` is the zone's spawn (used by debug teleport and when no position is given).
  */
 import { z } from 'zod';
+import type { Warp } from '../logic/warp';
+import { facingSchema } from './schemas/common';
 
 const propertySchema = z.object({ name: z.string(), type: z.string().optional(), value: z.unknown() });
 
@@ -92,6 +97,8 @@ export interface MapInfo {
   /** Row-major: tiles with `encounter = true`. */
   encounter: boolean[];
   spawns: SpawnPoint[];
+  /** Warp rectangles in tiles, in layer order. */
+  warps: Warp[];
   /** Tileset images, resolved relative to `public/` (e.g. `assets/tilesets/test.png`), by tileset name. */
   tilesetImages: { name: string; path: string }[];
 }
@@ -123,6 +130,42 @@ function gidsWith(map: TiledMap, name: string): Set<number> {
     }
   }
   return out;
+}
+
+/** Warp object properties (after reading them from the Tiled property list). */
+const warpPropsSchema = z.object({
+  toMap: z.string().min(1, 'needs a toMap property'),
+  toX: z.int().nullable(),
+  toY: z.int().nullable(),
+  toFacing: facingSchema.nullable(),
+  trigger: z.enum(['step', 'action']),
+});
+
+/** Read one warp object; throws a message naming the warp if a property is missing or wrong. */
+function parseWarp(o: TiledObject, index: number, map: TiledMap, mapFile: string): Warp {
+  const prop = (name: string) => tiledProperty(o.properties, name) ?? null;
+  const parsed = warpPropsSchema.safeParse({
+    toMap: prop('toMap') ?? '',
+    toX: prop('toX'),
+    toY: prop('toY'),
+    toFacing: prop('toFacing'),
+    trigger: prop('trigger'),
+  });
+  const label = o.name ? `"${o.name}"` : `#${index}`;
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    throw new Error(
+      `${mapFile}: warp ${label}: ${issue?.path.join('.') ?? ''} ${issue?.message ?? 'invalid'}`.trim(),
+    );
+  }
+  return {
+    name: o.name || `#${index}`,
+    x: Math.floor(o.x / map.tilewidth),
+    y: Math.floor(o.y / map.tileheight),
+    width: Math.max(1, Math.round(o.width / map.tilewidth)),
+    height: Math.max(1, Math.round(o.height / map.tileheight)),
+    ...parsed.data,
+  };
 }
 
 /** Tiled stores flip flags in the top 3 bits of a gid; strip them. */
@@ -165,14 +208,26 @@ export function parseTiledMap(json: unknown, mapFile: string): MapInfo {
     }
   }
 
+  const warps: Warp[] = [];
+  const warpLayer = map.layers.find((l) => l.type === 'objectgroup' && l.name === 'warps');
+  if (warpLayer && 'objects' in warpLayer) {
+    (warpLayer.objects as TiledObject[]).forEach((o, i) => warps.push(parseWarp(o, i, map, mapFile)));
+  }
+
   return {
     width: map.width,
     height: map.height,
     solid,
     encounter,
     spawns,
+    warps,
     tilesetImages: map.tilesets.map((ts) => ({ name: ts.name, path: resolveMapPath(mapFile, ts.image) })),
   };
+}
+
+/** True if (x, y) is inside the map and not solid (a valid place to stand). */
+export function isWalkable(info: MapInfo, x: number, y: number): boolean {
+  return !isBlocked(info, x, y);
 }
 
 /** True if (x, y) is outside the map or on a solid cell. */

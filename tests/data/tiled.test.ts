@@ -2,10 +2,10 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { findSpawn, isBlocked, parseTiledMap, resolveMapPath, tiledProperty } from '../../src/data/tiled';
-import { buildTestMap } from '../../tools/make-test-map';
+import { buildTestEast, buildTestHouse, buildTestMap } from '../../tools/make-test-map';
 
-const shipped = () =>
-  JSON.parse(readFileSync(join(__dirname, '..', '..', 'public', 'maps', 'test.tmj'), 'utf8')) as unknown;
+const shipped = (name = 'test') =>
+  JSON.parse(readFileSync(join(__dirname, '..', '..', 'public', 'maps', `${name}.tmj`), 'utf8')) as unknown;
 
 describe('Tiled maps', () => {
   it('resolves tileset paths relative to the map', () => {
@@ -38,8 +38,63 @@ describe('Tiled maps', () => {
     expect(info.encounter.some(Boolean)).toBe(false); // tall grass comes in M7
   });
 
-  it('the shipped map is what the tool generates (no hand edits lost)', () => {
+  it('the shipped maps are what the tool generates (no hand edits lost)', () => {
     expect(shipped()).toEqual(JSON.parse(JSON.stringify(buildTestMap())));
+    expect(shipped('test_house')).toEqual(JSON.parse(JSON.stringify(buildTestHouse())));
+    expect(shipped('test_east')).toEqual(JSON.parse(JSON.stringify(buildTestEast())));
+  });
+
+  it('reads warps: door, off-map edge (row kept), interior exit', () => {
+    const test = parseTiledMap(shipped(), 'maps/test.tmj');
+    expect(test.warps).toEqual([
+      {
+        name: 'house_door',
+        x: 6,
+        y: 6,
+        width: 1,
+        height: 1,
+        toMap: 'test_house',
+        toX: 4,
+        toY: 7,
+        toFacing: 'up',
+        trigger: 'step',
+      },
+      {
+        name: 'east_edge',
+        x: 30,
+        y: 0,
+        width: 1,
+        height: 20,
+        toMap: 'test_east',
+        toX: 0,
+        toY: null,
+        toFacing: null,
+        trigger: 'step',
+      },
+    ]);
+    expect(isBlocked(test, 6, 6)).toBe(false); // the door tile is walkable
+    const house = parseTiledMap(shipped('test_house'), 'maps/test_house.tmj');
+    expect(house.warps[0]).toMatchObject({ x: 4, y: 8, toMap: 'test', toX: 6, toY: 7, toFacing: 'down' });
+    const east = parseTiledMap(shipped('test_east'), 'maps/test_east.tmj');
+    expect(east.warps[0]).toMatchObject({ x: -1, y: 0, height: 20, toMap: 'test', toX: 29, toY: null });
+  });
+
+  it('rejects a warp with missing or wrong properties, naming it', () => {
+    const map = buildTestMap() as {
+      layers: { name: string; objects?: { name: string; properties?: object[] }[] }[];
+    };
+    const warps = map.layers.find((l) => l.name === 'warps')!.objects!;
+    warps[0]!.properties = [{ name: 'toMap', type: 'string', value: 'x' }];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(/maps\/x\.tmj: warp "house_door": trigger/);
+    warps[0]!.name = '';
+    warps[0]!.properties = [
+      { name: 'toMap', value: 'x' },
+      { name: 'trigger', value: 'step' },
+      { name: 'toFacing', value: 'sideways' },
+    ];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(/warp #0: toFacing/);
+    warps[0]!.properties = [{ name: 'trigger', value: 'step' }];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(/needs a toMap property/);
   });
 
   it('flags encounter tiles and strips flip bits', () => {

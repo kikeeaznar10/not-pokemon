@@ -17,6 +17,10 @@ export interface GameEvents {
   'zone:entered': { zone: string };
   /** The player finished a step or was placed on a map (M3). Tile coordinates match Tiled. */
   'player:moved': { map: string; x: number; y: number; facing: 'up' | 'down' | 'left' | 'right' };
+  /** Debug menu (M4): opened/closed. While open the overworld ignores movement. */
+  'debug:menu': { open: boolean };
+  /** Debug command (M4): teleport the player to a zone's `default` spawn. */
+  'debug:teleport': { map: string };
 }
 
 type Handler<P> = P extends void ? () => void : (payload: P) => void;

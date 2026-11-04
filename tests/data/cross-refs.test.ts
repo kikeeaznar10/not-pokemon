@@ -101,7 +101,7 @@ describe('cross-references (one test per rule)', () => {
       'npcs.json › [1].id › duplicate id "camarero_pacos"',
     ]);
     expect(errorsAfter((f) => f['zones.json'].push({ ...f['zones.json'][0] }))).toEqual([
-      'zones.json › [2].id › duplicate id "valencia"',
+      'zones.json › [3].id › duplicate id "test"',
     ]);
   });
 

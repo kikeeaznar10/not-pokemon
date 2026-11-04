@@ -1,5 +1,6 @@
 /**
- * BootScene — the first scene. Loads and validates every content JSON (`src/data/loader.ts`).
+ * BootScene — the first scene. Loads and validates every content JSON and every zone's map
+ * (`src/data/loader.ts`, map checks in `src/data/map-checks.ts`).
  * On success it stores the {@link GameData} and launches Preload (which stops Boot once loaded, so
  * some scene is always active); on any error it starts the ErrorScene
  * with one `file › path › message` line per problem.
@@ -24,7 +25,8 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     log('Boot: loading data');
-    void loadGameData(`${import.meta.env.BASE_URL}data/`).then((result) => {
+    const base = import.meta.env.BASE_URL;
+    void loadGameData(`${base}data/`, undefined, { mapsBaseUrl: base }).then((result) => {
       if (result.ok) {
         setGameData(result.data);
         events.emit('data:loaded');

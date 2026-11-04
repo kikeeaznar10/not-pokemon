@@ -50,7 +50,7 @@ test('valid data loads every asset and reaches Preload complete with no errors',
     attacks: 6,
     items: 6,
     npcs: 2,
-    zones: 2,
+    zones: 3,
     shops: 1,
     secretNames: 1,
   });
@@ -58,7 +58,7 @@ test('valid data loads every asset and reaches Preload complete with no errors',
   expect(await hook(page, 'hasTexture', 'assets/sprites/flexymon/portatil_front.png')).toBe(true);
   expect(await hook(page, 'hasTexture', 'assets/sprites/items/lata.png')).toBe(true);
   expect(await hook(page, 'hasSound', 'assets/audio/sfx/compilar.ogg')).toBe(true);
-  expect(await hook(page, 'hasSound', 'assets/audio/music/valencia.ogg')).toBe(true);
+  expect(await hook(page, 'hasSound', 'assets/audio/music/test.ogg')).toBe(true);
   expect(await hook(page, 'dataErrors')).toEqual([]);
 
   await page.screenshot({ path: testInfo.outputPath(`preload-${testInfo.project.name}.png`) });

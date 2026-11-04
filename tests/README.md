@@ -1,7 +1,7 @@
 # tests
 
-- `tests/core/`, `tests/i18n/`, `tests/tools/`, `tests/data/` (fixture: the shipped `public/data/` via
-  `tests/data/fixture.ts`), `tests/logic/`: Vitest unit
+- `tests/core/`, `tests/i18n/`, `tests/tools/`, `tests/data/` (fixture: the shipped `public/data/` via `tests/data/fixture.ts`;
+  `tests/logic/helpers.ts` adds `gameData()`, `inst()` and `scriptedRng()` for rule tests), `tests/logic/`: Vitest unit
   tests mirroring `src/` (`npm test`; coverage with `npm run coverage`). Vitest only picks up `tests/**/*.test.ts`
   and ignores `tests/e2e/`.
 - `tests/e2e/`: Playwright browser tests (`npx playwright test`). They build with `VITE_E2E=1` and serve `dist/`.

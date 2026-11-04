@@ -7,7 +7,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 
 - [x] M0 — Project skeleton and placeholders
 - [x] M1 — Config loading and validation
-- [ ] M2 — Battle and rules logic (no graphics)
+- [x] M2 — Battle and rules logic (no graphics)
 - [ ] M3 — Overworld: one map, movement, input
 - [ ] M4 — Maps, warps and interiors
 - [ ] M5 — Dialogue and talking NPCs
@@ -84,6 +84,23 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   directly (no Input service yet); switch it to `src/core/input.ts`. Phaser 4 geometry masks did not clip text, so
   the ErrorScene uses an opaque header strip instead.
 
+### M2
+
+- Built: every rule as pure, tested TypeScript in `src/logic/` (`instance`, `modifiers`, `damage`, `ai`, `battle`,
+  `team`, `merge`, `inventory`, `economy`, `encounter`, `npc-state`, `save`; table in `src/logic/README.md`) and the
+  M2 constants. `chooseAction(state, action, { data, rng })` returns `{ state, events[] }`; the event list and the
+  fixed RNG call order are documented in `battle.ts`. 142 unit tests, `src/logic/` coverage 99 % lines / 96 %
+  branches; `tests/logic/battle.test.ts` plays Portátil vs Ratón with seed 2026 and checks the exact events.
+- Deviations: `chooseAction` takes a third `ctx` argument (content + rng) so the state stays plain data; the
+  battle state carries the bag (`items`) and subtracts used items. Extra module `inventory.ts`, extra helpers
+  `actionError` / `availableSwitches` / `battleItems` / `introEvents`, and `SAVE_VERSION` in constants.
+  Fleeing ends the round before the AI chooses (no RNG used).
+- Decisions (safe assumptions, see Open questions › Raised in M2): items with no effect are refused; every completed
+  step counts as a safe step; merge HP gain also applies to a fainted instance (literal rule); save migration rules.
+- For M6: the scene calls `actionError()` to grey out options and plays `events` in order; `damage.hp` / `maxHp`
+  drive the HP bar. For M10: `parseSave` returns `warnings[]` to log and a failure reason; the store copies broken
+  saves. No e2e test added (no visible change); the existing Playwright suite was run.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -95,6 +112,18 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M2 (safe assumptions in brackets)
+
+- [ ] Can a healing item be used on a flexymon at full HP, or a heal on a fainted one? [No: `actionError` returns
+  `no_effect`, the turn is not used. Revive only works on fainted ones; buff items always target the active one.]
+- [ ] Do safe steps count every completed step or only steps on encounter tiles? [Every completed step.]
+- [ ] Merging an HP gain into a fainted instance raises `currentHp` too, which revives it. [Literal rule kept.]
+- [ ] Old saves that no longer fit the content. [Unknown flexymon/items/NPCs dropped; bonus and HP clamped; unknown
+  map → respawn point; extra team members → storage; empty team takes the first stored flexymon; no flexymon at all
+  → the save is treated as broken (`empty_team`).]
+- [ ] Should key items be buyable when they have a price? [Yes for buying (only `price: null` blocks it); never
+  sellable.]
 
 ### Raised in M1 (safe assumptions in brackets)
 

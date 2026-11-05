@@ -18,8 +18,8 @@ export interface AssetList {
 }
 
 /**
- * Collect sprites (flexymon, items, NPCs, M11 title + coworker, M12 the minimap of every outdoor zone, M13 the Audi)
- * and sounds (cries, attacks, voices, zone music, M11 jingle, M13 engine, M15 interface sounds).
+ * Collect sprites (flexymon, items, NPCs, title + coworker, the minimap of every outdoor zone, the Audi)
+ * and sounds (cries, attacks, voices, zone music, jingle, engine, interface sounds).
  */
 export function collectAssets(data: GameData): AssetList {
   const images = new Set<string>();
@@ -36,16 +36,16 @@ export function collectAssets(data: GameData): AssetList {
   for (const a of data.attacks.values()) sounds.add(a.sound);
   for (const z of data.zones.values()) {
     sounds.add(z.music);
-    // M12: outdoor zones have a pre-drawn minimap (`npm run placeholders` draws it from the map).
+    // Outdoor zones have a pre-drawn minimap (`npm run placeholders` draws it from the map).
     if (!z.indoor) images.add(minimapPath(z.id));
   }
-  // M11: the title image, the intro coworker and the handover jingle.
+  // The title image, the intro coworker and the handover jingle.
   images.add(data.intro.titleImage).add(data.intro.coworker.sprite);
   sounds.add(data.intro.coworker.voice).add(data.intro.jingle);
-  // M13: the car trip scene.
+  // The car trip scene.
   images.add(data.car.sprite);
   sounds.add(data.car.sound);
-  // M15: the interface sounds (cursor, confirm, cancel, error, money).
+  // The interface sounds (cursor, confirm, cancel, error, money).
   for (const path of Object.values(data.sounds)) sounds.add(path);
 
   return {

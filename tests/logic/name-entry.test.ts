@@ -10,7 +10,7 @@ import {
   typeChar,
 } from '../../src/logic/name-entry';
 
-describe('name entry (M11)', () => {
+describe('name entry', () => {
   it('allows letters (ñ and accents too) and spaces only', () => {
     for (const ch of ['a', 'Z', 'ñ', 'Ñ', 'á', 'ü', ' ']) expect(isNameChar(ch)).toBe(true);
     for (const ch of ['1', '-', '.', '', 'ab', '\n']) expect(isNameChar(ch)).toBe(false);
@@ -43,7 +43,7 @@ describe('name entry (M11)', () => {
     expect(finalName('Ana ')).toBe('Ana');
   });
 
-  it('builds the plan grid from es.json: A–Z, Ñ, á é í ó ú, space, Borrar, OK', () => {
+  it('builds the name grid from es.json: A–Z, Ñ, á é í ó ú, space, Borrar, OK', () => {
     const grid = nameGrid(es['name.letters']);
     const chars = grid.flatMap((c) => (c.kind === 'char' ? [c.char] : []));
     expect(chars.join('')).toBe('ABCDEFGHIJKLMNÑOPQRSTUVWXYZáéíóú ');

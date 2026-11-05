@@ -8,7 +8,7 @@ export interface DataError {
 }
 
 /**
- * Format a JSON path the way the plan shows it: indices as `[3]`, keys joined with dots,
+ * Format a JSON path for error messages: indices as `[3]`, keys joined with dots,
  * e.g. `[3].team[0]` or `spawn.map`. An empty path is shown as `(root)`.
  */
 export function formatPath(path: readonly PropertyKey[]): string {

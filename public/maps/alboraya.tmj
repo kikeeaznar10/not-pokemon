@@ -21273,7 +21273,7 @@
     },
     {
      "id": 3,
-     "name": "door_bar_las_rusas",
+     "name": "door_bar_este",
      "type": "",
      "x": 1792,
      "y": 192,
@@ -21285,7 +21285,7 @@
       {
        "name": "toMap",
        "type": "string",
-       "value": "bar_las_rusas"
+       "value": "bar_este"
       },
       {
        "name": "toX",
@@ -21311,7 +21311,7 @@
     },
     {
      "id": 4,
-     "name": "door_oficina_ahora",
+     "name": "door_oficina",
      "type": "",
      "x": 2656,
      "y": 224,
@@ -21323,7 +21323,7 @@
       {
        "name": "toMap",
        "type": "string",
-       "value": "oficina_ahora"
+       "value": "oficina"
       },
       {
        "name": "toX",
@@ -21349,7 +21349,7 @@
     },
     {
      "id": 5,
-     "name": "door_bar_pacos",
+     "name": "door_bar_centro",
      "type": "",
      "x": 2592,
      "y": 512,
@@ -21361,7 +21361,7 @@
       {
        "name": "toMap",
        "type": "string",
-       "value": "bar_pacos"
+       "value": "bar_centro"
       },
       {
        "name": "toX",

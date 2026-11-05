@@ -64,7 +64,7 @@ describe('warps', () => {
 
   it('lists every target tile (one per row for an edge warp)', () => {
     expect(warpTargetTiles(door)).toEqual([{ x: 4, y: 7 }]);
-    // M13: a car warp lands on the car.json endpoints, not on tiles of its own.
+    // A car warp lands on the car.json endpoints, not on tiles of its own.
     expect(warpTargetTiles({ ...car, car: 'murcia' })).toEqual([]);
     const tiles = warpTargetTiles(edge);
     expect(tiles).toHaveLength(20);

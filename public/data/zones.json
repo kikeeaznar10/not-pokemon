@@ -186,7 +186,7 @@
     "music": "assets/audio/music/murcia.ogg",
     "indoor": false,
     "encounters": {
-      "huerto_ciruelo": {
+      "huerto_frutal": {
         "rate": 10,
         "flexymon": [
           {
@@ -245,27 +245,27 @@
     }
   },
   {
-    "id": "oficina_ahora",
+    "id": "oficina",
     "name": "Oficina de ahora",
-    "file": "maps/oficina_ahora.tmj",
+    "file": "maps/oficina.tmj",
     "region": "valencia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,
     "encounters": {}
   },
   {
-    "id": "bar_pacos",
+    "id": "bar_centro",
     "name": "Bar Pacos",
-    "file": "maps/bar_pacos.tmj",
+    "file": "maps/bar_centro.tmj",
     "region": "valencia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,
     "encounters": {}
   },
   {
-    "id": "bar_las_rusas",
+    "id": "bar_este",
     "name": "Bar Las Rusas",
-    "file": "maps/bar_las_rusas.tmj",
+    "file": "maps/bar_este.tmj",
     "region": "valencia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,
@@ -353,9 +353,9 @@
     "encounters": {}
   },
   {
-    "id": "isaval",
+    "id": "empresa_sur",
     "name": "Isaval",
-    "file": "maps/isaval.tmj",
+    "file": "maps/empresa_sur.tmj",
     "region": "valencia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,
@@ -371,9 +371,9 @@
     "encounters": {}
   },
   {
-    "id": "ciruelo",
+    "id": "empresa_poligono",
     "name": "El Ciruelo",
-    "file": "maps/ciruelo.tmj",
+    "file": "maps/empresa_poligono.tmj",
     "region": "murcia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,

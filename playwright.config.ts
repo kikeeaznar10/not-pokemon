@@ -10,13 +10,13 @@ const chromiumWebGL = {
   },
 };
 
-// M12: on a portrait phone the game shows "Gira el móvil" and pauses. The tests written before M12 drive the game
+// On a portrait phone the game shows "Gira el móvil" and pauses. The older tests drive the game
 // on the portrait profiles (android, iphone), so those profiles start with this E2E-only switch on, which turns
-// the portrait guard off (src/main.ts). tests/e2e/m12-mobile.spec.ts removes it to test the guard itself.
+// the portrait guard off (src/main.ts). tests/e2e/mobile-minimap.spec.ts removes it to test the guard itself.
 //
-// M14: the real world replaced the test maps. The specs written before M14 (m0–m13) drive the frozen test world
+// The real world replaced the test maps. The older specs drive the frozen test world
 // (src/data/world.ts: public/test-world/data/ + public/maps/test/), so every profile starts with
-// `flexymon.e2e.world = test`. Specs about the real world (m14-world.spec.ts) remove it before the page loads.
+// `flexymon.e2e.world = test`. Specs about the real world (world.spec.ts) remove it before the page loads.
 const testWorld = { name: 'flexymon.e2e.world', value: 'test' };
 const testWorldOnly = { cookies: [], origins: [{ origin: BASE_URL, localStorage: [testWorld] }] };
 const allowPortrait = {

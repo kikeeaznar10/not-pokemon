@@ -1,5 +1,5 @@
 /**
- * Start menu rules (M10, docs/PLAN.md › M10): what the Equipo, Mochila and Opciones screens show and
+ * Start menu rules: what the Equipo, Mochila and Opciones screens show and
  * what their actions do, so the MenuScene computes nothing.
  *
  * - The menu lists *Equipo, Mochila, Mapa, Opciones, Cerrar* ({@link START_MENU}).

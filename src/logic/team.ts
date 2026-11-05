@@ -1,5 +1,5 @@
 /**
- * Team and storage (docs/PLAN.md › Team and storage). The team holds up to `teamSlots` flexymon
+ * Team and storage (docs/GAME-RULES.md › Team and storage). The team holds up to `teamSlots` flexymon
  * (starts at `start.json › teamSlots`, +1 per Regleta, max `TEAM_MAX`); storage has no limit. The team
  * can never be empty: the last member cannot be moved to storage. All functions are pure.
  */

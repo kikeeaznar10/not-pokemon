@@ -127,7 +127,7 @@ describe('Input service', () => {
     expect(i.isDown('b')).toBe(false);
   });
 
-  it('text mode (M11): typed keys are queued instead of pressing actions; arrows and Enter still act', () => {
+  it('text mode: typed keys are queued instead of pressing actions; arrows and Enter still act', () => {
     const i = new Input();
     i.setTextMode(true);
     expect(i.isTextMode).toBe(true);

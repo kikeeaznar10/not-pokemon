@@ -19,7 +19,7 @@ describe('intro text', () => {
   });
 });
 
-describe('secret names (plan › secret-names.json)', () => {
+describe('secret names (secret-names.json)', () => {
   it('matches ignoring case, accents and surrounding spaces', () => {
     expect(findSecretName('PACO', SECRETS)?.name).toBe('paco');
     expect(findSecretName('  PÁCO ', SECRETS)?.name).toBe('paco');

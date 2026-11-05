@@ -1,7 +1,7 @@
-// M6 "Done when": a debug battle Portátil vs Ratón can be won, lost and fled; HP bars match the numbers
+// Checks: a debug battle Portátil vs Ratón can be won, lost and fled; HP bars match the numbers
 // (the scene only plays logic events); B never gets the player stuck in a menu. Plus: the debug menu
-// starts a battle, Huir is greyed out against NPCs, switching (voluntary and forced), Objeto (item list since M9) and B,
-// and the player returns to the same tile with the team's HP kept (after a loss: the M8 Losing rule).
+// starts a battle, Huir is greyed out against NPCs, switching (voluntary and forced), Objeto (item list) and B,
+// and the player returns to the same tile with the team's HP kept (after a loss: the Losing rule).
 // Battles start through `__E2E__.startBattle(seed, species, kind)`; the team is set with `setTeam`.
 import { test, expect, type Page } from '@playwright/test';
 
@@ -65,7 +65,7 @@ async function enterOverworld(page: Page, url = '/'): Promise<string[]> {
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
@@ -76,7 +76,7 @@ async function enterOverworld(page: Page, url = '/'): Promise<string[]> {
 /**
  * Press a key and give the game a few frames to see it. First wait two animation frames, so at least one
  * game update ran since the last state read: a menu ignores input on the frame it opens, and a press
- * landing in that frame would be lost (this made the M6 tests flaky under load).
+ * landing in that frame would be lost (this made the tests flaky under load).
  */
 async function press(page: Page, key: string): Promise<void> {
   await page.evaluate(
@@ -98,14 +98,14 @@ async function advance(page: Page, uis: string[]): Promise<{ messages: string[];
     const v = await battle(page);
     if (v) last = v;
     if (!v) {
-      // Back in the overworld: free to move, or (M8, after a loss) showing the "woke up" message.
+      // Back in the overworld: free to move, or (after a loss) showing the "woke up" message.
       const back =
         !(await hook<boolean>(page, 'overworldLocked')) || (await hook<unknown>(page, 'dialogue')) !== null;
       if (uis.includes('over') && (await tile(page)) && back) return { messages, last };
     } else if (uis.includes(v.ui) && v.menu) {
       return { messages, last };
     } else if (v.ui === 'catch' && v.menu) {
-      // M7: after a wild win the catch choice appears; B = Dejarlo keeps the team as it was.
+      // After a wild win the catch choice appears; B = Dejarlo keeps the team as it was.
       await press(page, 'x');
       continue;
     } else if (v.message) {
@@ -188,7 +188,7 @@ test('a debug battle Portátil vs Ratón can be won; HP bars match; same tile an
   expect(errors).toEqual([]);
 });
 
-test('a battle can be lost: the Losing rule wakes the player at the office (M8)', async ({ page }) => {
+test('a battle can be lost: the Losing rule wakes the player at the office', async ({ page }) => {
   // Plays up to 10 whole battles (messages type out at 30 characters per second).
   test.setTimeout(120_000);
   const errors = await enterOverworld(page);
@@ -212,7 +212,7 @@ test('a battle can be lost: the Losing rule wakes the player at the office (M8)'
     if (!lost) await standing(page, { map: 'test', x: 15, y: 10 });
   }
   expect(lost).toBe(true);
-  // M8's Losing rule: respawn point (start.json › respawn), the message, euros halved, team healed.
+  // the Losing rule: respawn point (start.json › respawn), the message, euros halved, team healed.
   await expect
     .poll(async () => (await hook<{ full: string } | null>(page, 'dialogue'))?.full)
     .toBe('Te has despertado en la oficina...');
@@ -281,7 +281,7 @@ test('B always goes back (also from Objeto); switching works', async ({ page }, 
   await press(page, 'x');
   await expect.poll(ui).toBe('main');
   expect((await battle(page))!.menu!.cursor).toBe(2);
-  // Objeto → the item list (M9 replaced the "Pronto" placeholder) → B → back, no turn used.
+  // Objeto → the item list → B → back, no turn used.
   await press(page, 'ArrowUp');
   await press(page, 'ArrowRight');
   await press(page, 'z');

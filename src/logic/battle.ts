@@ -1,5 +1,5 @@
 /**
- * The battle state machine (docs/PLAN.md › Battle flow, Hit and damage, Buffs and debuffs).
+ * The battle state machine (docs/GAME-RULES.md › Battle flow, Hit and damage, Buffs and debuffs).
  *
  * `createBattle()` builds a plain-data {@link BattleState}. Each player decision goes through
  * `chooseAction(state, action, ctx)`, which returns the next state plus the list of

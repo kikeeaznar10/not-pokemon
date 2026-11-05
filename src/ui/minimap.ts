@@ -1,5 +1,5 @@
 /**
- * Minimap (M12) — the current zone's pre-drawn map image (`assets/ui/minimap_<zone>.png`) in the top-left corner
+ * Minimap — the current zone's pre-drawn map image (`assets/ui/minimap_<zone>.png`) in the top-left corner
  * of the screen, with a blinking dot on the player's tile. Owned by the OverworldScene, which calls
  * {@link Minimap.update} every frame with the player's tile.
  *

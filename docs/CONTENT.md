@@ -1,139 +1,403 @@
-# Flexymon — Content guide
+# Content guide
 
-How to add or change game content: flexymon, attacks, items, NPCs, shops, maps, sounds and the new-game intro.
-This is the plan's *Content guide* (docs/PLAN.md), kept up to date with what the game really does (M15). Adding
-content means editing JSON and maps only; no TypeScript change is needed.
+How to add or change game content: flexymon, attacks, items, NPCs and their dialogue, enemy trainers, wild
+encounters, shops, the new game, secret names, the Audi, the intro, sounds and UI text.
 
-**After any change:** run `npm run art` (styled art for new sprite paths) and `npm run placeholders` (sound, and any
-other new path), then `npm run dev` and fix whatever
-the red error screen reports (`file › JSON path › message`). With the dev server running, F2 twice opens the debug
-menu; *Recargar datos* reloads every JSON and map without reloading the page (an error is shown and the old data
-kept). Before sharing, run the checks in `CLAUDE.md` › Definition of done.
+**Content is data.** Adding content means editing JSON (and maps, see [MAPS.md](MAPS.md)); no TypeScript change is
+needed. Never hard-code content in `.ts` files.
+
+## The workflow
+
+1. Edit the JSON in `public/data/`.
+2. Create any new image or sound the JSON names:
+   - `npm run art` draws styled art for every new sprite path (see [ART.md](ART.md));
+   - `npm run placeholders` makes beeps for new sounds and any other missing file.
+
+   Both never overwrite existing files, so they are always safe to run.
+3. `npm run dev` and open the printed URL. If something is wrong, the game stops on a **red error screen** listing
+   `file › JSON path › message`, for example `npcs.json › [3].team[0] › unknown flexymon "teclado"`. Fix it and
+   reload.
+4. Try it in the game. The debug menu (below) teleports you anywhere, starts any battle and gives items.
+5. Run the checks before opening a pull request (`CONTRIBUTING.md`).
+
+**Live reload of data:** with the dev server running, press **F2** twice to open the debug menu and choose
+*Recargar datos*: every JSON and map is reloaded and validated without reloading the page (on an error the old data
+is kept and the errors are shown). A replaced image or sound under the same path still needs a page reload.
+
+**Finding a tile's coordinates:** stand on it and press **F2** (`Casilla: x, y`), or hover it in Tiled and read the
+status bar. Both use the same numbers: x from the left, y from the top, starting at 0.
 
 ## Where things live
 
-| What | Where | Details |
+| What | Where | Validated by |
 | --- | --- | --- |
-| Content (11 files) | `public/data/*.json` | Rules per file: `public/data/README.md`; schemas: `src/data/schemas/` |
-| Maps | `public/maps/<zone>.tmj` | Layers, properties, the world layout: `public/maps/README.md` |
-| Map sources (cloud sessions) | `tools/world/<zone>.txt` + `world.json` | `npm run world`, legend in `tools/README.md` |
-| Sprites | `public/assets/sprites/…` (PNG) | Sizes below |
-| Sounds | `public/assets/audio/sfx/…`, `…/music/…` | OGG + MP3 with the same name |
-| Interface texts | `src/i18n/es.json` | Menu labels, battle messages… (content texts stay in the JSON) |
-| Tunable rule numbers | `src/logic/constants.ts` | Damage scale, cooldown distance, text speeds, timings |
+| Flexymon species | `public/data/flexymon.json` | `src/data/schemas/flexymon.ts` |
+| Attacks | `public/data/attacks.json` | `src/data/schemas/attacks.ts` |
+| Items | `public/data/items.json` | `src/data/schemas/items.ts` |
+| NPCs (talkers, enemies, shopkeepers, healer, storage) | `public/data/npcs.json` | `src/data/schemas/npcs.ts` |
+| Zones: map file, name, region, music, wild encounters | `public/data/zones.json` | `src/data/schemas/zones.ts` |
+| Shop stock | `public/data/shops.json` | `src/data/schemas/shops.ts` |
+| New-game state | `public/data/start.json` | `src/data/schemas/start.ts` |
+| Secret names | `public/data/secret-names.json` | `src/data/schemas/secret-names.ts` |
+| The Audi | `public/data/car.json` | `src/data/schemas/car.ts` |
+| Title image and intro script | `public/data/intro.json` | `src/data/schemas/intro.ts` |
+| Interface sounds | `public/data/sounds.json` | `src/data/schemas/sounds.ts` |
+| Maps | `public/maps/<zone>.tmj` (built from `tools/world/`) | `src/data/tiled.ts`, `src/data/map-checks.ts` |
+| UI strings (menus, battle messages) | `src/i18n/es.json` | missing keys show `⟦key⟧` |
+| Tunable rule numbers | `src/logic/constants.ts` | unit tests |
 
-The content files are the plan's nine — `flexymon.json`, `attacks.json`, `items.json`, `npcs.json`, `zones.json`,
-`shops.json`, `start.json`, `secret-names.json`, `car.json` — plus `intro.json` (M11: title image and new-game
-intro) and `sounds.json` (M15: interface sounds). All visible content text is written in Spanish directly in them.
+All asset paths in the JSON are relative to `public/`. All visible content text is Spanish, written directly in the
+JSON (content text is not duplicated in `es.json`).
 
-`public/test-world/data/` is a frozen copy of the M0–M13 content used by the tests (`?world=test` in dev builds).
-**Do not add real content there**; its numbers must not change.
+### Rules every file follows
+
+- Every object is **strict**: an unknown or misspelled field is an error (this catches typos).
+- Ids are `snake_case` and unique within their file.
+- Visible texts and dialogue lines must not be empty; dialogue lists need at least one line.
+- Image paths match `assets/….png`. Sound paths match `assets/….ogg` (or `.mp3`); both `<name>.ogg` and
+  `<name>.mp3` are loaded, so ship both.
+- Every id you reference must exist (attacks in flexymon, flexymon in teams and encounters, items in shops, maps in
+  NPCs…). These cross-references are checked at boot (`src/data/cross-refs.ts`).
+- Every map point (NPC spawn, start, respawn, car arrival, warp target, intro walk) must be a walkable tile
+  (`src/data/map-checks.ts`).
 
 ## Add a flexymon
 
-1. Add its attacks to `attacks.json` first (new ids, or reuse existing ones). Effects: `damage` (`power` 1–200,
-   target `enemy`), `heal` (`percent` of max HP, target `self`), `buff` / `debuff` (`stat` attack / defense / speed,
-   `percent` 1–100, `turns` 1–9; buff on `self`, debuff on `enemy`). `accuracy` 1–100, and a `sound`.
-2. Add an entry to `flexymon.json` with a new `snake_case` id, the Spanish name, `sprite` (`front`, `back`, `icon`),
-   `cry`, the four `stats` (whole numbers 1–999) and 1–3 attack ids.
-3. Run `npm run art` for its images (a new id gets a generic round creature in its own colour until its look is
-   added to `tools/art/flexymon.ts`), then `npm run placeholders` for its sounds; or drop real files at those paths:
-   front / back 64 × 64 PNG, icon 16 × 16 PNG, sounds as OGG + MP3 with the same name.
-4. Make it appear: add `{ "id": "...", "weight": n }` to an encounter group in `zones.json`, or put it in an enemy
-   NPC's `team`.
-5. Balance: total stats 60–100 for the Valencia side, 100–140 for the Murcia side. `tests/data/world.test.ts` checks
-   the content counts and the balance guide, so update it when the roster changes on purpose.
+1. **Attacks first.** Reuse existing ids from `attacks.json` or add new ones (see *Add an attack*).
+2. **Add the species** to `flexymon.json`:
 
-## Add an NPC
+   ```json
+   {
+     "id": "impresora",
+     "name": "Impresora",
+     "sprite": {
+       "front": "assets/sprites/flexymon/impresora_front.png",
+       "back": "assets/sprites/flexymon/impresora_back.png",
+       "icon": "assets/sprites/flexymon/impresora_icon.png"
+     },
+     "cry": "assets/audio/sfx/cry_impresora.ogg",
+     "stats": { "hp": 36, "attack": 11, "defense": 9, "speed": 10 },
+     "attacks": ["atasco_papel", "toner"]
+   }
+   ```
 
-1. Find the tile: in Tiled, hover it and read x / y in the status bar; with `npm run dev`, stand on it and press F2
-   (`Casilla: x, y`). The tile must be walkable (checked at boot).
-2. Add an entry to `npcs.json`: `id`, `type`, `name`, `sprite` (32 × 32 PNG, or a 64 × 128 walk sheet like the
-   player's to show facing), `voice` (a short sound played while it speaks), `map`, `spawn`, `facing`, `wander`
-   (`null` to stand still, or a rectangle `{ x, y, width, height, stepEveryMs: [min, max] }` containing the spawn)
-   and `dialogue` (a list of short strings, one text box each; long ones continue on more boxes).
-3. Per type:
-   - `talker`: nothing more.
-   - `enemy`: `sight` (tiles, 1–16; the plan uses 4), `team` (1–6 flexymon ids), `reward` `{ min, max }` euros and
-     `defeatDialogue` (said after you win, and when you talk to it before it is ready again).
-   - `shopkeeper`: `shop` (a key of `shops.json`); the shop opens after its dialogue.
-   - `healer`: heals the team and storage, then says its dialogue (the office has one).
-   - `storage`: says its dialogue, then opens the storage box.
+   - `id`: new, `snake_case`. `name`: what the player sees.
+   - `stats`: whole numbers 1–999. Balance guide: the four stats add up to **60–100** for species met on the
+     Valencia side and **100–140** for the Murcia side (`tests/data/world.test.ts` enforces this).
+   - `attacks`: 1–3 attack ids.
+3. **Art and sound.** Run `npm run art` and `npm run placeholders`. A new id gets a generic round creature in its own
+   colour and a beep for its cry. For a real look, either drop PNGs at those paths (front / back 64 × 64, icon
+   16 × 16) or add a drawing for the id to `SPECIES` in `tools/art/flexymon.ts` and run `npm run art -- --force`
+   (see [ART.md](ART.md)).
+4. **Make it appear**, otherwise nobody can get it:
+   - in the wild: add `{ "id": "impresora", "weight": 30 }` to an encounter group in `zones.json`
+     (see *Wild encounters*);
+   - and/or in an enemy NPC's `team`.
+
+   The world test requires every species except the starter to be met in the wild somewhere.
+
+## Add an attack
+
+```json
+{
+  "id": "atasco_papel",
+  "name": "Atasco de papel",
+  "sound": "assets/audio/sfx/atasco_papel.ogg",
+  "accuracy": 90,
+  "target": "enemy",
+  "effect": { "type": "damage", "power": 45 }
+}
+```
+
+| `effect.type` | Fields | `target` |
+| --- | --- | --- |
+| `damage` | `power` 1–200 | `enemy` |
+| `heal` | `percent` of max HP, 1–100 | `self` |
+| `buff` | `stat` (`attack` / `defense` / `speed`), `percent` 1–100, `turns` 1–9 | `self` |
+| `debuff` | same as `buff` | `enemy` |
+
+`accuracy` is 1–100 (percent chance to hit). How these numbers turn into damage: [GAME-RULES.md](GAME-RULES.md) ›
+Hit and damage. Every attack must be known by at least one species (world test). Run `npm run placeholders` for
+its sound.
 
 ## Add an item
 
-An entry in `items.json` (`id`, `name`, `description`, `sprite` 16 × 16 PNG, `price` whole euros or `null` = cannot
-be bought or sold, `usableIn` ⊂ `["battle", "field"]`, `effect`), then list it in a shop (`shops.json`) or give it at
-the start (`start.json › items`) or through a secret name. Effects: `heal` (`amount` HP), `heal_full`, `revive`
-(`percent` of max HP), `buff` (as attacks, on the active flexymon), `team_slot` (+1 team slot, consumed, refused at
-6), `key` (never consumed or sold; only checked, e.g. by the Audi), `catch` (reserved). Selling pays half the
-price, rounded down.
+```json
+{
+  "id": "cafe",
+  "name": "Café",
+  "description": "Recupera 20 PS.",
+  "sprite": "assets/sprites/items/cafe.png",
+  "price": 50,
+  "usableIn": ["battle", "field"],
+  "effect": { "type": "heal", "amount": 20 }
+}
+```
 
-## Shops, the start, secret names, the Audi
+- `price`: whole euros 0–999 999, or `null` = cannot be bought or sold. Selling pays half, rounded down.
+- `usableIn`: any of `"battle"` (Objeto in battle) and `"field"` (Start › Mochila).
+- `effect`: `heal` (`amount` 1–999 HP), `heal_full`, `revive` (`percent` 1–100 of max HP), `buff` (`stat`,
+  `percent`, `turns`, on the active flexymon), `team_slot` (+1 team slot), `key` (never consumed or sold; only
+  checked, e.g. by the Audi), `catch` (reserved, does nothing yet). Details: [GAME-RULES.md](GAME-RULES.md) › Items.
+- `sprite`: 16 × 16 PNG. `npm run art` draws a generic parcel for unknown ids; add a drawing to `ITEMS` in
+  `tools/art/sprites.ts` for a real one.
 
-- `shops.json`: shop id → item ids it sells (only items with a price). One per town plus the two bars.
-- `start.json`: starter, euros, team slots, starting items, `spawn` (new game) and `respawn` (after losing). Moving
-  `spawn` means updating `intro.json` too (its walks are checked against the spawn's map).
-- `secret-names.json`: `{ name, items, message }`; matching ignores case, accents and surrounding spaces. Keep real
-  coworkers' names out of public repositories (open question in docs/PROGRESS.md).
-- `car.json`: `unlockPairs` (owning both items of any pair opens the office Audi; items are not consumed),
-  `lockedDialogue`, the trip `sprite` (side view, nose right) and engine `sound`, the arrival points `toMurcia` /
-  `toValencia`. The cars on the maps are action warps with the property `car` (see `public/maps/README.md`).
+Then give the player a way to get it: list it in a shop (`shops.json`, only items with a price), put it in
+`start.json › items`, or reward it through a secret name.
 
-## The new-game intro and the title (`intro.json`)
+## Add an NPC
 
-`titleImage` (512 × 288 PNG behind the title), `jingle` (the handover sound), `coworker` (name, sprite, voice, start
-tile and facing — it only exists during the intro) and `steps`: `fade_in`, `wait`, `walk` (`player` or `coworker`,
-one tile per direction), `face`, `say` (`{name}` = the player's name, `{starter}` = the starter's name) and exactly
-one `handover`. Control starts where the script leaves the player; walk the coworker out of view at the end. Field
-rules: `public/data/README.md`.
+Every NPC is one entry in `npcs.json`. Common fields:
+
+```json
+{
+  "id": "camarero_bar_centro",
+  "type": "shopkeeper",
+  "name": "Camarero",
+  "sprite": "assets/sprites/npcs/camarero.png",
+  "voice": "assets/audio/sfx/voice_low.ogg",
+  "map": "bar_centro",
+  "spawn": { "x": 7, "y": 3 },
+  "facing": "down",
+  "wander": null,
+  "dialogue": ["¿Lo de siempre?"],
+  "shop": "bar_centro"
+}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Unique `snake_case` id. Enemy states in the save are stored under it, so don't rename shipped NPCs lightly. |
+| `type` | `talker`, `enemy`, `shopkeeper`, `healer` or `storage` (below). |
+| `name` | Shown above its lines. |
+| `sprite` | A 64 × 128 walk sheet (2 columns stand / stride × 4 rows down / left / right / up, 32 × 32 frames) so it shows its facing and steps; any other size (e.g. 32 × 32) is drawn as one still image. |
+| `voice` | A short sound played every 3 characters while it speaks (`voice_low` and `voice_high` exist). |
+| `map` | Zone id (`zones.json`). |
+| `spawn` | Tile `{ x, y }` where it starts. Must be walkable. |
+| `facing` | `up` / `down` / `left` / `right`. |
+| `wander` | `null` to stand still, or `{ "x", "y", "width", "height", "stepEveryMs": [min, max] }`: a rectangle in tiles that must contain the spawn. Every random `min`–`max` ms it steps one tile inside it, never onto a solid tile, another NPC, the player or a warp. |
+| `dialogue` | List of strings, one text box each. Long strings wrap and continue on more boxes; no text is ever cut. |
+
+### NPC types
+
+| `type` | Extra fields | Behaviour |
+| --- | --- | --- |
+| `talker` | — | Says `dialogue`. |
+| `enemy` | `sight`, `team`, `reward`, `defeatDialogue` | A trainer who fights. See *Add an enemy trainer*. |
+| `shopkeeper` | `shop` (a key of `shops.json`) | Says `dialogue`, then opens that shop. |
+| `healer` | — | Heals the team and the storage box, says "Tus flexymon están como nuevos." then `dialogue`, and auto-saves. |
+| `storage` | — | Says `dialogue`, then opens the storage box. |
+
+### Give the NPC its own look
+
+Run `npm run art`: a new sprite path gets a walk sheet with clothes picked from its file name. For a chosen look,
+add the file name (without `.png`) to `NPC_LOOKS` in `tools/art/characters.ts` (skin, hair style and colour, shirt,
+trousers, optional hat, apron front or tie) and run `npm run art -- --force`. Or drop a hand-drawn 64 × 128 sheet at
+the path. Several NPCs may share one sprite.
+
+## Change NPC dialogue
+
+Edit the strings in `npcs.json`:
+
+- `dialogue`: what it says when you talk to it (and, for enemies, before the battle).
+- `defeatDialogue` (enemies only): after you win, and whenever you talk to it while it is in cooldown.
+- Each string is one text box. Keep them short (about two lines of 40 characters); a longer one simply continues on
+  the next box.
+- Plain Spanish text, any characters. There are no variables in NPC dialogue (`{name}` and `{starter}` only work in
+  `intro.json`).
+- Text speed is a player option; you don't control it per line.
+
+Shop, healer and storage reactions ("Tus flexymon están como nuevos.", shop menus…) are UI strings in
+`src/i18n/es.json`, not NPC dialogue.
+
+## Add an enemy trainer
+
+An enemy is an NPC with `"type": "enemy"` and four more fields:
+
+```json
+{
+  "id": "becario_alboraya",
+  "type": "enemy",
+  "name": "Becario",
+  "sprite": "assets/sprites/npcs/becario.png",
+  "voice": "assets/audio/sfx/voice_high.ogg",
+  "map": "alboraya",
+  "spawn": { "x": 12, "y": 17 },
+  "facing": "left",
+  "wander": { "x": 11, "y": 16, "width": 3, "height": 4, "stepEveryMs": [1200, 3000] },
+  "dialogue": ["¡Eh! ¿Tú también eres nuevo?", "¡Vamos a ver quién despliega antes!"],
+  "sight": 4,
+  "defeatDialogue": ["Vale, vale... me vuelvo a mi tarea de Jira."],
+  "team": ["raton", "teclado"],
+  "reward": { "min": 60, "max": 100 }
+}
+```
+
+- `sight`: how many tiles it sees in a straight line in front of it (1–16; the game uses 4). Walls and other NPCs
+  block it. A wandering enemy looks wherever it last stepped.
+- `team`: 1–6 flexymon ids, sent out in order. Each battle uses fresh, full-HP copies with no bonus.
+- `reward`: euros paid on a win, a random whole number between `min` and `max` (min ≤ max).
+- `defeatDialogue`: said after you win, and while it is in cooldown.
+
+After a defeat it won't fight again until you walk more than 6 tiles away or leave the map; losing any battle makes
+every enemy fightable again. Full rules: [GAME-RULES.md](GAME-RULES.md) › Enemy NPCs.
+
+Balance: rewards and teams grow with distance from the start, from about 60–100 € with two weak flexymon in
+Alboraya to 250–420 € with Murcia-side species. Place enemies where the player can walk up to them: the world test
+checks that every NPC has a reachable neighbouring tile.
+
+## Wild encounters
+
+Wild flexymon are configured per zone in `zones.json › encounters`, a map of *group name* → group:
+
+```json
+{
+  "id": "valencia",
+  "name": "Valencia",
+  "file": "maps/valencia.tmj",
+  "region": "valencia",
+  "music": "assets/audio/music/valencia.ogg",
+  "indoor": false,
+  "encounters": {
+    "jardin_turia": { "rate": 10, "flexymon": [ { "id": "raton", "weight": 60 }, { "id": "monitor", "weight": 40 } ] },
+    "plaza_ayuntamiento": { "rate": 6, "flexymon": [ { "id": "movil", "weight": 100 } ] }
+  }
+}
+```
+
+- `rate`: percent chance (1–100) of a battle per completed step on a qualifying tile.
+- `weight`: relative chance of each species (whole numbers ≥ 1; they need not add up to 100).
+- `encounters` is required; use `{}` for none.
+
+A group only does something where the **map** has an encounter rectangle with that `group` name. To add wild
+flexymon to a new area, add the group here and the rectangle on the map ([MAPS.md](MAPS.md) › Encounter areas).
+Rectangles in mode `tiles` roll only on encounter tiles (tall grass, dune grass, vineyard); mode `all` rolls on every
+tile, for city crowds. A group on a map but missing here stops the game at boot; a group here that no map uses is a
+warning (and fails the world test).
+
+## Shops
+
+`shops.json` maps a shop id to the item ids it sells, in the order shown:
+
+```json
+{ "tienda_alboraya": ["cafe", "bocadillo", "redbull", "regleta"], "bar_centro": ["cafe", "bocadillo"] }
+```
+
+Only items with a price can be listed. A shop opens through a `shopkeeper` NPC whose `shop` names it; usually the
+shopkeeper stands behind a counter inside a small shop interior (see [MAPS.md](MAPS.md) › Add a building). Every
+shop can buy any sellable item from the player.
+
+## The new game (`start.json`)
+
+```json
+{
+  "starter": "portatil",
+  "euros": 200,
+  "teamSlots": 2,
+  "spawn": { "map": "oficina", "x": 7, "y": 12, "facing": "up" },
+  "respawn": { "map": "oficina", "x": 7, "y": 10, "facing": "down" },
+  "items": { "cafe": 3, "llaves_audi": 1 }
+}
+```
+
+`starter` is handed over in the intro; `spawn` is where the intro starts; `respawn` is where you wake up after
+losing. `euros` 0–999 999, `teamSlots` 1–6, item counts 1–99. **Moving `spawn` means updating `intro.json`** too:
+the intro's walks are checked against the spawn's map at boot.
+
+## Secret names (`secret-names.json`)
+
+```json
+[{ "name": "paco", "items": { "cafe": 10 }, "message": "El de siempre te ha guardado unos cafés." }]
+```
+
+If the player's name matches `name` (ignoring case, accents and surrounding spaces), `items` are added and `message`
+is shown right after the starter handover. Two entries may not match the same name. Don't put real people's names in
+a public repository.
+
+## The Audi (`car.json`)
+
+```json
+{
+  "unlockPairs": [["llaves_audi", "carnet"], ["llaves_audi", "cafe_doble"]],
+  "lockedDialogue": ["El Audi está cerrado. Tienes las llaves, pero te falta algo...", "..."],
+  "sprite": "assets/sprites/car/audi.png",
+  "sound": "assets/audio/sfx/car_engine.ogg",
+  "toMurcia": { "map": "murcia", "x": 16, "y": 15, "facing": "down" },
+  "toValencia": { "map": "alboraya", "x": 85, "y": 9, "facing": "down" }
+}
+```
+
+- `unlockPairs`: owning both items of any pair opens the office car (items are not consumed). The shipped sources:
+  the keys at the start, *Café doble* at the bar `bar_este`, *Carnet* at El Pueblo's shop `tienda_pueblo`.
+- `lockedDialogue`: what the locked car says.
+- `sprite`: the car seen from the side, nose to the right (flipped for the way back), used by the trip scene.
+- `sound`: the engine, looped during the trip.
+- `toMurcia` / `toValencia`: where each trip arrives (next to the other car).
+
+The cars on the maps are action warps with a `car` property ([MAPS.md](MAPS.md) › The Audi). The game knows exactly
+two destinations, `murcia` and `valencia`; a third region reachable by car would need code changes in
+`src/logic/car.ts` and the car warp schema.
+
+## The title and the intro (`intro.json`)
+
+- `titleImage`: 512 × 288 PNG behind the title screen.
+- `jingle`: sound played at the handover.
+- `coworker`: `{ name, sprite, voice, x, y, facing }`, an intro-only character placed on the `start.json › spawn`
+  map.
+- `steps`, run in order, the player starting on the spawn tile:
+
+| Step | Fields | What happens |
+| --- | --- | --- |
+| `fade_in` | `ms` 0–10 000 | Fades in from black. |
+| `wait` | `ms` 0–10 000 | Pauses. |
+| `walk` | `actor` (`player` / `coworker`), `path` (`["up", "up", …]`) | Walks one tile per direction. |
+| `face` | `actor`, `facing` | Turns. |
+| `say` | `lines` | The coworker speaks. `{name}` = the player's name, `{starter}` = the starter's name. |
+| `handover` | — | Exactly one. Jingle, "¡Recibes a {starter}!", then the secret name's items and message. |
+
+The player gets control where the script leaves them; walk the coworker out of view at the end. Boot checks that
+the coworker's tile and every walked tile are walkable and that no walk enters the other actor's tile.
 
 ## Sounds and music
 
-- Every sound path in the JSON is an OGG; an MP3 with the same name is the fallback (both are loaded by path).
-- Zone music: `zones.json › music` per zone (one loop per region; interiors share `interior.ogg`). It crossfades
-  when the next zone uses another file.
-- Interface sounds (M15): `sounds.json` holds `cursor` (a menu cursor moved), `confirm` (an option chosen), `cancel`
-  (B backed out), `error` (a refused action: greyed option, not enough money, the storage box refusing) and `money`
-  (a purchase, a sale, an enemy's reward). Every key is required.
-- Volumes are the player's options (Start › Opciones: Música, Efectos 0–10); every sound effect uses the effects
-  volume. Audio starts only after the first key press, click or touch (browser rule).
-- Placeholders: `npm run placeholders` makes a short beep per sound (distinct tones for the interface sounds, a hum
-  for the car engine) when `ffmpeg` is installed, silent files otherwise.
+- **Zone music:** `zones.json › music`, one loop per region (`valencia.ogg`, `murcia.ogg`; every interior plays
+  `interior.ogg`). The same file keeps playing across zones; a different one crossfades over 500 ms.
+- **Attack sounds** (`attacks.json › sound`), **cries** (`flexymon.json › cry`), **voices** (`npcs.json › voice`),
+  the jingle and the car engine are content paths like any other.
+- **Interface sounds:** `sounds.json` has `cursor` (a menu cursor moved), `confirm` (an option chosen), `cancel` (B
+  backed out), `error` (a refused action) and `money` (a purchase, a sale, a reward). All five are required.
+- Every path is an OGG with an MP3 of the same name next to it as a fallback.
+- Audio starts only after the first key press, click or touch (a browser rule). Volumes are player options.
 
-## Maps
+## UI text (`src/i18n/es.json`)
 
-Tiled works as the plan describes (orthogonal, 32 × 32 tiles, CSV layers, tilesets embedded, saved as
-`public/maps/<zone_id>.tmj`), with the layers `spawns`, `encounters`, `warps` (objects), `above`, `collision`,
-`deco`, `ground` (tiles). Tile properties: `solid = true` blocks (on any layer), `encounter = true` makes tall grass,
-sand and vineyard roll encounters. Encounter rectangles have `group` (a key of the zone's `encounters` in
-`zones.json`) and `mode` (`tiles` or `all` for city crowds). Warps have `toMap`, `toX`, `toY`, `toFacing`, `trigger`
-(`step` or `action`); every door needs a matching warp back. Then add the zone to `zones.json` (file, name, region,
-music, `indoor`, encounter groups).
+Every string the interface shows that is not content (menu labels, battle messages, shop prompts…) is a flat key in
+`src/i18n/es.json`, grouped by prefix (`battle.*`, `shop.*`, `menu.*`…). Code reads them with
+`t('battle.wild_appeared', { name })`; `{var}` placeholders are filled from the second argument. To reword the UI,
+edit the value; to add a string, add a key and use it with `t()`. A missing key shows `⟦key⟧` on screen and logs a
+warning. Never write Spanish text in a `.ts` file.
 
-In a cloud session, where Tiled cannot be used, the real world is built from text: edit `tools/world/<zone>.txt`
-(one character per tile) and `tools/world/world.json` (doors, edges, the Audi, metro / train links, encounter
-rectangles, spawn), then
-`npm run world -- --force`. Legend and fields: `tools/README.md` › `npm run world`; the current layout, landmarks and
-tile ids: `public/maps/README.md`. After changing an outdoor map, delete its `assets/ui/minimap_<zone>.png` and run
-`npm run placeholders` to redraw the minimap.
+## Tunable numbers (`src/logic/constants.ts`)
 
-## Real art
+Damage scale, merge percent, team size, cooldown distance, safe steps, walk speed, text speeds, timings and sizes are
+constants with a doc comment each. Some are pinned by unit tests that encode a rule (e.g. the damage examples in
+`tests/logic/damage.test.ts`); if you change a rule number, update [GAME-RULES.md](GAME-RULES.md) and those tests in
+the same change.
 
-Since the post-M15 restyle the game's art is drawn by code in the style of `docs/STYLE-REFERENCE.md` (bright
-handheld-RPG pixel art, dark outlines, 16 px design scaled ×2): `npm run world` draws the world tileset and
-`npm run art` draws the player, NPC walk sheets, flexymon, items, the car and the title. Each new sprite path in the
-content gets styled art the next time you run `npm run art` (it never overwrites; `-- --force` redraws everything).
-To give a new NPC its own clothes, add its sprite name to `NPC_LOOKS` in `tools/art/characters.ts`; a new flexymon or
-item gets hand-made art in `tools/art/flexymon.ts` / `tools/art/sprites.ts`. Without that, they get generic art
-picked from the name. See `tools/README.md` › `npm run art`.
+## The debug menu
 
-Replace any drawn image by dropping a file with the same path and size; nothing else changes. Sizes: flexymon
-front / back 64 × 64, icons and items 16 × 16, NPCs a 64 × 128 walk sheet (or a 32 × 32 still image: 2 columns stand / stride × 4
-rows down / left / right / up; still images show no facing), the player sheet `assets/sprites/player.png` (same layout), the trip car (any size,
-side view), the title 512 × 288, tilesets 32 px tiles (keep `world.png`'s tile order: see `public/maps/README.md`), minimaps any size (they are scaled to fit). There is no pixel
-font yet: texts use the browser's monospace font.
+Available with `npm run dev`, or on any build with `?debug=1` in the URL. **F2** cycles: hidden → info (map, tile,
+FPS, euros) → menu → hidden. In the menu (arrows, A, B):
 
-`npm run build` packs every sprite of the content up to 128 × 128 into one texture atlas
-(`public/assets/atlas/`, made by `npm run atlas`, not committed) so phones download one image instead of ~70; the
-game still uses each sprite by its own path. Nothing to do by hand: the atlas is rebuilt on every build.
+- teleport to any zone's `default` spawn;
+- *Combate: {name}*: a wild battle against any species;
+- *Dar 1000 €*, *Dar: {item}*: give euros or one of any item;
+- *Recargar datos*: reload and validate every JSON and map;
+- *Borrar partida*: delete the save and reload;
+- *Encuentros: sí/no*: switch wild encounters off;
+- *NPC: todos listos*: make every enemy fightable again.
+
+## The frozen test world
+
+`public/test-world/data/` and `public/maps/test/` are a small, frozen content set (3 flexymon, 3 test maps) that many
+tests run on, so their numbers never change. **Do not add real content there.** Details: [TESTING.md](TESTING.md).

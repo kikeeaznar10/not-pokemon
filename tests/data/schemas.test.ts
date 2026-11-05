@@ -184,7 +184,7 @@ describe('schemas: one broken fixture per rule', () => {
     expect(errors.map((e) => e.split(' › ')[0])).toEqual(['flexymon.json', 'car.json']);
   });
 
-  it('intro (M11): exactly one handover, walk paths not empty, known step types and actors', () => {
+  it('intro: exactly one handover, walk paths not empty, known step types and actors', () => {
     expect(errorsAfter((f) => f['intro.json'].steps.push({ type: 'handover' }))).toEqual([
       'intro.json › steps › needs exactly one "handover" step (found 2)',
     ]);
@@ -213,7 +213,7 @@ describe('schemas: one broken fixture per rule', () => {
     ]);
   });
 
-  it('sounds (M15): every interface sound is required, a sound path, no unknown kinds', () => {
+  it('sounds: every interface sound is required, a sound path, no unknown kinds', () => {
     expect(errorsAfter((f) => delete f['sounds.json'].money)[0]).toMatch(/^sounds\.json › money › /);
     expect(errorsAfter((f) => (f['sounds.json'].cursor = 'assets/audio/sfx/tick.wav'))).toEqual([
       'sounds.json › cursor › must be a path like assets/….ogg',

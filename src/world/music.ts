@@ -1,5 +1,5 @@
 /**
- * Zone music (M4). `play(key)` keeps the current track when the next zone uses the same file;
+ * Zone music. `play(key)` keeps the current track when the next zone uses the same file;
  * otherwise the old track fades out and the new one fades in over `MUSIC_FADE_MS` (a crossfade).
  * Fades advance in `update(dtMs)`, driven by the game loop in `main.ts`, so they keep running while
  * the Overworld scene restarts on a warp. `main.ts` calls `play()` on every `zone:entered` event.
@@ -7,7 +7,7 @@
  * The player is engine-free: it receives a `makeTrack(key)` factory (Phaser's `sound.add` in the game,
  * fakes in tests). Audio only becomes audible after the first user gesture (browser rule; Phaser
  * unlocks it), and the title needs a key press, so this happens before any zone plays.
- * M10: the music volume option scales every track ({@link MusicPlayer.setGain}).
+ * The music volume option scales every track ({@link MusicPlayer.setGain}).
  */
 import { MUSIC_FADE_MS } from '../logic/constants';
 
@@ -33,7 +33,7 @@ interface Playing {
 export class MusicPlayer {
   private current: Playing | null = null;
   private fading: Playing[] = [];
-  /** The music option as a 0–1 gain (M10), multiplied into every track's volume. */
+  /** The music option as a 0–1 gain, multiplied into every track's volume. */
   private gain = 1;
 
   /** @param makeTrack creates a looping track for a sound key */
@@ -59,12 +59,12 @@ export class MusicPlayer {
     this.current = { key, track, level: 0 };
   }
 
-  /** The music option's gain (0–1, M10). */
+  /** The music option's gain (0–1). */
   getGain(): number {
     return this.gain;
   }
 
-  /** Set the music option's gain (0–1, M10); applied at once to the playing and fading tracks. */
+  /** Set the music option's gain (0–1); applied at once to the playing and fading tracks. */
   setGain(gain: number): void {
     this.gain = Math.min(1, Math.max(0, gain));
     for (const p of [...(this.current ? [this.current] : []), ...this.fading]) {

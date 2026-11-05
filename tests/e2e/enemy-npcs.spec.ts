@@ -1,4 +1,4 @@
-// M8 "Done when": an enemy NPC 4 tiles away in a straight line triggers, 5 tiles away or behind a wall does
+// Checks: an enemy NPC 4 tiles away in a straight line triggers, 5 tiles away or behind a wall does
 // not; after beating it, standing next to it gives only `defeatDialogue`, and walking 7 tiles away and back
 // triggers it again; after a loss, previously beaten NPCs fight again. Plus: the "!" bubble, the walk up,
 // the reward message and euros, the Losing rule (respawn, half the euros, "Te has despertado…"), talking to a
@@ -107,7 +107,7 @@ async function patchData(page: Page, extra: object[], spawn?: object): Promise<v
       const start = (await res.json()) as Record<string, unknown>;
       await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
     });
-    // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+    // The intro must fit the spawn's map at boot (see neutral-intro.ts).
     await neutralIntro(page, (spawn as { map: string }).map);
   }
 }
@@ -123,7 +123,7 @@ async function enterOverworld(page: Page, expected: Partial<Tile>, url = '/'): P
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );

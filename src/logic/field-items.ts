@@ -1,5 +1,5 @@
 /**
- * Items used outside battle (M9, docs/PLAN.md › items.json, Team and storage). The field menu (M10's
+ * Items used outside battle (docs/CONTENT.md › Items; docs/GAME-RULES.md › Team and storage). The field menu (the Start menu's
  * Mochila) calls {@link useFieldItem}; nothing else in the game uses items in the field yet.
  *
  * Rules:

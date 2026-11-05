@@ -27,7 +27,7 @@ const setWarp = (map: Json, name: string, prop: string, value: unknown) => {
   else warp.properties.push({ name: prop, type: typeof value === 'number' ? 'int' : 'string', value });
 };
 
-describe('maps at load time (M4)', () => {
+describe('maps at load time', () => {
   it('the test-world data and maps load, with the parsed maps in GameData', async () => {
     const result = await loadGameData('test-world/data/', disk, { mapsBaseUrl: '' });
     expect(result.ok).toBe(true);
@@ -66,7 +66,7 @@ describe('maps at load time (M4)', () => {
     ]);
   });
 
-  it('a car warp (M13) is not checked as a warp target; car.json endpoints are', async () => {
+  it('a car warp is not checked as a warp target; car.json endpoints are', async () => {
     expect(await load()).toBe('ok');
     expect(
       await load((file, json) => {
@@ -105,7 +105,7 @@ describe('maps at load time (M4)', () => {
     ]);
   });
 
-  it('an encounter rectangle with a group missing from zones.json is an error (M7)', async () => {
+  it('an encounter rectangle with a group missing from zones.json is an error', async () => {
     expect(
       await load((file, json) => {
         if (file !== 'maps/test/test.tmj') return;
@@ -117,7 +117,7 @@ describe('maps at load time (M4)', () => {
     ]);
   });
 
-  it('a group in zones.json that no rectangle uses is only a warning (M7)', async () => {
+  it('a group in zones.json that no rectangle uses is only a warning', async () => {
     const fetcher: TextFetcher = async (url) => {
       const json = JSON.parse(await disk(url)) as Json;
       if (url === 'test-world/data/zones.json') {
@@ -147,7 +147,7 @@ describe('maps at load time (M4)', () => {
     ]);
   });
 
-  it('the intro (M11) may not walk into walls or into the other actor', async () => {
+  it('the intro may not walk into walls or into the other actor', async () => {
     // The player walks left from (15, 8) into the wall at x = 11.
     expect(
       await load((file, json) => {

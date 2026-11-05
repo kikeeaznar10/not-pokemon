@@ -1,5 +1,5 @@
 /**
- * Owned flexymon instances (docs/PLAN.md › Owned flexymon). An instance is plain data:
+ * Owned flexymon instances (docs/GAME-RULES.md › Owned flexymon). An instance is plain data:
  * `{ uid, speciesId, bonus, currentHp }`. A stat's value is `base + bonus`; max HP is
  * `base.hp + bonus.hp`; `currentHp = 0` means *debilitado* (fainted).
  *

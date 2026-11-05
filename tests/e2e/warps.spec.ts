@@ -1,4 +1,4 @@
-// M4 "Done when": entering the house door and leaving puts the player back outside the door facing
+// Checks: entering the house door and leaving puts the player back outside the door facing
 // down; walking off the east edge arrives at the west edge of test_east on the same row; a warp
 // pointing at a wall fails at load time with a clear message. Plus: interiors are centred, zone
 // music changes only when the file changes, and the debug teleport menu works.
@@ -55,7 +55,7 @@ async function enterOverworld(page: Page, query = ''): Promise<string[]> {
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );

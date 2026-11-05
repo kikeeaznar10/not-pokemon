@@ -1,8 +1,8 @@
 /**
- * Touch controls (M12) — an HTML overlay over the game canvas with a D-pad (bottom left), A and B (bottom
+ * Touch controls — an HTML overlay over the game canvas with a D-pad (bottom left), A and B (bottom
  * right) and Start and Mapa (top right). They feed the same Input service as the keyboard
  * (`input.press(action, source)` / `input.release(action, source)`), so every scene works by touch with no
- * change. M11's text mode does not affect them: on the name screen the touch B deletes and A presses the cell.
+ * change. the text mode does not affect them: on the name screen the touch B deletes and A presses the cell.
  *
  * - Shown only on touch devices: {@link isTouchDevice} (`matchMedia('(pointer: coarse)')`), checked once at start.
  * - Drawn in HTML, not in the canvas, so the buttons keep their size whatever the game's pixel scale is. Every
@@ -19,7 +19,7 @@ import type { Action, Direction, Input } from '../core/input';
 import { t } from '../i18n';
 import { DPAD_DEAD_ZONE } from '../logic/constants';
 
-/** Smallest touch target in CSS pixels (docs/PLAN.md › M12). The CSS in `index.html` keeps every control at least this big. */
+/** Smallest touch target in CSS pixels. The CSS in `index.html` keeps every control at least this big. */
 export const TOUCH_MIN_PX = 48;
 
 /** The buttons (not the D-pad): id → action and the `es.json` key of its label. */

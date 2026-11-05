@@ -1,11 +1,11 @@
 /**
- * OverworldScene — draws one zone's Tiled map and lets the player walk on it (M3), and moves between
- * maps through warps (M4).
+ * OverworldScene — draws one zone's Tiled map and lets the player walk on it, and moves between
+ * maps through warps.
  *
  * - Start it with {@link OverworldData}: the zone id (a key of `zones.json`) and optionally the tile and
  *   facing; without a position the map's `default` spawn point is used.
  * - The map was loaded and checked at boot (`GameData.maps`) and is drawn by `drawZoneMap`
- *   (`src/world/zone-map.ts`, shared with the M11 IntroScene). Tileset images and the player sheet are
+ *   (`src/world/zone-map.ts`, shared  IntroScene). Tileset images and the player sheet are
  *   loaded by Preload.
  * - Layers: `ground` (depth 0), `deco` (1), the player (2), `above` (3); `collision` is never drawn.
  *   Blocking: solid tiles and the map edges, except off-map tiles covered by a step warp.
@@ -14,27 +14,27 @@
  * - Warps (`src/logic/warp.ts`): finishing a step on a `step` warp, or pressing A while standing still
  *   facing an `action` warp, locks input, fades out (`WARP_FADE_MS`), restarts this scene on the
  *   target, fades in and unlocks. Safe steps are reset on every map entry.
- * - Debug teleport (M4): `debug:teleport` moves the player to a zone's `default` spawn the same way;
- *   while `debug:menu` is open the player does not move. `debug:reloaded` (M15) rebuilds the current map from the
+ * - Debug teleport: `debug:teleport` moves the player to a zone's `default` spawn the same way;
+ *   while `debug:menu` is open the player does not move. `debug:reloaded` rebuilds the current map from the
  *   reloaded data where the player stands.
- * - NPCs (M5): every `npcs.json` entry whose `map` is this zone appears on its spawn tile and wanders
+ * - NPCs: every `npcs.json` entry whose `map` is this zone appears on its spawn tile and wanders
  *   (`src/world/npc.ts`, rules in `src/logic/npc-wander.ts`). NPCs never step onto solid tiles, warp
  *   tiles, the player or another NPC; the player can never step onto an NPC. While a step is in progress
  *   both its tiles count as taken, for the player and for NPCs.
- * - Talking (M5): standing still, A while facing an NPC (one standing on, or arriving at, the tile in
+ * - Talking: standing still, A while facing an NPC (one standing on, or arriving at, the tile in
  *   front) makes it turn to the player and stop; its lines (`src/logic/talk.ts`) show in the DialogBox
  *   with its `voice`. The player cannot move until the last box closes. NPCs take priority over
  *   `action` warps.
- * - Battles (M6): {@link OverworldScene.startBattle} locks input, flashes the screen for `BATTLE_FLASH_MS`,
+ * - Battles: {@link OverworldScene.startBattle} locks input, flashes the screen for `BATTLE_FLASH_MS`,
  *   then launches the BattleScene and puts this scene to sleep (map, player and NPCs keep their state).
  *   On `battle:ended` it wakes up on the same tile, fades in and resets the safe steps. The debug command
  *   `debug:battle` starts a wild battle against a fresh flexymon of any species.
- * - Wild encounters (M7): after every completed step that is not a warp, `checkStep`
+ * - Wild encounters: after every completed step that is not a warp, `checkStep`
  *   (`src/logic/encounter.ts`) rolls against the map's `encounters` rectangles and the zone's groups
  *   in zones.json; on success the player stops on that tile and a wild battle starts. Safe steps:
  *   `SAFE_STEPS` after every map entry and battle. The debug menu can switch encounters off
  *   (`src/core/debug-flags.ts`).
- * - Enemy NPCs (M8): after every completed player step, and every NPC step while the player stands
+ * - Enemy NPCs: after every completed player step, and every NPC step while the player stands
  *   still, the `ready` enemies on the map look for the player (`findSpotter`, `src/logic/enemy-npc.ts`:
  *   straight line in front, at most `sight` tiles, no solid tile or NPC between). A spotted player halts
  *   on that tile; input stays locked while the NPC shows a "!" bubble for `NPC_ALERT_MS`, walks up to the
@@ -45,27 +45,27 @@
  *   BattleScene already paid the reward and set `cooldown`) the NPC says its `defeatDialogue`, then
  *   wanders again (back into its rectangle, see `npc-wander.ts`). Cooldowns are refreshed
  *   (`refreshCooldowns`) on map entry and after every player or NPC step.
- * - Healer, storage, shops (M9): talking to a `healer` fully heals the team and the storage box, then it
+ * - Healer, storage, shops: talking to a `healer` fully heals the team and the storage box, then it
  *   says "Tus flexymon están como nuevos." and its dialogue, and an auto-save is requested
  *   (`save:request` `healer`). A `storage` NPC opens the StorageScene and a `shopkeeper` its ShopScene
  *   after their dialogue; while one is open this scene is paused (locked) and it resumes on
  *   `overlay:closed`.
- * - Losing (M8): the BattleScene applies the Losing rule to the game state; on `battle:ended` with
+ * - Losing: the BattleScene applies the Losing rule to the game state; on `battle:ended` with
  *   `lose` this scene restarts at the respawn point (`start.json › respawn`), fades in and shows
  *   `lose.woke_up` ("Te has despertado en la oficina...").
- * - Start menu (M10): Start while the player stands still and nothing else is open launches the MenuScene
+ * - Start menu: Start while the player stands still and nothing else is open launches the MenuScene
  *   over this scene, which pauses (game time stops: NPCs freeze) until `overlay:closed`.
- * - Minimap (M12): outdoors, the zone's minimap (`src/ui/minimap.ts`) shows in the top-left corner with a
+ * - Minimap: outdoors, the zone's minimap (`src/ui/minimap.ts`) shows in the top-left corner with a
  *   blinking dot on the player's tile. M (or the touch *Mapa* button) toggles it whenever this scene runs, except
  *   while the debug menu is open; the choice is kept across maps.
- * - The Audi (M13): an `action` warp with a `car` property is the car. A while facing it: the office car
+ * - The Audi: an `action` warp with a `car` property is the car. A while facing it: the office car
  *   (`car = murcia`) shows `car.json › lockedDialogue` unless the bag holds both items of an unlock pair
  *   (`src/logic/car.ts`; the items are never consumed); otherwise, and always for the Murcia car
  *   (`car = valencia`), "¿Subir al Audi?" stays on screen with Sí / No (B = No). Sí locks input, fades out,
  *   launches the CarScene and sleeps; on `car:ended` this scene restarts at `car.json › toMurcia` /
  *   `toValencia`, fading in.
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
- *   the player, after every step and (M10) after every turn on the spot; on entry it then asks for an auto-save (`save:request` `map`, M10).
+ *   the player, after every step and after every turn on the spot; on entry it then asks for an auto-save (`save:request` `map`).
  */
 import Phaser from 'phaser';
 import { TILE_SIZE } from '../config/game';
@@ -120,7 +120,7 @@ export interface OverworldData {
   y?: number;
   facing?: Facing;
   fadeIn?: boolean;
-  /** Dialogue strings shown once the scene has faded in (M8: the "woke up" message after a loss). */
+  /** Dialogue strings shown once the scene has faded in (the "woke up" message after a loss). */
   messages?: string[];
 }
 
@@ -131,7 +131,7 @@ export interface BattleRequest {
   seed?: number;
 }
 
-/** An enemy NPC sequence in progress (M8): "!" bubble → walk up → dialogue → battle → defeat dialogue. */
+/** An enemy NPC sequence in progress: "!" bubble → walk up → dialogue → battle → defeat dialogue. */
 interface Engagement {
   npc: NpcActor;
   /** Tiles still to walk (reserved: other NPCs may not step onto them). */
@@ -165,16 +165,16 @@ export class OverworldScene extends Phaser.Scene {
   private npcs: NpcActor[] = [];
   private dialog: DialogBox | null = null;
   private choice: ChoiceBox | null = null;
-  /** The zone's minimap (M12; draws nothing indoors). */
+  /** The zone's minimap (draws nothing indoors). */
   private minimap: Minimap | null = null;
   /** Result of the last {@link openChoice} (`undefined` = none chosen yet). For the E2E hooks. */
   private lastChoice: number | null | undefined = undefined;
   /** True during a warp fade: the player cannot move. */
   private locked = false;
   private debugMenuOpen = false;
-  /** Enemy NPC sequence in progress (M8), or `null`. */
+  /** Enemy NPC sequence in progress, or `null`. */
   private engagement: Engagement | null = null;
-  /** Key of the overlay scene open over this one (M9: Shop, Storage), or `null`. */
+  /** Key of the overlay scene open over this one (Shop, Storage), or `null`. */
   private overlay: string | null = null;
   /** Steps left without encounter rolls (`SAFE_STEPS` after every map entry and battle). */
   safeSteps = 0;
@@ -259,7 +259,7 @@ export class OverworldScene extends Phaser.Scene {
     if (input.justPressed('map') && !this.debugMenuOpen) toggleMinimap();
     this.minimap?.update(dt, player.state.x, player.state.y);
     const talking = this.isTalking();
-    // Both can be open at once: a question box (M13 "¿Subir al Audi?") stays under its ChoiceBox.
+    // Both can be open at once: a question box ("¿Subir al Audi?") stays under its ChoiceBox.
     if (this.dialog?.isOpen) this.dialog.update(dt);
     if (this.choice?.isOpen) this.choice.update();
     let npcStepped = false;
@@ -273,7 +273,7 @@ export class OverworldScene extends Phaser.Scene {
     const dir = frozen ? null : input.direction();
     const fresh = dir !== null && input.justPressed(dir);
     const moves = player.update(dir, dt, (px, py) => this.blockedForPlayer(px, py), fresh);
-    // M10: a turn on the spot is announced too, so the saved facing follows the player.
+    // A turn on the spot is announced too, so the saved facing follows the player.
     if (moves.some((m) => m.type === 'turn') && !moves.some((m) => m.type === 'step_end')) this.emitMoved();
     if (moves.some((m) => m.type === 'step_end')) {
       this.emitMoved();
@@ -347,7 +347,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * Enemy NPCs (M8): if a `ready` enemy on this map sees the player standing on `at`, halt the player
+   * Enemy NPCs: if a `ready` enemy on this map sees the player standing on `at`, halt the player
    * there and start its sequence. Returns true if one did. Nobody looks while a sequence runs.
    */
   private lookForPlayer(at: Point): boolean {
@@ -439,7 +439,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * Wild encounters (M7): run the encounter rules for a step that just ended on (x, y). On an encounter
+   * Wild encounters: run the encounter rules for a step that just ended on (x, y). On an encounter
    * the player halts on that tile (a step already started by a held key is dropped) and a wild battle
    * starts. With the debug flag `encounters` off nothing rolls, but safe steps still run down.
    * Returns true if a battle started.
@@ -469,7 +469,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * After a battle. Lost (M8): restart at the respawn point already in the game state, with the "woke up"
+   * After a battle. Lost: restart at the respawn point already in the game state, with the "woke up"
    * message. Otherwise wake up on the same tile: fade in, reset safe steps, unlock; after beating an
    * enemy NPC it first says its `defeatDialogue`.
    */
@@ -516,7 +516,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * The Audi (M13), A pressed facing a car warp going `to`: locked → `car.json › lockedDialogue`; otherwise ask
+   * The Audi, A pressed facing a car warp going `to`: locked → `car.json › lockedDialogue`; otherwise ask
    * "¿Subir al Audi?" (the question box stays under Sí / No; B = No) and drive on Sí.
    */
   private useCar(to: CarDestination): void {
@@ -551,7 +551,7 @@ export class OverworldScene extends Phaser.Scene {
     });
   }
 
-  /** The trip is over (M13): restart at the arrival point from car.json, fading in. */
+  /** The trip is over: restart at the arrival point from car.json, fading in. */
   private arriveByCar(to: CarDestination): void {
     if (!this.sys.isSleeping()) return;
     this.scene.wake();
@@ -572,7 +572,7 @@ export class OverworldScene extends Phaser.Scene {
 
   /**
    * Start a conversation with `npc`; the player is frozen until the last box closes. A `ready` enemy
-   * starts its battle sequence instead (M8); a `cooldown` one says its `defeatDialogue`. M9: a healer heals
+   * starts its battle sequence instead; a `cooldown` one says its `defeatDialogue`. A healer heals
    * the team and storage first and asks for an auto-save afterwards; a storage NPC opens the storage box
    * and a shopkeeper its shop after their dialogue (see {@link openOverlay}).
    */
@@ -608,7 +608,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * Open an overlay scene (M9: Shop, Storage; M10: the Start menu, with no NPC) over this one: launch it
+   * Open an overlay scene (Shop, Storage; The Start menu, with no NPC) over this one: launch it
    * and pause this scene (map, player and NPCs freeze, still drawn underneath). On `overlay:closed` this
    * scene resumes and `npc` (if any) goes back to wandering.
    */
@@ -632,7 +632,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * NPC blocking: solid tiles, map edges, warp tiles, the player's tiles, the other NPCs' tiles and (M8)
+   * NPC blocking: solid tiles, map edges, warp tiles, the player's tiles, the other NPCs' tiles and
    * the tiles an approaching enemy still has to walk.
    */
   private blockedForNpc(self: NpcActor, x: number, y: number): boolean {
@@ -679,7 +679,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * Open a ChoiceBox with `options` (test hook; real uses arrive with M7/M9). The player is frozen until
+   * Open a ChoiceBox with `options` (test hook). The player is frozen until
    * it closes; the result is read with {@link choiceResult}.
    */
   openChoice(options: string[]): void {
@@ -705,7 +705,7 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * After "Recargar datos" (M15): rebuild the map from the new data at the player's position in the game state
+   * After "Recargar datos": rebuild the map from the new data at the player's position in the game state
    * (which the reload already checked: an unknown map became the respawn point). Only while this scene runs.
    */
   private rebuildHere(): void {
@@ -715,7 +715,7 @@ export class OverworldScene extends Phaser.Scene {
     this.warpTo({ map, x, y, facing });
   }
 
-  /** The minimap as data (M12, for the E2E hooks), or `null` before the map is built. */
+  /** The minimap as data (for the E2E hooks), or `null` before the map is built. */
   minimapView(): MinimapView | null {
     return this.minimap?.view() ?? null;
   }
@@ -729,7 +729,7 @@ export class OverworldScene extends Phaser.Scene {
 
   /**
    * True while the player cannot move: warp fade, debug menu, a dialogue/choice box, an enemy sequence, an
-   * open shop or storage box (M9) or the Start menu (M10).
+   * open shop or storage box or the Start menu.
    */
   isLocked(): boolean {
     return (

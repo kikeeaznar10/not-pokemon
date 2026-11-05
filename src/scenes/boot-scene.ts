@@ -1,9 +1,9 @@
 /**
  * BootScene — the first scene. Loads and validates every content JSON and every zone's map
  * (`src/data/loader.ts`, map checks in `src/data/map-checks.ts`) from `public/data/` — or, in dev / E2E builds, the
- * frozen test world (`src/data/world.ts`, M14).
- * Load warnings (unused encounter groups, M7) are logged with `warn()` and do not stop the game.
- * On success it stores the {@link GameData}, looks for the sprite atlas (M15, `src/data/atlas.ts`) and launches Preload (which stops Boot once loaded, so
+ * frozen test world (`src/data/world.ts`).
+ * Load warnings (unused encounter groups) are logged with `warn()` and do not stop the game.
+ * On success it stores the {@link GameData}, looks for the sprite atlas (`src/data/atlas.ts`) and launches Preload (which stops Boot once loaded, so
  * some scene is always active); on any error it starts the ErrorScene
  * with one `file › path › message` line per problem.
  */
@@ -35,7 +35,7 @@ export class BootScene extends Phaser.Scene {
         for (const w of result.warnings ?? []) warn(formatDataError(w));
         setGameData(result.data);
         events.emit('data:loaded');
-        // M15: look for the sprite atlas (none in `npm run dev`: sprites then load as files).
+        // Look for the sprite atlas (none in `npm run dev`: sprites then load as files).
         void loadAtlasIndex(base).then((atlas) => {
           log(atlas ? `Boot: sprite atlas with ${atlas.frames.size} frames` : 'Boot: no sprite atlas');
           // Launch (not start) so Boot stays active while Preload loads; Preload stops Boot when done.

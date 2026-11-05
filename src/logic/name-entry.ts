@@ -1,5 +1,5 @@
 /**
- * Name entry rules (M11, pure), used by the NameScene:
+ * Name entry rules (pure), used by the NameScene:
  * - the name holds at most `NAME_MAX_LENGTH` (10) characters;
  * - only letters (any alphabet, so ñ and accented vowels too) and spaces can be typed; a space cannot be
  *   the first character and two spaces never follow each other;

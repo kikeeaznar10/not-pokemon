@@ -59,7 +59,7 @@ describe('quantity picker', () => {
   });
 });
 
-describe('M9 "Done when": buying 3 Cafés with 200 € leaves 50 € and 3 more Cafés; selling one gives 25 €', () => {
+describe('buying 3 Cafés with 200 € leaves 50 € and 3 more Cafés; selling one gives 25 €', () => {
   it('works through the economy rules', () => {
     const start = { cafe: 3 };
     const limit = buyRows('tienda_alboraya', data, 200, start)[0]!.limit;

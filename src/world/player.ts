@@ -62,7 +62,7 @@ export class Player {
     this.draw();
   }
 
-  /** Turn to `facing` (M8: face an enemy that walked up). Ignored while a step is in progress. */
+  /** Turn to `facing` (face an enemy that walked up). Ignored while a step is in progress. */
   face(facing: Facing): void {
     if (this.move.step) return;
     this.move = createMoveState(this.move.x, this.move.y, facing);

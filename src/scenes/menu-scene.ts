@@ -1,5 +1,5 @@
 /**
- * MenuScene (M10) — the Start menu, opened with Start in the overworld and drawn over it while it is
+ * MenuScene — the Start menu, opened with Start in the overworld and drawn over it while it is
  * paused (game time stops: NPCs freeze, nothing rolls).
  *
  * - Main: a column on the right with *Equipo, Mochila, Mapa, Opciones, Cerrar* (`START_MENU`). B, Start or
@@ -13,12 +13,12 @@
  *   bottom. Items usable outside battle can be chosen (others are greyed): heal / revive items ask for a
  *   team member (greyed when it would do nothing), the Regleta is used at once; `useFieldItem` does the
  *   rest and the result is shown in the dialogue box. An empty bag says so.
- * - Mapa (M12): outdoors it toggles the minimap (`src/ui/minimap.ts`, same as M) and says "Minimapa activado." /
+ * - Mapa: outdoors it toggles the minimap (`src/ui/minimap.ts`, same as M) and says "Minimapa activado." /
  *   "Minimapa desactivado."; the change shows at once in the paused overworld underneath. Indoors (`zones.json ›
  *   indoor`) it only says there is no map inside.
  * - Opciones: *Música*, *Efectos* (0–10) and *Texto* (lenta / normal / rápida). Up/Down choose, Left/Right
  *   change the value at once (saved in `flexymon.options`, applied live), A on *Volver* or B goes back.
- * Sounds (M15): menus play their own; Start closing the menu plays `cancel`, the options page `cursor` on a move or
+ * Sounds: menus play their own; Start closing the menu plays `cancel`, the options page `cursor` on a move or
  * a changed value (after the change, so a new effects volume is heard), refused bag items `error`.
  * Every rule (rows, enabled options, stats, messages) comes from `src/logic/menu.ts` and
  * `src/logic/options.ts`; this scene only draws and reads input.
@@ -194,7 +194,7 @@ export class MenuScene extends Phaser.Scene {
     );
   }
 
-  /** *Mapa* (M12): toggle the minimap outdoors and return what to say about it. */
+  /** *Mapa*: toggle the minimap outdoors and return what to say about it. */
   private mapMessage(): string {
     const zone = getGameData().zones.get(gameState().player.map);
     if (!zone || zone.indoor) return t('menu.map_indoor');

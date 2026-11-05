@@ -1,8 +1,8 @@
 /**
- * Dialogue box rules (docs/PLAN.md › M5), pure so they can be unit-tested:
+ * Dialogue box rules, pure so they can be unit-tested:
  * - Each dialogue string is one box. It is word-wrapped to the box width ({@link wrapText}); a string
  *   too long for one box continues on extra boxes ({@link dialoguePages}), so text is never cut off.
- * - Text types out at `TEXT_CPS` characters per second ({@link typeTick}); M10's text speed option passes
+ * - Text types out at `TEXT_CPS` characters per second ({@link typeTick}); the text speed option passes
  *   another speed (`cps`). Line breaks count as characters, so typing pauses briefly at the end of a line.
  * - The voice plays on the 1st, 4th, 7th… typed character (once every `VOICE_EVERY_CHARS`). Every
  *   character counts, spaces and line breaks included, so the rhythm stays even.

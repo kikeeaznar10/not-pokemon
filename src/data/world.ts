@@ -1,10 +1,10 @@
 /**
- * Which content set the game loads (M14).
+ * Which content set the game loads.
  *
  * The real game always reads `public/data/`. Dev and E2E builds (`import.meta.env.DEV` or `VITE_E2E=1`) can
- * load the frozen **test world** instead — the content and test maps of M0–M13 (`public/test-world/data/`, maps in
+ * load the frozen **test world** instead — the small early content set and test maps (`public/test-world/data/`, maps in
  * `public/maps/test/`) — with the URL parameter `?world=test` or `localStorage['flexymon.e2e.world'] = 'test'`.
- * The browser tests written before M14 run on it (`playwright.config.ts` sets the localStorage key), so their
+ * The older browser tests run on it (`playwright.config.ts` sets the localStorage key), so their
  * tile coordinates keep working while the real world changes. Production builds ignore both switches.
  */
 

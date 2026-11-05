@@ -1,5 +1,5 @@
 /**
- * Schema for `public/data/intro.json` (M11): the title screen image and the new-game intro script.
+ * Schema for `public/data/intro.json`: the title screen image and the new-game intro script.
  *
  * - `titleImage`: the pixel office drawn behind the title (`assets/ui/title.png`, 512 × 288).
  * - `jingle`: the sound played when the starter is handed over.

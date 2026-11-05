@@ -82,7 +82,7 @@ describe('MusicPlayer', () => {
     expect(made[0]!.destroyed).toBe(true);
   });
 
-  it('scales every track by the music option gain, at once and during fades (M10)', () => {
+  it('scales every track by the music option gain, at once and during fades', () => {
     const { made, make } = fakeTracks();
     const m = new MusicPlayer(make);
     expect(m.getGain()).toBe(1);

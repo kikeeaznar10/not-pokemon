@@ -1,5 +1,5 @@
 /**
- * The game's box style (post-M15 restyle, `docs/STYLE-REFERENCE.md › UI`): a cream fill inside a dark outer line
+ * The game's box style (`docs/ART.md` › Style guide): a cream fill inside a dark outer line
  * and a soft blue inner line, like the handheld RPG dialogue boxes the art follows. Every dialogue box, choice
  * box, grid menu and battle panel is drawn with {@link framedBox}.
  */

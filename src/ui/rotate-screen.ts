@@ -1,5 +1,5 @@
 /**
- * Portrait guard and fullscreen (M12). Flexymon is played in landscape only.
+ * Portrait guard and fullscreen. Flexymon is played in landscape only.
  *
  * - {@link RotateScreen}: on touch devices, while the screen is taller than wide ({@link isPortrait}) a black
  *   HTML screen covers everything with "Gira el móvil" (`mobile.rotate`, `mobile.rotate_hint` in `es.json`) and

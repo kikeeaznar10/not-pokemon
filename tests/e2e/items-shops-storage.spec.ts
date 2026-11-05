@@ -1,4 +1,4 @@
-// M9 "Done when": buying 3 Cafés with 200 € leaves 50 € and 3 more Cafés, selling one gives 25 €; a Café in
+// Checks: buying 3 Cafés with 200 € leaves 50 € and 3 more Cafés, selling one gives 25 €; a Café in
 // battle heals 20 HP and the opponent then acts; the storage box never lets the team become empty or exceed
 // its slots. Plus: the shopkeeper's dialogue opens the shop, an unaffordable item says so, B backs out of every
 // step, the shop and the healer ask for an auto-save, the healer heals team and storage.
@@ -59,7 +59,7 @@ const shop = (page: Page) => hook<ShopView | null>(page, 'shop');
 const storage = (page: Page) => hook<StorageView | null>(page, 'storage');
 const battle = (page: Page) => hook<BattleView | null>(page, 'battle');
 const dialogue = (page: Page) => hook<{ full: string } | null>(page, 'dialogue');
-/** The M9 save requests (`shop`, `healer`); M10 also asks for one on every map entry (`map`), left out here. */
+/** The shop and healer save requests (`shop`, `healer`); the game also asks for one on every map entry (`map`), left out here. */
 const shopSaves = async (page: Page) =>
   (await hook<string[]>(page, 'saveRequests')).filter((r) => r === 'shop' || r === 'healer');
 
@@ -70,7 +70,7 @@ async function startAt(page: Page, spawn: object): Promise<void> {
     const start = (await res.json()) as Record<string, unknown>;
     await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
   });
-  // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+  // The intro must fit the spawn's map at boot (see neutral-intro.ts).
   await neutralIntro(page, (spawn as { map: string }).map);
 }
 
@@ -85,7 +85,7 @@ async function enterOverworld(page: Page, expected: Partial<Tile>): Promise<stri
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );

@@ -3,16 +3,16 @@
  * Pure (no Phaser): the OverworldScene hands Phaser the same JSON for drawing, and uses
  * {@link parseTiledMap} for the rules (which tiles block, where the spawn points are).
  *
- * Map conventions (docs/PLAN.md › Content guide):
+ * Map conventions (docs/MAPS.md):
  * - Tile layers `ground`, `deco`, `above` (drawn over the player) and `collision` (hidden in game).
  * - A cell is solid if ANY tile layer has a tile there whose tileset tile has the bool property
- *   `solid = true`. Tiles with `encounter = true` mark grass/sand/vineyard (used from M7).
- * - Object layer `warps` (M4): rectangles with `toMap` (string), `toX` / `toY` (int, optional = keep
+ *   `solid = true`. Tiles with `encounter = true` mark grass/sand/vineyard.
+ * - Object layer `warps`: rectangles with `toMap` (string), `toX` / `toY` (int, optional = keep
  *   the player's column / row), `toFacing` (optional) and `trigger` (`step` or `action`); see
- *   `src/logic/warp.ts`. Rectangles may lie one tile outside the map (edge warps). M13: a warp with the
+ *   `src/logic/warp.ts`. Rectangles may lie one tile outside the map (edge warps). A warp with the
  *   string property `car` (`murcia` or `valencia`) is the Audi: it must use `trigger = action`, and its
  *   destination comes from car.json, so it needs no `toMap`.
- * - Object layer `encounters` (M7): rectangles with the string properties `group` (a key of the zone's
+ * - Object layer `encounters`: rectangles with the string properties `group` (a key of the zone's
  *   `encounters` in zones.json) and `mode` (`tiles`: only tiles with `encounter = true`; `all`: every
  *   tile, urban crowds); see `src/logic/encounter.ts`. The object name is only used in messages.
  * - Object layer `spawns`. Spawn points are point (or tile-sized)

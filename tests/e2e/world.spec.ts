@@ -1,13 +1,12 @@
-// M14 "Done when": every landmark exists and can be entered; a tester can walk from Alboraya to the south town and
-// use the car without the debug menu; boot validation passes with zero warnings. Plus: the new game's intro plays in
-// the real office.
-// M16 (world redesign): the same checks on the new layout — Alboraya (village, industrial estate with the office,
+// Checks: every landmark exists and can be entered; a tester can walk the whole world and use the car without the
+// debug menu; boot validation passes with zero warnings; the new game's intro plays in the real office. The layout:
+// Alboraya (village, industrial estate with the office,
 // tourist beach), Valencia (Turia park, Estació del Nord, CAC), El Pueblo by train only, Murcia by the Audi only;
 // the walk also takes the metro, the train, both Alboraya ↔ Valencia edges (beach and road) and M.P.'s house.
 //
 // These tests run on the REAL world: playwright.config.ts starts every profile on the frozen test world
 // (`flexymon.e2e.world = test`, src/data/world.ts), so this spec removes that key before the page loads.
-// Layout of the world: public/maps/README.md › "The real world"; source layouts in tools/world/.
+// Layout of the world: docs/MAPS.md; source layouts in tools/world/.
 //
 // The walks use a small path finder over the real .tmj maps (solid tiles, step warps, the NPCs where they stand
 // now), pressing one arrow per tile. Wild encounters are switched off with the `setEncounters` hook (the same
@@ -90,7 +89,7 @@ async function quickStart(page: Page): Promise<void> {
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
-  await standing(page, { map: 'oficina_ahora', x: 10, y: 13 });
+  await standing(page, { map: 'oficina', x: 10, y: 13 });
   await hook(page, 'setEncounters', false);
   await strongTeam(page);
 }
@@ -276,7 +275,7 @@ async function drive(page: Page, to: Partial<Tile>): Promise<void> {
   await standing(page, to);
 }
 
-test.describe('the real world (M14)', () => {
+test.describe('the real world', () => {
   test('boot validation passes with zero warnings and the intro plays in the office', async ({
     page,
   }, testInfo) => {
@@ -323,7 +322,7 @@ test.describe('the real world (M14)', () => {
       } else await page.waitForTimeout(50);
     }
     expect(seen).toContain('¡Recibes a Portátil!');
-    await standing(page, { map: 'oficina_ahora', x: 10, y: 10 });
+    await standing(page, { map: 'oficina', x: 10, y: 10 });
     expect(await hook(page, 'items')).toEqual({ cafe: 3, llaves_audi: 1 });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/interior.ogg');
     await page.screenshot({ path: testInfo.outputPath(`m14-office-${testInfo.project.name}.png`) });
@@ -343,19 +342,19 @@ test.describe('the real world (M14)', () => {
     const shot = (name: string) => page.screenshot({ path: testInfo.outputPath(`m14-${name}.png`) });
 
     // Out of the office into Alboraya's industrial estate: Bar Pacos in front, Las Rusas at the other end.
-    await walkTo(page, 'oficina_ahora', 10, 14, { map: 'alboraya' });
+    await walkTo(page, 'oficina', 10, 14, { map: 'alboraya' });
     await standing(page, { map: 'alboraya', x: 83, y: 8, facing: 'down' });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/valencia.ogg');
     await shot('alboraya-office');
-    await visit(page, 'alboraya', [81, 16], 'bar_pacos');
-    await visit(page, 'alboraya', [56, 6], 'bar_las_rusas');
+    await visit(page, 'alboraya', [81, 16], 'bar_centro');
+    await visit(page, 'alboraya', [56, 6], 'bar_este');
     // The village: its shop; the tourist beach: M.P.'s house.
     await visit(page, 'alboraya', [14, 18], 'tienda_alboraya');
     await shot('alboraya-village');
     await visit(page, 'alboraya', [94, 13], 'casa_mp');
     await shot('alboraya-beach');
     // Back in after leaving: the office door.
-    await visit(page, 'alboraya', [83, 7], 'oficina_ahora');
+    await visit(page, 'alboraya', [83, 7], 'oficina');
 
     // The beach runs on into Valencia (the Malvarrosa) and back.
     await walkTo(page, 'alboraya', 105, 44, { map: 'valencia', x: 105, y: 0 });
@@ -378,7 +377,7 @@ test.describe('the real world (M14)', () => {
     await walkTo(page, 'estacion_pueblo', 4, 7, { map: 'pueblo' });
     await standing(page, { map: 'pueblo', x: 8, y: 4, facing: 'down' });
     await shot('pueblo');
-    await visit(page, 'pueblo', [18, 19], 'isaval');
+    await visit(page, 'pueblo', [18, 19], 'empresa_sur');
 
     // The licence from El Pueblo's shop (Comprar → Carnet de conducir → 1 → Sí).
     await walkTo(page, 'pueblo', 22, 19, { map: 'tienda_pueblo' });
@@ -428,11 +427,11 @@ test.describe('the real world (M14)', () => {
     // Arrive in Murcia the normal way: drive from the office car with the keys and a double coffee.
     await quickStart(page);
     await hook(page, 'setItems', { llaves_audi: 1, cafe_doble: 1 });
-    await walkTo(page, 'oficina_ahora', 10, 14, { map: 'alboraya' });
+    await walkTo(page, 'oficina', 10, 14, { map: 'alboraya' });
     await walkTo(page, 'alboraya', 85, 9);
     await drive(page, { map: 'murcia', x: 16, y: 15 });
 
-    await visit(page, 'murcia', [21, 12], 'ciruelo');
+    await visit(page, 'murcia', [21, 12], 'empresa_poligono');
     await walkTo(page, 'murcia', 50, 19);
     await page.screenshot({ path: testInfo.outputPath('m14-vinedos.png') });
     await walkTo(page, 'murcia', 85, 19);

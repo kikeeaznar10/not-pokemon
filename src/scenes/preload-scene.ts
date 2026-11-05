@@ -2,10 +2,10 @@
  * PreloadScene — loads every sprite and sound listed in the content data, using its JSON path as the
  * Phaser key (`this.textures.exists('assets/sprites/items/cafe.png')`), plus every map's tileset images
  * and the player sheet. Sounds load the OGG, falling
- * back to the MP3 with the same name (M11: also the title image, the intro coworker and the jingle, all
- * listed by `collectAssets`). M15: sprites held by the sprite atlas (`src/data/atlas.ts`) come from that one image
- * and are copied into textures under their own paths. When done it emits `game:ready`, launches the HudScene (M10, save icon) and
- * the DebugScene when debugging is enabled, and starts the TitleScene (M11), which reads the save.
+ * back to the MP3 with the same name (also the title image, the intro coworker and the jingle, all
+ * listed by `collectAssets`). Sprites held by the sprite atlas (`src/data/atlas.ts`) come from that one image
+ * and are copied into textures under their own paths. When done it emits `game:ready`, launches the HudScene (save icon) and
+ * the DebugScene when debugging is enabled, and starts the TitleScene, which reads the save.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, TILE_SIZE } from '../config/game';
@@ -26,7 +26,7 @@ export const PRELOAD_SCENE = 'Preload';
 
 /** Loads all content assets, then starts the title. */
 export class PreloadScene extends Phaser.Scene {
-  /** Sprite paths taken from the atlas (M15); empty without one. */
+  /** Sprite paths taken from the atlas; empty without one. */
   fromAtlas: string[] = [];
   /** True once every asset finished loading (read by the E2E hooks). */
   complete = false;
@@ -39,13 +39,13 @@ export class PreloadScene extends Phaser.Scene {
 
   preload(): void {
     const assets = collectAssets(getGameData());
-    // M15: sprites in the atlas come from one image; the rest (and everything without an atlas) load as files.
+    // Sprites in the atlas come from one image; the rest (and everything without an atlas) load as files.
     const atlas = getAtlas();
     this.fromAtlas = atlas ? assets.images.filter((p) => atlas.frames.has(p)) : [];
     for (const path of assets.images) if (!this.fromAtlas.includes(path)) this.load.image(path, path);
     if (atlas && this.fromAtlas.length > 0) this.load.atlas(ATLAS_KEY, ATLAS_IMAGE, atlas.json);
     for (const s of assets.sounds) this.load.audio(s.key, s.urls);
-    // Map art (M4): every tileset image used by a zone map, plus the player sheet.
+    // Map art: every tileset image used by a zone map, plus the player sheet.
     const tilesets = new Set<string>();
     for (const m of getGameData().maps.values()) for (const ts of m.info.tilesetImages) tilesets.add(ts.path);
     for (const path of tilesets) this.load.image(path, path);
@@ -93,7 +93,7 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   /**
-   * M15: copy every atlas frame into its own canvas texture keyed by its asset path (same key and size as the
+   * Copy every atlas frame into its own canvas texture keyed by its asset path (same key and size as the
    * file it replaces), then drop the atlas texture.
    */
   private unpackAtlas(): void {

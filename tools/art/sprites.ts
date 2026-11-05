@@ -1,6 +1,6 @@
 /**
  * Item icons (16 × 16), the side-view car (96 × 40) and the title picture (512 × 288), in the style of
- * `docs/STYLE-REFERENCE.md`. Items are drawn at their real size; the car and the title at half size and scaled ×2.
+ * `docs/ART.md`. Items are drawn at their real size; the car and the title at half size and scaled ×2.
  * Unknown item ids get a generic parcel coloured from the id.
  */
 import { hash, hex, Pix, shade, type Rgba } from './pixels';

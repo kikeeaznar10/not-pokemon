@@ -14,7 +14,7 @@ import { parseTiledMap, type MapInfo } from './tiled';
 import { DATA_FILES, FILE_SCHEMAS, type DataFileName } from './schemas';
 
 /**
- * Result of loading or validating content. `warnings` (M7: unused encounter groups) do not stop the
+ * Result of loading or validating content. `warnings` (unused encounter groups) do not stop the
  * game; Boot logs them.
  */
 export type LoadResult =

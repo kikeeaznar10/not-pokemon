@@ -1,5 +1,5 @@
 /**
- * NameScene (M11) — the player types their name (at most `NAME_MAX_LENGTH` = 10 characters; rules in
+ * NameScene — the player types their name (at most `NAME_MAX_LENGTH` = 10 characters; rules in
  * `src/logic/name-entry.ts`).
  *
  * - An on-screen grid: the letters of `es.json › name.letters` (A–Z, Ñ, á é í ó ú), a space, *Borrar* and *OK*.
@@ -10,7 +10,7 @@
  *   Enter keep their meaning. Text mode is switched off when the scene ends.
  * - OK with no letter shows "Escribe al menos una letra." and stays. Otherwise the IntroScene starts with the
  *   trimmed name.
- * - Sounds (M15): `cursor` on a move, `confirm` for a letter / Borrar / a valid OK, `cancel` on B, `error` for OK
+ * - Sounds: `cursor` on a move, `confirm` for a letter / Borrar / a valid OK, `cancel` on B, `error` for OK
  *   with no letter.
  */
 import Phaser from 'phaser';

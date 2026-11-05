@@ -1,5 +1,5 @@
 /**
- * Enemy NPC state rules (docs/PLAN.md › Enemy NPCs). States `ready` and `cooldown`. A `ready` NPC sees
+ * Enemy NPC state rules (docs/GAME-RULES.md › Enemy NPCs). States `ready` and `cooldown`. A `ready` NPC sees
  * the player if the player stands in a straight line in front of it, at most `sight` tiles away, with no
  * blocking tile or NPC between them. After losing to the player an NPC is in `cooldown` (talks with
  * `defeatDialogue` only) until the player is more than `NPC_COOLDOWN_DISTANCE` tiles away (Manhattan) or

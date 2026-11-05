@@ -1,5 +1,5 @@
 /**
- * CarScene (M13) — the white Audi A3 speeding along a road between the office and Murcia.
+ * CarScene — the white Audi A3 speeding along a road between the office and Murcia.
  *
  * - Started by the OverworldScene (which sleeps underneath) with {@link CarSceneData}: `to = murcia` drives
  *   to the right, `to = valencia` is the same scene in reverse (the car faces left, the world scrolls the

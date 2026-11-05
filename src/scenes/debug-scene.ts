@@ -3,22 +3,22 @@
  * the URL. Preload launches it once (it is last in the scene list, so it draws on top of every scene).
  *
  * F2 (`debug` action) cycles: hidden → info → teleport menu → hidden.
- * - Info (M3): map id, player tile x/y (same numbers as Tiled's status bar), FPS; euros (M8).
- * - Teleport menu (M4): every zone in `zones.json`; up/down choose, A teleports to that zone's `default`
+ * - Info: map id, player tile x/y (same numbers as Tiled's status bar), FPS; euros.
+ * - Teleport menu: every zone in `zones.json`; up/down choose, A teleports to that zone's `default`
  *   spawn (event `debug:teleport`), B closes the menu. While the menu is open it emits
  *   `debug:menu { open: true }` and the overworld ignores movement.
- * - Battle entries (M6): below the zones, one "Combate: {name}" line per flexymon in `flexymon.json`;
+ * - Battle entries: below the zones, one "Combate: {name}" line per flexymon in `flexymon.json`;
  *   A starts a wild battle against a fresh one (event `debug:battle`).
- * - Options (M7): "Encuentros: sí/no" toggles wild encounters (`debugFlags.encounters`); A flips it and
+ * - Options: "Encuentros: sí/no" toggles wild encounters (`debugFlags.encounters`); A flips it and
  *   the menu stays open so the new value shows.
- * - Euros (M8): the info lines also show the player's euros ("Euros: {n}").
- * - Options (M8): "NPC: todos listos" sets every enemy NPC to `ready` (`resetAllNpcs`); the menu stays open.
- * - Options (M10): "Borrar partida" (first under "Opciones") emits `debug:delete_save`: `main.ts` stops auto-saving, deletes
+ * - Euros: the info lines also show the player's euros ("Euros: {n}").
+ * - Options: "NPC: todos listos" sets every enemy NPC to `ready` (`resetAllNpcs`); the menu stays open.
+ * - Options: "Borrar partida" (first under "Opciones") emits `debug:delete_save`: `main.ts` stops auto-saving, deletes
  *   `flexymon.save.v1` and reloads the page, which then starts a new game.
- * - Give (M15, group "Dar", between the battles and "Datos"): "Dar {n} €" adds `DEBUG_GIVE_EUROS` euros, then one
+ * - Give (group "Dar", between the battles and "Datos"): "Dar {n} €" adds `DEBUG_GIVE_EUROS` euros, then one
  *   "Dar: {item}" line per item in `items.json` adds one of it (key items too); the menu stays open. Rules in
  *   `src/logic/debug-tools.ts`.
- * - Data (M15, group "Datos"): "Recargar datos" fetches and validates every content JSON and map again, without a
+ * - Data (group "Datos"): "Recargar datos" fetches and validates every content JSON and map again, without a
  *   page reload ({@link reloadContent}). On success the new data replaces the old, the game state is checked
  *   against it like a loaded save (unknown ids dropped, `parseSave`), new sprites and sounds are loaded, and
  *   `debug:reloaded` makes the overworld rebuild the current map where the player stands. On any error the old
@@ -45,13 +45,13 @@ import { setGameData } from '../data/game-data';
 import { error, log, warn } from '../core/log';
 import { t } from '../i18n';
 
-/** How many menu lines the overlay draws at once (M15); the window follows the cursor. */
+/** How many menu lines the overlay draws at once; the window follows the cursor. */
 const DEBUG_MENU_ROWS = 14;
 
 /** How many error lines the overlay shows after a failed reload (all of them are logged). */
 const RELOAD_ERROR_LINES = 4;
 
-/** State of the last "Recargar datos" (M15, read by the overlay and the E2E hook `debugReload()`). */
+/** State of the last "Recargar datos" (read by the overlay and the E2E hook `debugReload()`). */
 export interface ReloadStatus {
   state: 'idle' | 'loading' | 'ok' | 'error';
   /** The formatted `file › path › message` errors of a failed reload. */
@@ -77,9 +77,9 @@ export class DebugScene extends Phaser.Scene {
   private cursor = 0;
   /** Current mode (read by the E2E hooks). */
   mode: DebugMode = 'hidden';
-  /** First menu line drawn (M15: the menu scrolls). */
+  /** First menu line drawn (the menu scrolls). */
   private menuTop = 0;
-  /** The last data reload (M15). */
+  /** The last data reload. */
   reload: ReloadStatus = { state: 'idle', errors: [] };
 
   constructor() {
@@ -122,7 +122,7 @@ export class DebugScene extends Phaser.Scene {
     }
     if (!this.shown) return;
     this.text.setText(this.drawnLines());
-    // M15: scale the panel (Shape.setSize did not resize the drawn rectangle).
+    // Scale the panel (Shape.setSize did not resize the drawn rectangle).
     this.panel.setDisplaySize(Math.max(120, this.text.width + 8), this.text.height + 6);
   }
 
@@ -191,7 +191,7 @@ export class DebugScene extends Phaser.Scene {
   }
 
   /**
-   * What the overlay draws (M15): {@link lines}, but only `DEBUG_MENU_ROWS` menu lines, a window that follows the
+   * What the overlay draws: {@link lines}, but only `DEBUG_MENU_ROWS` menu lines, a window that follows the
    * cursor (the real world's menu is taller than the screen).
    */
   drawnLines(): string[] {
@@ -205,7 +205,7 @@ export class DebugScene extends Phaser.Scene {
     return [...this.infoLines(), ...menu.slice(this.menuTop, this.menuTop + DEBUG_MENU_ROWS)];
   }
 
-  /** The info lines: map, tile, FPS, euros, and the last reload's result (M15). */
+  /** The info lines: map, tile, FPS, euros, and the last reload's result. */
   private infoLines(): string[] {
     const info = [
       t('debug.map', { map: this.where.map }),
@@ -238,7 +238,7 @@ export class DebugScene extends Phaser.Scene {
   }
 
   /**
-   * "Recargar datos" (M15): load and validate every content file and map again. On success: replace the game
+   * "Recargar datos": load and validate every content file and map again. On success: replace the game
    * data, check the game state against it (`parseSave` rules), load sprites / sounds that are new, then emit
    * `debug:reloaded`. On failure: keep the old data and show the errors.
    */

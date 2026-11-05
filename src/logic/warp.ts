@@ -1,14 +1,14 @@
 /**
- * Warps between maps (docs/PLAN.md › M4). A warp is a rectangle in a map's `warps` object layer with the
+ * Warps between maps. A warp is a rectangle in a map's `warps` object layer with the
  * properties `toMap`, `toX`, `toY`, `toFacing` and `trigger`:
  * - `trigger = step` (doors, map edges): fires when the player FINISHES a step onto a tile inside it.
- * - `trigger = action` (the car, M13): fires when the player stands still facing a tile inside it and
+ * - `trigger = action` (the car): fires when the player stands still facing a tile inside it and
  *   presses A.
  * - `toX` / `toY` left out = keep the player's column / row (map edges: "same row"). `toFacing` left
  *   out = keep the facing.
  * - A step warp may lie outside the map (one tile past an edge): those off-map tiles become walkable,
  *   so walking off the edge enters the warp. Every other off-map tile blocks.
- * - Car warps (M13): an `action` warp with the property `car` (`murcia` or `valencia`) is the Audi. Its
+ * - Car warps: an `action` warp with the property `car` (`murcia` or `valencia`) is the Audi. Its
  *   destination comes from `car.json` (`toMurcia` / `toValencia`), so `toMap` / `toX` / `toY` / `toFacing`
  *   are not used; the OverworldScene checks the unlock pairs and runs the CarScene instead of warping
  *   (`src/logic/car.ts`).
@@ -30,7 +30,7 @@ export interface Warp {
   toY: number | null;
   toFacing: Facing | null;
   trigger: 'step' | 'action';
-  /** M13: set on the Audi's `action` warp; the trip's destination (`toMap` is then empty and unused). */
+  /** Set on the Audi's `action` warp; the trip's destination (`toMap` is then empty and unused). */
   car: CarDestination | null;
 }
 

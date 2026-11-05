@@ -1,11 +1,11 @@
-// M5 "Done when": adding a new talker to npcs.json makes it appear and talk with no code change;
+// Checks: adding a new talker to npcs.json makes it appear and talk with no code change;
 // wandering NPCs never leave their rectangle; the player can never end up inside an NPC. Plus: the
 // dialogue box types, A reveals then advances, the arrow/`more` flag, the voice, the healer/storage
-// talk order (M9 replaced the "[curar]"/"[caja]" placeholders with the real heal and storage box) and the ChoiceBox.
+// talk order and the ChoiceBox.
 // Extra NPCs are injected by intercepting `data/npcs.json` (no code or shipped data changes).
-// The shipped becario wanders in the same rectangle, so three wanderers share it with the player. Since M8
+// The shipped becario wanders in the same rectangle, so three wanderers share it with the player.
 // an enemy walks out of its rectangle to challenge the player, so this test serves it as a talker.
-// The wander watch lasts M5_WATCH_MS (default 20 s; run once with 120000 for the plan's 2 minutes).
+// The wander watch lasts WANDER_WATCH_MS (default 20 s; 120000 for a 2-minute watch).
 import { test, expect, type Page } from '@playwright/test';
 import { neutralIntro } from './neutral-intro';
 
@@ -31,7 +31,7 @@ interface Dialog {
 }
 type Hooks = Record<string, (...a: unknown[]) => unknown>;
 
-const WATCH_MS = Number(process.env.M5_WATCH_MS ?? 20_000);
+const WATCH_MS = Number(process.env.WANDER_WATCH_MS ?? 20_000);
 
 const hook = <T>(page: Page, name: string, ...args: unknown[]): Promise<T> =>
   page.evaluate(
@@ -61,7 +61,7 @@ const npc = (over: Record<string, unknown>) => ({
 
 /**
  * Serve npcs.json with `extra` appended and, optionally, a different new-game spawn. With `talkersOnly`,
- * shipped enemies become talkers (M8: they would otherwise walk out of their rectangle to battle).
+ * shipped enemies become talkers (they would otherwise walk out of their rectangle to battle).
  */
 async function patchData(page: Page, extra: object[], spawn?: object, talkersOnly = false): Promise<void> {
   await page.route('**/data/npcs.json', async (route) => {
@@ -83,7 +83,7 @@ async function patchData(page: Page, extra: object[], spawn?: object, talkersOnl
       const start = (await res.json()) as Record<string, unknown>;
       await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
     });
-    // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+    // The intro must fit the spawn's map at boot (see neutral-intro.ts).
     await neutralIntro(page, (spawn as { map: string }).map);
   }
 }
@@ -99,7 +99,7 @@ async function enterOverworld(page: Page, expected: Partial<Tile>): Promise<stri
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
@@ -127,7 +127,7 @@ test('a talker added to npcs.json appears, turns to the player and talks through
   ]);
   const errors = await enterOverworld(page, { map: 'test', x: 15, y: 10 });
   expect(await npcs(page)).toEqual([
-    // `state` (null: not an enemy) and `alert` were added in M8.
+    // `state` (null: not an enemy) and `alert` were added later.
     {
       id: 'vecina_test',
       x: 17,
@@ -193,7 +193,7 @@ test('a talker added to npcs.json appears, turns to the player and talks through
   expect(errors).toEqual([]);
 });
 
-test('healer heals before its dialogue; storage opens the box after it (M9)', async ({ page }) => {
+test('healer heals before its dialogue; storage opens the box after it', async ({ page }) => {
   await patchData(page, [
     npc({
       id: 'enfermera_test',

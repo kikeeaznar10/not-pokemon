@@ -1,5 +1,5 @@
 /**
- * IntroScene (M11) — plays the new-game script in `public/data/intro.json` on the `start.json › spawn` map,
+ * IntroScene — plays the new-game script in `public/data/intro.json` on the `start.json › spawn` map,
  * then hands control to the player in the overworld.
  *
  * - Start it with {@link IntroSceneData} (the player's name). The new game is built from `start.json`

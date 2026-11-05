@@ -64,17 +64,17 @@ describe('cross-references (one test per rule)', () => {
   });
 
   it('map ids in NPCs, start, car', () => {
-    expect(errorsAfter((f) => (f['npcs.json'][0].map = 'bar_pacos'))).toEqual([
-      'npcs.json › [0].map › unknown map "bar_pacos"',
+    expect(errorsAfter((f) => (f['npcs.json'][0].map = 'bar_centro'))).toEqual([
+      'npcs.json › [0].map › unknown map "bar_centro"',
     ]);
     expect(
       errorsAfter((f) => {
-        f['start.json'].spawn.map = 'oficina_ahora';
-        f['start.json'].respawn.map = 'oficina_ahora';
+        f['start.json'].spawn.map = 'oficina';
+        f['start.json'].respawn.map = 'oficina';
       }),
     ).toEqual([
-      'start.json › spawn.map › unknown map "oficina_ahora"',
-      'start.json › respawn.map › unknown map "oficina_ahora"',
+      'start.json › spawn.map › unknown map "oficina"',
+      'start.json › respawn.map › unknown map "oficina"',
     ]);
     expect(
       errorsAfter((f) => {
@@ -97,8 +97,8 @@ describe('cross-references (one test per rule)', () => {
     expect(errorsAfter((f) => (f['items.json'][1].id = 'cafe'))).toContain(
       'items.json › [1].id › duplicate id "cafe"',
     );
-    expect(errorsAfter((f) => (f['npcs.json'][1].id = 'camarero_pacos'))).toEqual([
-      'npcs.json › [1].id › duplicate id "camarero_pacos"',
+    expect(errorsAfter((f) => (f['npcs.json'][1].id = 'camarero_bar_centro'))).toEqual([
+      'npcs.json › [1].id › duplicate id "camarero_bar_centro"',
     ]);
     expect(errorsAfter((f) => f['zones.json'].push({ ...f['zones.json'][0] }))).toEqual([
       'zones.json › [3].id › duplicate id "test"',

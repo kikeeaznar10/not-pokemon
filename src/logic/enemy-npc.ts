@@ -1,5 +1,5 @@
 /**
- * Enemy NPC battles (docs/PLAN.md › Enemy NPCs, Losing; M8), pure so the overworld and battle scenes only
+ * Enemy NPC battles (docs/GAME-RULES.md › Enemy NPCs, Losing), pure so the overworld and battle scenes only
  * play the results:
  * - {@link findSpotter}: which `ready` enemy NPC sees the player right now (first in the list given, which
  *   is `npcs.json` order) and the tiles it walks to end up adjacent.

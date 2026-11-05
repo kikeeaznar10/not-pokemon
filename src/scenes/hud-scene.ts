@@ -1,6 +1,6 @@
 /**
- * HudScene (M10) — a transparent layer over every game scene for small status marks. For now it only
- * shows the save icon: a tiny "Guardando…" box at the top centre (M12: moved from the top-right corner, where
+ * HudScene — a transparent layer over every game scene for small status marks. For now it only
+ * shows the save icon: a tiny "Guardando…" box at the top centre (moved from the top-right corner, where
  * the touch Start / Mapa buttons cover it) for `SAVE_ICON_MS` (600 ms) after
  * every auto-save (`save:done`; a new save restarts the timer). Preload launches it once; it never reads
  * input. It sits just below the Debug overlay in the scene list, so it draws over the overworld, the

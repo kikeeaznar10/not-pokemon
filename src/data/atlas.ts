@@ -1,9 +1,9 @@
 /**
- * The sprite atlas (M15, made by `npm run atlas` / `npm run build`, see `tools/make-atlas.ts`).
+ * The sprite atlas (made by `npm run atlas` / `npm run build`, see `tools/make-atlas.ts`).
  *
  * Boot calls {@link loadAtlasIndex}: it fetches `assets/atlas/sprites.json` and keeps the frame list
  * ({@link getAtlas}). When there is no atlas (`npm run dev` before a build) or the file is not a valid atlas, the
- * index is `null` and every sprite loads as its own file, as before M15.
+ * index is `null` and every sprite loads as its own file.
  *
  * Preload loads the atlas image instead of the sprites it holds, then copies every frame into its own canvas
  * texture keyed by the frame's name — the sprite's asset path — so the rest of the game (and `hasTexture()`) sees

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { UNLOCK_EVENTS, unlockAudioOnFirstInput } from '../../src/core/audio-unlock';
 
-describe('unlockAudioOnFirstInput (M15)', () => {
+describe('unlockAudioOnFirstInput', () => {
   it('unlocks once on the first gesture and removes every listener', () => {
     const target = new EventTarget();
     const unlock = vi.fn();

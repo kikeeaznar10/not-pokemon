@@ -16,17 +16,17 @@
         {
           "x": 56,
           "y": 6,
-          "to": "bar_las_rusas"
+          "to": "bar_este"
         },
         {
           "x": 83,
           "y": 7,
-          "to": "oficina_ahora"
+          "to": "oficina"
         },
         {
           "x": 81,
           "y": 16,
-          "to": "bar_pacos"
+          "to": "bar_centro"
         },
         {
           "x": 94,
@@ -195,7 +195,7 @@
         {
           "x": 18,
           "y": 19,
-          "to": "isaval"
+          "to": "empresa_sur"
         },
         {
           "x": 22,
@@ -222,7 +222,7 @@
         {
           "x": 21,
           "y": 12,
-          "to": "ciruelo"
+          "to": "empresa_poligono"
         },
         {
           "x": 117,
@@ -232,12 +232,12 @@
       ],
       "encounters": [
         {
-          "name": "ciruelos",
+          "name": "frutales",
           "x": 2,
           "y": 3,
           "width": 32,
           "height": 34,
-          "group": "huerto_ciruelo",
+          "group": "huerto_frutal",
           "mode": "tiles"
         },
         {
@@ -275,15 +275,15 @@
       },
       "spawn": [16, 15]
     },
-    "oficina_ahora": {
+    "oficina": {
       "ground": "office",
       "indoor": true
     },
-    "bar_pacos": {
+    "bar_centro": {
       "ground": "floor",
       "indoor": true
     },
-    "bar_las_rusas": {
+    "bar_este": {
       "ground": "floor",
       "indoor": true
     },
@@ -363,7 +363,7 @@
       "ground": "floor",
       "indoor": true
     },
-    "isaval": {
+    "empresa_sur": {
       "ground": "floor",
       "indoor": true
     },
@@ -371,7 +371,7 @@
       "ground": "floor",
       "indoor": true
     },
-    "ciruelo": {
+    "empresa_poligono": {
       "ground": "floor",
       "indoor": true
     }

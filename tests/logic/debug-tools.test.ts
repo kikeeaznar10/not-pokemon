@@ -13,7 +13,7 @@ const state = (): GameState => ({
   npcs: {},
 });
 
-describe('debug tools (M15)', () => {
+describe('debug tools', () => {
   it('giveEuros adds DEBUG_GIVE_EUROS, clamped to EUROS_MAX, and leaves the input alone', () => {
     const s = state();
     expect(giveEuros(s).euros).toBe(200 + DEBUG_GIVE_EUROS);

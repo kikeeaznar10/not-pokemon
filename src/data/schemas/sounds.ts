@@ -1,5 +1,5 @@
 /**
- * Schema for `public/data/sounds.json` (M15): the interface sounds. Every key is required; each value is a sound
+ * Schema for `public/data/sounds.json`: the interface sounds. Every key is required; each value is a sound
  * path like the other files' (`assets/….ogg`, the MP3 with the same name is the fallback).
  *
  * - `cursor`: a menu cursor moved. `confirm`: an option chosen. `cancel`: B backed out of a menu.

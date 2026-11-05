@@ -1,5 +1,5 @@
 /**
- * BattleScene (M6) — the battle screen, driven entirely by the M2 logic (`src/logic/battle.ts`).
+ * BattleScene — the battle screen, driven entirely by the logic (`src/logic/battle.ts`).
  *
  * - Start it with {@link BattleSceneData}: the battle kind, the opponent's team and optionally an RNG
  *   seed (applied before the first roll, so tests replay a battle exactly). The player's team and bag
@@ -15,20 +15,20 @@
  *   accuracy beside it; team list with icons, names and HP (fainted greyed). B goes back to the main
  *   menu from every sub-menu; in the main menu B does nothing. The forced switch after a faint cannot
  *   be cancelled (the player must pick someone; there is always someone alive in that phase).
- * - Objeto (M9): the battle items in the bag with "x{n}" (`itemMenu`; greyed when no target would accept
+ * - Objeto: the battle items in the bag with "x{n}" (`itemMenu`; greyed when no target would accept
  *   it); a heal / revive item then asks for a team member (`itemTargetMenu`, greyed when it would do
  *   nothing), a buff goes on the active flexymon. Using it plays the round (`chooseAction` `item`: the
  *   item is consumed and the opponent acts). No battle items → "No tienes objetos…". B goes back a step.
- * - Catching (M7): after a won wild battle (and `canCatch()`), "¿Te llevas a {name}?" shows in the
+ * - Catching: after a won wild battle (and `canCatch()`), "¿Te llevas a {name}?" shows in the
  *   prompt panel with a ChoiceBox *Llevármelo* / *Dejarlo* (B = Dejarlo). Taking it runs
  *   `takeFlexymon` (`src/logic/merge.ts`: added to the team, to storage when the team is full, or merged)
  *   and shows the matching message (`catchMessages`) before the battle ends.
  * - End: the team (HP) and bag are written back to the game state, the screen fades out, the scene
- *   asks for an auto-save (`save:request` `battle`, M10), emits `battle:ended` and stops; the overworld
- *   wakes up on the same tile. Attack sounds play at the effects volume option (M10).
- * - Enemy NPCs (M8): started with `npcId`, a win runs `winAgainstNpc` (euros `+= rng.int(min, max)`,
- *   the NPC goes to `cooldown`) and shows "¡Has ganado {n} €!" (`battle.reward`, with the M15 `money` sound) before leaving.
- * - Losing (M8, wild or NPC): `loseBattle` applies the Losing rule to the game state (euros halved, team
+ *   asks for an auto-save (`save:request` `battle`), emits `battle:ended` and stops; the overworld
+ *   wakes up on the same tile. Attack sounds play at the effects volume option.
+ * - Enemy NPCs: started with `npcId`, a win runs `winAgainstNpc` (euros `+= rng.int(min, max)`,
+ *   the NPC goes to `cooldown`) and shows "¡Has ganado {n} €!" (`battle.reward`, `money` sound) before leaving.
+ * - Losing (wild or NPC): `loseBattle` applies the Losing rule to the game state (euros halved, team
  *   and storage fully healed, every NPC `ready`, player at `start.json › respawn`); the overworld then
  *   restarts at the respawn point.
  * - While the debug menu (`debug:menu`) is open, the battle ignores input.
@@ -85,13 +85,13 @@ export interface BattleSceneData {
   opponent: FlexymonInstance[];
   /** Re-seed the shared RNG before the battle starts (tests, debug). */
   seed?: number;
-  /** The enemy NPC fought (M8): a win pays its reward and puts it in `cooldown`. */
+  /** The enemy NPC fought: a win pays its reward and puts it in `cooldown`. */
   npcId?: string;
 }
 
 /**
- * What the battle screen is doing. `catch`: the Llevármelo / Dejarlo choice after a wild win (M7);
- * `item` / `item_target`: the Objeto list and its target list (M9).
+ * What the battle screen is doing. `catch`: the Llevármelo / Dejarlo choice after a wild win;
+ * `item` / `item_target`: the Objeto list and its target list.
  */
 export type BattleUi = 'anim' | 'main' | 'attack' | 'team' | 'item' | 'item_target' | 'catch' | 'end';
 
@@ -222,7 +222,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   /**
-   * The battle backdrop (post-M15 restyle): a pale sky fading into a grass band, and a grassy platform with a dark
+   * The battle backdrop: a pale sky fading into a grass band, and a grassy platform with a dark
    * rim and a light top under each side's flexymon.
    */
   private drawBackdrop(): void {
@@ -304,7 +304,7 @@ export class BattleScene extends Phaser.Scene {
       case 'hit': {
         const sprite = this.sides[step.who].sprite;
         const x = HOME[step.who].x;
-        // M15: the sprite shakes HIT_SHAKES times but dims only once (flashes stay under 3 per second).
+        // The sprite shakes HIT_SHAKES times but dims only once (flashes stay under 3 per second).
         return Promise.all([
           this.tweenTo(sprite, { x: x + 6 }, HIT_SHAKE_MS / 2, HIT_SHAKES - 1, true),
           this.tweenTo(sprite, { alpha: 0.3 }, HIT_DIM_MS / 2, 0, true),
@@ -441,7 +441,7 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
-  /** Objeto (M9): the battle items in the bag. B goes back to the main menu. */
+  /** Objeto: the battle items in the bag. B goes back to the main menu. */
   private openItems(initial = 0): void {
     const data = getGameData();
     const options = itemMenu(this.battle, data, t);

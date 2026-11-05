@@ -1,4 +1,4 @@
-// M3 "Done when": the player moves exactly one tile per press, never stops between tiles, cannot walk
+// Checks: the player moves exactly one tile per press, never stops between tiles, cannot walk
 // through walls or off the map; holding walks continuously, tapping turns in place; F2 shows the tile
 // coordinates and they match Tiled. Test map geometry: public/maps/README.md.
 import { test, expect, type Page } from '@playwright/test';
@@ -34,7 +34,7 @@ const expectStanding = async (page: Page, expected: Partial<Tile>): Promise<void
   expect(await tile(page)).toMatchObject({ ...expected, moving: false });
 };
 
-/** Load the game, quick-start from the title (M11) and wait for the overworld. */
+/** Load the game, quick-start from the title and wait for the overworld. */
 async function enterOverworld(page: Page, query = ''): Promise<string[]> {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -46,7 +46,7 @@ async function enterOverworld(page: Page, query = ''): Promise<string[]> {
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
@@ -132,7 +132,7 @@ test('F2 (with ?debug=1) shows the map and tile coordinates, matching Tiled', as
   await expect.poll(lines).toEqual(expect.arrayContaining(['Casilla: 16, 10']));
   expect((await lines())!.some((l) => /^FPS: \d+$/.test(l))).toBe(true);
   await page.screenshot({ path: testInfo.outputPath(`debug-${testInfo.project.name}.png`) });
-  // Since M4, F2 cycles hidden → info → teleport menu → hidden.
+  // , F2 cycles hidden → info → teleport menu → hidden.
   await page.keyboard.press('F2');
   await expect.poll(lines).toContain('Teletransporte (A: ir, B: cerrar)');
   await page.keyboard.press('F2');

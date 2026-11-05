@@ -1,5 +1,5 @@
 /**
- * Buffs and debuffs (docs/PLAN.md › Buffs and debuffs). A modifier lives on the *active* flexymon of a
+ * Buffs and debuffs (docs/GAME-RULES.md › Buffs and debuffs). A modifier lives on the *active* flexymon of a
  * battle side. Effective stat = `stat × (100 + Σbuff − Σdebuff) / 100`, clamped to
  * [`MOD_MIN` × stat, `MOD_MAX` × stat], floored, minimum 1. The same attack or item used again on the
  * same flexymon replaces its old modifier (turns reset) instead of stacking.

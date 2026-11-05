@@ -10,7 +10,7 @@ import {
   TITLE_BLINK_MS,
 } from '../../src/logic/constants';
 
-describe('accessibility helpers (M15)', () => {
+describe('accessibility helpers', () => {
   it('blinkRate: on + off is one flash', () => {
     expect(blinkRate(500)).toBe(1);
     expect(blinkRate(250)).toBe(2);
@@ -29,7 +29,7 @@ describe('accessibility helpers (M15)', () => {
   });
 });
 
-describe('every flashing effect stays under 3 flashes per second (plan M15 task 4)', () => {
+describe('every flashing effect stays under 3 flashes per second', () => {
   it.each([
     ['title "Pulsa START"', blinkRate(TITLE_BLINK_MS)],
     ['dialogue arrow', blinkRate(DIALOG_ARROW_BLINK_MS)],

@@ -1,5 +1,5 @@
 /**
- * The storage box screen (M9, docs/PLAN.md › Team and storage): two columns, *Equipo* (the team, at most
+ * The storage box screen (docs/GAME-RULES.md › Team and storage): two columns, *Equipo* (the team, at most
  * `teamSlots`) and *Caja* (storage, no limit). A on a flexymon moves it to the other column:
  * - Equipo → Caja is refused for the last team member (`last_member`): the team can never be empty.
  * - Caja → Equipo is refused when the team is full (`team_full`): it never exceeds its slots.

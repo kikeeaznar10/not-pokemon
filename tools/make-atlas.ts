@@ -1,6 +1,6 @@
 /**
- * `npm run atlas` (M15) — packs the content's small sprites into one texture atlas, so a phone on 4G downloads one
- * image instead of ~70 (plan M15 task 3: "texture atlas for sprites if load time exceeds 3 seconds on 4G").
+ * `npm run atlas` — packs the content's small sprites into one texture atlas, so a phone on 4G downloads one
+ * image instead of ~70 .
  *
  * - Input: every PNG path under `assets/sprites/` named in the content JSON (`public/data/` and the test world,
  *   `readAssetPaths`) whose image is at most {@link MAX_SPRITE_SIZE} pixels on each side. Bigger images (e.g. a

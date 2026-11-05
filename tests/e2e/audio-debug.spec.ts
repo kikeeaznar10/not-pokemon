@@ -1,4 +1,4 @@
-// M15 "Audio, polish": audio unlocks on the first input; interface sounds (cursor, confirm, cancel, error, money)
+// Audio and polish: audio unlocks on the first input; interface sounds (cursor, confirm, cancel, error, money)
 // play at the effects volume; the debug menu gives euros and items and reloads every JSON without a page reload
 // (a broken file shows its error and keeps the old data). Runs on the frozen test world (playwright.config.ts).
 import { test, expect, type Page } from '@playwright/test';
@@ -61,7 +61,7 @@ async function standing(page: Page, expected: Partial<Tile> = {}): Promise<void>
     .toMatchObject({ ...expected, moving: false, locked: false });
 }
 
-/** Into the overworld at the spawn without the intro (M11's `quickStart`). */
+/** Into the overworld at the spawn without the intro (the `quickStart`). */
 async function quickStart(page: Page): Promise<void> {
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),

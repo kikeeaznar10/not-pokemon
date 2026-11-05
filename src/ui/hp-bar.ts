@@ -1,5 +1,5 @@
 /**
- * HpBar (M6): a framed HP bar, optionally with a "PS 31/40" line under it.
+ * HpBar: a framed HP bar, optionally with a "PS 31/40" line under it.
  *
  * - {@link HpBar.set} jumps to a value; {@link HpBar.animateTo} moves the bar (and the number) over
  *   `HP_ANIM_MS` and resolves when done. The numbers always come from the battle events; the bar never

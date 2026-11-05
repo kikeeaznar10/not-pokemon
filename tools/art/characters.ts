@@ -218,7 +218,7 @@ export const PLAYER_LOOK: Look = {
 
 /** One look per NPC sprite file name (`assets/sprites/npcs/<name>.png`). */
 export const NPC_LOOKS: Record<string, Look> = {
-  // World redesign (M16): townsfolk, station staff and M.P.
+  // World redesign: townsfolk, station staff and M.P.
   abuelo: { skin: SKIN.tan, hair: HAIR.white, style: 'bald', shirt: hex('#c8b890'), pants: hex('#585048') },
   vecina: { skin: SKIN.light, hair: HAIR.brown, style: 'bun', shirt: hex('#e070a0'), pants: hex('#4c5070') },
   nina: { skin: SKIN.mid, hair: HAIR.black, style: 'long', shirt: hex('#f8d048'), pants: hex('#d05050') },

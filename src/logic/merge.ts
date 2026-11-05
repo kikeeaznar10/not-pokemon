@@ -1,5 +1,5 @@
 /**
- * Catching and merging (docs/PLAN.md › Catching and merging). After beating a wild flexymon the player
+ * Catching and merging (docs/GAME-RULES.md › Catching and merging). After beating a wild flexymon the player
  * may take it (`canCatch()` is the hook for a future catch item). A species not yet owned is added
  * (team if a slot is free, else storage). An owned species merges into the first instance (team first,
  * then storage): a random stat whose bonus is below `(MERGE_CAP − 1) × base` gains
@@ -19,7 +19,7 @@ export type CatchOutcome =
 
 /**
  * Whether the player may take the beaten wild flexymon. Always true for now; the future catch item
- * (open question in docs/PROGRESS.md) will be checked here.
+ * will be checked here.
  */
 export function canCatch(): boolean {
   return true;

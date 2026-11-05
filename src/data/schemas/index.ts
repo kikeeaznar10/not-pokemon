@@ -1,4 +1,4 @@
-/** The content files (nine from the plan, plus `intro.json` since M11 and `sounds.json` since M15) and the zod schema of each. */
+/** The content files (`DATA_FILES`) and the zod schema of each. */
 import { attacksFileSchema } from './attacks';
 import { carFileSchema } from './car';
 import { flexymonFileSchema } from './flexymon';

@@ -1,5 +1,5 @@
 /**
- * Audio unlock (M15). Browsers keep a page's audio context suspended until the first user gesture, and Phaser's
+ * Audio unlock. Browsers keep a page's audio context suspended until the first user gesture, and Phaser's
  * own unlock only listens for some events. {@link unlockAudioOnFirstInput} adds one-shot listeners for the first
  * key press, pointer press or touch and then calls `unlock` (in `main.ts`: Phaser's `sound.unlock()` plus a
  * `resume()` of the Web Audio context). Every listener is removed after that first gesture.

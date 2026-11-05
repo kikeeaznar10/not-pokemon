@@ -1,5 +1,5 @@
 /**
- * Auto-save (M10, docs/PLAN.md › Saving): writes the game state to the save store at every save point,
+ * Auto-save (docs/GAME-RULES.md › Saving): writes the game state to the save store at every save point,
  * announced on the event bus as `save:request`:
  * - `map` — the overworld entered a map (warp, respawn, the first map after the title);
  * - `battle` — a battle ended (after the Losing rule or the reward was applied);
@@ -12,9 +12,9 @@
  * - The player's position in the game state follows every `player:moved`, so a save always holds where
  *   the player stands.
  * - When the page is hidden or closed (`visibilitychange` hidden, `pagehide`) the game is also saved,
- *   quietly (no `save:done`), so a reload "at any time" comes back to the same place (M10 "Done when").
+ *   quietly (no `save:done`), so a reload "at any time" comes back to the same place.
  *   The quiet save is skipped when the slot no longer holds what this page last wrote (changed in devtools or
- *   by another tab): then the next load reads that text, and a broken one starts fresh (M10 "Done when").
+ *   by another tab): then the next load reads that text, and a broken one starts fresh.
  * - {@link Autosave.disable} stops all saving until the page reloads (the debug "delete save" command).
  */
 import type { GameState } from '../logic/save';

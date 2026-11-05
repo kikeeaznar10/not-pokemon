@@ -1,6 +1,6 @@
 /**
  * Schema for `public/data/zones.json`: every map (Tiled file, display name, region, music,
- * encounter groups). Encounter group keys must match rectangles in the map's `encounters` layer (M7).
+ * encounter groups). Encounter group keys must match rectangles in the map's `encounters` layer.
  */
 import { z } from 'zod';
 import { idSchema, soundPathSchema, textSchema } from './common';

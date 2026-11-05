@@ -52,7 +52,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) input.releaseAll();
 });
 
-// Mobile (M12): on touch devices, on-screen controls feed the Input service, browser gestures are blocked,
+// Mobile: on touch devices, on-screen controls feed the Input service, browser gestures are blocked,
 // the first tap asks for fullscreen, and portrait shows "Gira el móvil" and pauses the game (loop and sound).
 const touchDevice = isTouchDevice(window);
 let touchControls: TouchControls | null = null;
@@ -97,7 +97,7 @@ function portraitAllowedForTests(): boolean {
   }
 }
 
-// Zone music (M4): crossfades run on the game loop, so they survive Overworld restarts on warps.
+// Zone music: crossfades run on the game loop, so they survive Overworld restarts on warps.
 const music = new MusicPlayer((key) => game.sound.add(key, { loop: true }) as unknown as Track);
 game.events.on(Phaser.Core.Events.STEP, (_time: number, delta: number) => music.update(delta));
 events.on('zone:entered', ({ zone }) => {
@@ -105,11 +105,11 @@ events.on('zone:entered', ({ zone }) => {
   if (z) music.play(z.music);
 });
 
-// Options (M10): read from `flexymon.options`; the music volume follows the option.
+// Options: read from `flexymon.options`; the music volume follows the option.
 music.setGain(volumeGain(loadOptions().music));
 events.on('options:changed', (o) => music.setGain(volumeGain(o.music)));
 
-// Audio (M15): unlock on the first key press, click or touch (browsers block sound before a gesture); interface
+// Audio: unlock on the first key press, click or touch (browsers block sound before a gesture); interface
 // sounds (`sounds.json`) play at the effects volume, like every other sound effect.
 let audioUnlockRequested = false;
 unlockAudioOnFirstInput(window, () => {
@@ -127,7 +127,7 @@ setUiSoundPlayer((kind) => {
   if (game.cache.audio.exists(key)) game.sound.play(key, { volume });
 });
 
-// Saving (M10): auto-save at every save point and when the page is hidden or closed.
+// Saving: auto-save at every save point and when the page is hidden or closed.
 const autosave = new Autosave({ store: saveStore, getState: gameState, setState: setGameState });
 autosave.start(window);
 events.on('debug:delete_save', () => {
@@ -147,11 +147,11 @@ export interface DataSummary {
   secretNames: number;
 }
 
-/** Helpers for Playwright tests. They grow with the milestones (see tests/README.md). */
+/** Helpers for Playwright tests. Add new ones here and to the table in tests/README.md. */
 export interface E2EHooks {
   /** Keys of the currently active scenes, bottom to top. */
   activeScenes(): string[];
-  /** Key of the topmost active scene, ignoring the Debug overlay and the HUD (M10); `null` before any scene runs. */
+  /** Key of the topmost active scene, ignoring the Debug overlay and the HUD; `null` before any scene runs. */
   currentScene(): string | null;
   /** Counts of the loaded content, or `null` if data is not loaded (yet, or it failed). */
   dataSummary(): DataSummary | null;
@@ -176,7 +176,7 @@ export interface E2EHooks {
   /** True while the overworld ignores movement (warp fade, debug menu, dialogue or choice box). */
   overworldLocked(): boolean;
   /**
-   * NPCs on the current map: id, tile (the step's start while moving), facing, moving, talking; from M8
+   * NPCs on the current map: id, tile (the step's start while moving), facing, moving, talking;
    * also `state` (`ready`/`cooldown` for enemies, `null` otherwise) and `alert` ("!" bubble showing).
    * `[]` outside the overworld.
    */
@@ -201,26 +201,26 @@ export interface E2EHooks {
   team(): FlexymonInstance[];
   /** Replace the team with fresh flexymon of these species (optionally with `currentHp` set). */
   setTeam(members: { speciesId: string; currentHp?: number }[]): void;
-  /** Team, storage box and team slots in the game state (M7). */
+  /** Team, storage box and team slots in the game state. */
   party(): { team: FlexymonInstance[]; storage: FlexymonInstance[]; teamSlots: number };
-  /** Steps left without encounter rolls in the overworld, or `null` outside it (M7). */
+  /** Steps left without encounter rolls in the overworld, or `null` outside it. */
   safeSteps(): number | null;
-  /** Whether wild encounters roll (debug flag, M7). */
+  /** Whether wild encounters roll (debug flag). */
   encountersEnabled(): boolean;
-  /** Switch wild encounters on or off (same as the debug menu's option, M7). */
+  /** Switch wild encounters on or off (same as the debug menu's option). */
   setEncounters(on: boolean): void;
-  /** The player's euros in the game state (M8). */
+  /** The player's euros in the game state. */
   euros(): number;
-  /** Set the player's euros (M8). */
+  /** Set the player's euros. */
   setEuros(n: number): void;
-  /** Enemy NPC states in the game state (M8): id → `ready` / `cooldown` (missing = `ready`). */
+  /** Enemy NPC states in the game state: id → `ready` / `cooldown` (missing = `ready`). */
   npcStates(): NpcStates;
-  /** The bag in the game state (M9): item id → count. */
+  /** The bag in the game state: item id → count. */
   items(): Inventory;
-  /** Replace the bag (M9). */
+  /** Replace the bag. */
   setItems(items: Inventory): void;
   /**
-   * Replace team, storage and/or team slots with fresh flexymon of these species (M9; `currentHp` optional).
+   * Replace team, storage and/or team slots with fresh flexymon of these species (`currentHp` optional).
    * Fields left out stay as they are.
    */
   setParty(party: {
@@ -228,71 +228,71 @@ export interface E2EHooks {
     storage?: { speciesId: string; currentHp?: number }[];
     teamSlots?: number;
   }): void;
-  /** Use an item outside battle through `useFieldItem` (M9): the result's `use`, or the refusal reason. */
+  /** Use an item outside battle through `useFieldItem`: the result's `use`, or the refusal reason. */
   useFieldItem(itemId: string, targetUid?: string): FieldItemUse | { error: string };
-  /** The open shop screen (M9): ui, mode, euros, menu, item, quantity, total, prompt, message; else `null`. */
+  /** The open shop screen: ui, mode, euros, menu, item, quantity, total, prompt, message; else `null`. */
   shop(): ShopView | null;
-  /** The open storage box (M9): column, cursor, species per column, team slots, message; else `null`. */
+  /** The open storage box: column, cursor, species per column, team slots, message; else `null`. */
   storage(): StorageView | null;
-  /** Reasons of every `save:request` since the page loaded (M9: `healer`, `shop`; M10: `map`, `battle`, `menu`). */
+  /** Reasons of every `save:request` since the page loaded (`healer`, `shop`; `map`, `battle`, `menu`). */
   saveRequests(): string[];
-  /** Reasons of every save written since the page loaded (M10; `quiet` = page hidden / closed). */
+  /** Reasons of every save written since the page loaded (`quiet` = page hidden / closed). */
   savesWritten(): string[];
-  /** The raw `flexymon.save.v1` text, or `null` (M10). */
+  /** The raw `flexymon.save.v1` text, or `null`. */
   savedGame(): string | null;
-  /** True while the "Guardando…" icon shows (M10). */
+  /** True while the "Guardando…" icon shows. */
   saveIcon(): boolean;
-  /** The open Start menu (M10): ui, menu, detail page, options, description, message; else `null`. */
+  /** The open Start menu: ui, menu, detail page, options, description, message; else `null`. */
   menu(): MenuView | null;
-  /** The current options (M10). */
+  /** The current options. */
   options(): Options;
-  /** Replace the options (M10; stored and applied like the options screen does). */
+  /** Replace the options (stored and applied like the options screen does). */
   setOptions(options: Options): void;
-  /** Music option gain applied to the music player (0–1, M10). */
+  /** Music option gain applied to the music player (0–1). */
   musicGain(): number;
-  /** Merge these fields into the game state (M10 tests: bonuses, NPC states…); the position follows the player. */
+  /** Merge these fields into the game state (tests: bonuses, NPC states…); the position follows the player. */
   patchState(patch: Partial<GameState>): void;
-  /** The title screen (M11): ui, menu options and cursor, confirm box, whether a save exists; else `null`. */
+  /** The title screen: ui, menu options and cursor, confirm box, whether a save exists; else `null`. */
   title(): TitleView | null;
   /**
-   * From the title (M11): continue a valid save, or start a new game with the default name at the spawn,
-   * skipping the menu, the name and the intro (what Start did before M11). False if the title is not showing.
+   * From the title: continue a valid save, or start a new game with the default name at the spawn,
+   * skipping the menu, the name and the intro (a test shortcut). False if the title is not showing.
    */
   quickStart(): boolean;
-  /** The name screen (M11): name, cursor, cell labels, message; else `null`. */
+  /** The name screen: name, cursor, cell labels, message; else `null`. */
   nameEntry(): NameView | null;
-  /** The intro (M11): step, actors' tiles, dialogue, handover, secret message, jingle plays; else `null`. */
+  /** The intro: step, actors' tiles, dialogue, handover, secret message, jingle plays; else `null`. */
   intro(): IntroView | null;
-  /** The player's name in the game state (M11). */
+  /** The player's name in the game state. */
   playerName(): string;
-  /** The touch overlay (M12): shown, each control's box in CSS pixels, controls held; `shown: false` on desktop. */
+  /** The touch overlay: shown, each control's box in CSS pixels, controls held; `shown: false` on desktop. */
   touchControls(): TouchView;
-  /** Actions the Input service holds down right now (M12: keys and touch alike). */
+  /** Actions the Input service holds down right now (keys and touch alike). */
   inputDown(): Action[];
-  /** The portrait guard (M12): `shown` ("Gira el móvil" on screen), `paused` (the game loop), `touch` (touch device). */
+  /** The portrait guard: `shown` ("Gira el móvil" on screen), `paused` (the game loop), `touch` (touch device). */
   rotateScreen(): { shown: boolean; paused: boolean; touch: boolean };
-  /** True once the first tap asked for fullscreen (M12). */
+  /** True once the first tap asked for fullscreen. */
   fullscreenRequested(): boolean;
-  /** The minimap in the overworld (M12): shown / visible, frame, dot, tile…; `null` outside the overworld. */
+  /** The minimap in the overworld: shown / visible, frame, dot, tile…; `null` outside the overworld. */
   minimap(): MinimapView | null;
-  /** The Audi trip while the CarScene runs (M13): destination, elapsed ms, skippable, finished, skipped; else `null`. */
+  /** The Audi trip while the CarScene runs: destination, elapsed ms, skippable, finished, skipped; else `null`. */
   carTrip(): CarTripView | null;
-  /** The last Audi trip that ended (M13), kept after the Car scene stopped: same fields, `finished: true`; else `null`. */
+  /** The last Audi trip that ended, kept after the Car scene stopped: same fields, `finished: true`; else `null`. */
   lastCarTrip(): CarTripView | null;
-  /** Interface sounds played since the page loaded (M15), oldest first (at most the last 100). */
+  /** Interface sounds played since the page loaded, oldest first (at most the last 100). */
   uiSounds(): UiSoundKind[];
-  /** The last interface sound played and the effects volume (0–1) it was played at (M15), or `null`. */
+  /** The last interface sound played and the effects volume (0–1) it was played at, or `null`. */
   lastUiSound(): { kind: UiSoundKind; volume: number } | null;
-  /** Audio unlock (M15): whether the first gesture asked for it, and whether Phaser's sound manager is still locked. */
+  /** Audio unlock: whether the first gesture asked for it, and whether Phaser's sound manager is still locked. */
   audio(): { unlockRequested: boolean; locked: boolean; contextState: string | null };
-  /** Sprites Preload took from the sprite atlas (M15; `0` without an atlas, e.g. in `npm run dev`). */
+  /** Sprites Preload took from the sprite atlas (`0` without an atlas, e.g. in `npm run dev`). */
   atlasSprites(): number;
-  /** The debug menu's last "Recargar datos" (M15): `idle` / `loading` / `ok` / `error` and the errors; `null` without debug. */
+  /** The debug menu's last "Recargar datos": `idle` / `loading` / `ok` / `error` and the errors; `null` without debug. */
   debugReload(): ReloadStatus | null;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
-  // Running, or paused under a Shop / Storage (M9) or Menu (M10) overlay.
+  // Running, or paused under a Shop / Storage or Menu overlay.
   const overworld = (): OverworldScene | null =>
     game.scene.isActive(OVERWORLD_SCENE) || game.scene.isPaused(OVERWORLD_SCENE)
       ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene)

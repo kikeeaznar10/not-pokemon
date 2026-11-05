@@ -4,9 +4,6 @@ Flexymon is a fully static site: `npm run build` writes everything to `dist/` (o
 the content JSON, the maps, the art and the sounds). Any static host can serve it. No server code, database or
 environment variables are needed.
 
-**Which host, and whether the link needs a password, is still an open question** (docs/PROGRESS.md). Nothing has
-been deployed yet. The steps for each option are below; pick one and record the choice in docs/PROGRESS.md.
-
 ## 1. Build and check locally
 
 ```bash
@@ -65,8 +62,7 @@ Upload the **contents** of `dist/` (so `index.html` is at the top). The folders 
 - Settings › Pages › Source: *GitHub Actions*, with a workflow that runs `npm ci && npm run build` on Node 22 and
   publishes `dist/` (`actions/upload-pages-artifact` + `actions/deploy-pages`). The site is
   `https://<owner>.github.io/<repo>/`, a sub-path, which `base: './'` already handles.
-- GitHub Pages sites are public on most plans (private Pages need GitHub Enterprise Cloud). Check the open question
-  about real company and place names before publishing there.
+- GitHub Pages sites are public on most plans (private Pages need GitHub Enterprise Cloud).
 
 ### Company web server
 
@@ -84,12 +80,12 @@ A password can be added with the server's basic authentication (nginx `auth_basi
 
 - Open the URL on a desktop browser and on a phone in landscape: the title appears, *Nueva partida* starts the
   intro, and the game saves (reload: *Continuar* is offered).
-- Hand coworkers only the URL. Controls are shown on the phone; on desktop: arrows / WASD to move, Z = A, X = B,
+- Players only need the URL. Controls are shown on the phone; on desktop: arrows / WASD to move, Z = A, X = B,
   Enter = Start, M = minimap.
 - Updating the game: build again and upload `dist/` again. Saves survive updates; a save that no longer fits the
   content (a removed flexymon…) is repaired on load, and an unreadable one is kept as `flexymon.save.broken`.
 
-## Measured size and speed (M15)
+## Measured size and speed
 
 Production build: about 2.3 MB on disk; about 0.7 MB is transferred with gzip, in about 90 requests (the sprites
 come in one atlas image). Time to the title screen, measured with Chromium's network throttling on a Pixel 7

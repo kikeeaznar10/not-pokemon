@@ -1,5 +1,5 @@
 /**
- * Grid movement of the player (docs/PLAN.md › M3). Pure: the scene feeds the held direction and the
+ * Grid movement of the player. Pure: the scene feeds the held direction and the
  * frame time, and draws the result.
  *
  * Rules:
@@ -111,7 +111,7 @@ export function updateMovement(
   return { state: next.step ? { ...next, hold: null } : next, events };
 }
 
-/** Position in tiles (fractional while stepping), for drawing. Also used for NPCs (M5). */
+/** Position in tiles (fractional while stepping), for drawing. Also used for NPCs. */
 export function renderPosition(state: Pick<MoveState, 'x' | 'y' | 'step'>): { x: number; y: number } {
   if (!state.step) return { x: state.x, y: state.y };
   const t = Math.min(1, state.step.elapsed / WALK_MS);
@@ -125,7 +125,7 @@ export function walkFrame(state: Pick<MoveState, 'step'>): 0 | 1 {
 }
 
 /**
- * Stop on tile (x, y), keeping the facing (M7: a wild encounter at the end of a step). A step that
+ * Stop on tile (x, y), keeping the facing (a wild encounter at the end of a step). A step that
  * already started from that tile in the same frame (the direction was held) is dropped, so the player
  * stands still on the encounter tile.
  */

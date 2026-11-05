@@ -42,8 +42,8 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
     // Scenes never read the keyboard: the Input service (src/core/input.ts) does. Pointer/touch stay on.
     input: { keyboard: false },
     // No physics: movement is grid-based and handled by the game rules.
-    // Title, Name and Intro (M11) come before the overworld. Shop, Storage (M9) and Menu (M10) draw over the paused overworld. Hud (M10, the save icon) draws over
-    // every game scene; DebugScene is last so it draws on top of everything. Car (M13) replaces the sleeping
+    // Title, Name and Intro come before the overworld. Shop, Storage and Menu draw over the paused overworld. Hud (the save icon) draws over
+    // every game scene; DebugScene is last so it draws on top of everything. Car replaces the sleeping
     // overworld during the Audi trip, like Battle.
     scene: [
       BootScene,

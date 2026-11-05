@@ -1,5 +1,5 @@
 /**
- * World tileset, part 2 (world redesign, M16): the extra tiles the redesigned maps need (huerta crops, the sea,
+ * World tileset, part 2 (world redesign): the extra tiles the redesigned maps need (huerta crops, the sea,
  * the industrial estate and the ahora façade, stations and trains, the open-plan office, the Turia park, the CAC…).
  * Each is a 16 × 16 design grid (one character per pixel, a palette per tile; `.` is transparent), scaled ×2 like
  * every tile of `tools/art/tiles.ts`. They come after the base tiles and their variants in `world.png`, so their

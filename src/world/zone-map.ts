@@ -1,5 +1,5 @@
 /**
- * Draw a zone's Tiled map in a scene (shared by the OverworldScene and, from M11, the IntroScene).
+ * Draw a zone's Tiled map in a scene (shared by the OverworldScene and the IntroScene).
  *
  * - The map was loaded and checked at boot (`GameData.maps`); its JSON goes into Phaser's tilemap cache
  *   under the map path (e.g. `maps/test.tmj`) the first time. Tileset images are loaded by Preload.

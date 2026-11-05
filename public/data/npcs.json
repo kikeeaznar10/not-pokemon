@@ -5,7 +5,7 @@
     "name": "Recepcionista",
     "sprite": "assets/sprites/npcs/recepcionista.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "oficina_ahora",
+    "map": "oficina",
     "spawn": {
       "x": 5,
       "y": 12
@@ -20,7 +20,7 @@
     "name": "Informático",
     "sprite": "assets/sprites/npcs/informatico.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "oficina_ahora",
+    "map": "oficina",
     "spawn": {
       "x": 19,
       "y": 9
@@ -30,12 +30,12 @@
     "dialogue": ["Aquí guardo los flexymon que no te caben en el equipo."]
   },
   {
-    "id": "camarero_pacos",
+    "id": "camarero_bar_centro",
     "type": "shopkeeper",
     "name": "Camarero",
     "sprite": "assets/sprites/npcs/camarero.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "bar_pacos",
+    "map": "bar_centro",
     "spawn": {
       "x": 7,
       "y": 3
@@ -43,15 +43,15 @@
     "facing": "down",
     "wander": null,
     "dialogue": ["¿Lo de siempre?"],
-    "shop": "bar_pacos"
+    "shop": "bar_centro"
   },
   {
-    "id": "camarera_rusas",
+    "id": "camarera_bar_este",
     "type": "shopkeeper",
     "name": "Camarera",
     "sprite": "assets/sprites/npcs/camarera.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "bar_las_rusas",
+    "map": "bar_este",
     "spawn": {
       "x": 2,
       "y": 3
@@ -59,7 +59,7 @@
     "facing": "down",
     "wander": null,
     "dialogue": ["¡Hola! ¿Un café doble para el viaje?"],
-    "shop": "bar_las_rusas"
+    "shop": "bar_este"
   },
   {
     "id": "tendero_alboraya",
@@ -110,12 +110,12 @@
     "shop": "tienda_murcia"
   },
   {
-    "id": "cliente_isaval",
+    "id": "cliente_empresa_sur",
     "type": "talker",
     "name": "Cliente",
     "sprite": "assets/sprites/npcs/cliente.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "isaval",
+    "map": "empresa_sur",
     "spawn": {
       "x": 6,
       "y": 5
@@ -128,12 +128,12 @@
     ]
   },
   {
-    "id": "cliente_ciruelo",
+    "id": "cliente_empresa_poligono",
     "type": "talker",
     "name": "Cliente",
     "sprite": "assets/sprites/npcs/cliente.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "ciruelo",
+    "map": "empresa_poligono",
     "spawn": {
       "x": 6,
       "y": 5
@@ -545,7 +545,7 @@
     "name": "Compañero",
     "sprite": "assets/sprites/npcs/consultor.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "oficina_ahora",
+    "map": "oficina",
     "spawn": {
       "x": 3,
       "y": 9
@@ -563,7 +563,7 @@
     "name": "Compañera",
     "sprite": "assets/sprites/npcs/companera.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "oficina_ahora",
+    "map": "oficina",
     "spawn": {
       "x": 6,
       "y": 2
@@ -1410,7 +1410,7 @@
     "dialogue": ["¡He visto llegar el tren de Valencia!", "Pita dos veces al entrar en la estación."]
   },
   {
-    "id": "agricultor_ciruelo",
+    "id": "agricultor_frutal",
     "type": "talker",
     "name": "Agricultor",
     "sprite": "assets/sprites/npcs/hortelano.png",
@@ -1434,7 +1434,7 @@
     ]
   },
   {
-    "id": "temporera_ciruelo",
+    "id": "temporera_frutal",
     "type": "talker",
     "name": "Temporera",
     "sprite": "assets/sprites/npcs/recolectora.png",

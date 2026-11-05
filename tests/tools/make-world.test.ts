@@ -16,7 +16,7 @@ import {
 import { SIDE, VARIANT_TILES } from '../../tools/art/tiles';
 import { EXTRA_FIRST, EXTRA_TILES, XT } from '../../tools/world-tiles';
 
-describe('make-world (M14)', () => {
+describe('make-world', () => {
   it('draws an 8-column tileset of 32 px tiles: 32 base tiles, then the variants', () => {
     const ts = PNG.sync.read(drawWorldTileset());
     expect(ts.width).toBe(256);
@@ -29,7 +29,7 @@ describe('make-world (M14)', () => {
     expect(TILE_ID.get(VARIANT_TILES[0]!.key)).toBe(32);
   });
 
-  it('appends the world redesign tiles (M16) after the variants, each drawn and with its own properties', () => {
+  it('appends the world redesign tiles after the variants, each drawn and with its own properties', () => {
     const ts = PNG.sync.read(drawWorldTileset());
     expect(EXTRA_FIRST).toBe(32 + VARIANT_TILES.length);
     expect(TILE_ID.get('x:soil')).toBe(XT.soil);

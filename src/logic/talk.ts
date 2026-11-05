@@ -1,12 +1,12 @@
 /**
- * What an NPC says when the player talks to it (M5), by NPC type, and what happens around it (M9):
+ * What an NPC says when the player talks to it, by NPC type, and what happens around it:
  * - `talker`: its `dialogue`.
- * - `enemy` (M8): its `dialogue` while `ready` (said before the battle); only its `defeatDialogue`
+ * - `enemy`: its `dialogue` while `ready` (said before the battle); only its `defeatDialogue`
  *   while in `cooldown`.
- * - `healer` (M9): heals the team and the storage box first (`talkAction` → `heal`), then says
+ * - `healer`: heals the team and the storage box first (`talkAction` → `heal`), then says
  *   `healer.done` ("Tus flexymon están como nuevos.") and its dialogue; the game then auto-saves.
- * - `storage` (M9): says its dialogue, then the storage box opens (`talkAction` → `storage`).
- * - `shopkeeper` (M9): says its dialogue, then its shop opens (`talkAction` → `shop`).
+ * - `storage`: says its dialogue, then the storage box opens (`talkAction` → `storage`).
+ * - `shopkeeper`: says its dialogue, then its shop opens (`talkAction` → `shop`).
  * UI texts come from `src/i18n/es.json`; the caller passes the translator.
  */
 import type { Npc } from '../data/schemas';

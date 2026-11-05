@@ -1,9 +1,9 @@
 /**
- * Interface sounds (M15): `uiSound('cursor' | 'confirm' | 'cancel' | 'error' | 'money')` plays the matching sound
+ * Interface sounds: `uiSound('cursor' | 'confirm' | 'cancel' | 'error' | 'money')` plays the matching sound
  * of `public/data/sounds.json` at the effects volume. UI code calls it; it never touches Phaser itself.
  *
  * - `main.ts` installs the player ({@link setUiSoundPlayer}): it looks the kind up in `getGameData().sounds` and
- *   plays it through the game's sound manager with `{ volume: sfxVolume() }` (the effects option, M10).
+ *   plays it through the game's sound manager with `{ volume: sfxVolume() }` (the effects option).
  * - Before a player is installed (unit tests, boot) the call is only recorded.
  * - Every call is recorded in a short history ({@link uiSoundsPlayed}, newest last, at most
  *   {@link UI_SOUND_HISTORY} entries) for the E2E hook `uiSounds()`.

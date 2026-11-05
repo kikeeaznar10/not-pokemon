@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ATLAS_JSON, getAtlas, loadAtlasIndex } from '../../src/data/atlas';
 
-describe('loadAtlasIndex (M15)', () => {
+describe('loadAtlasIndex', () => {
   it('fetches the atlas from the base URL and keeps it', async () => {
     const urls: string[] = [];
     const atlas = await loadAtlasIndex('./', async (url) => {

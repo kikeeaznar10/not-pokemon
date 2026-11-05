@@ -1,4 +1,4 @@
-// M1 "Done when": valid data reaches Preload-complete with no console errors; a broken attack id
+// Checks: valid data reaches Preload-complete with no console errors; a broken attack id
 // shows the red ErrorScene naming the file and path.
 import { test, expect, type Page } from '@playwright/test';
 
@@ -44,7 +44,7 @@ test('valid data loads every asset and reaches Preload complete with no errors',
     () => (window as unknown as { __E2E__?: Hooks }).__E2E__?.preloadComplete() === true,
   );
 
-  // M11: Preload hands over to the TitleScene as soon as it is complete.
+  // Preload hands over to the TitleScene as soon as it is complete.
   await expect.poll(() => hook(page, 'currentScene')).toBe('Title');
   expect(await hook(page, 'dataSummary')).toEqual({
     flexymon: 3,

@@ -59,7 +59,8 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.inputDown()` | M12 | Actions the Input service holds down now (keys and touch alike). |
 | `window.__E2E__.rotateScreen()` | M12 | `{ shown ("Gira el móvil" on screen), paused (game loop), touch (touch device) }`. |
 | `window.__E2E__.fullscreenRequested()` | M12 | True once the first tap asked for fullscreen. |
-| `window.__E2E__.carTrip()` | M13 | The Audi trip while the Car scene runs: `{ to ('murcia' / 'valencia'), elapsedMs, skippable (a button would skip it), finished (ended, fading out), skipped, flipped (car faces left) }`, else `null`. The `finished` state lasts one 200 ms fade: poll often. |
+| `window.__E2E__.carTrip()` | M13 | The Audi trip while the Car scene runs: `{ to ('murcia' / 'valencia'), elapsedMs, skippable (a button would skip it), finished (ended, fading out), skipped, flipped (car faces left) }`, else `null`. The `finished` state lasts only one 200 ms fade, so check the outcome with `lastCarTrip()`. |
+| `window.__E2E__.lastCarTrip()` | M13 | The last trip that ended this page load (kept after the Car scene stopped): the `carTrip()` fields at the moment it ended (`finished: true`, `skipped`, `elapsedMs`), else `null`. |
 | `window.__E2E__.minimap()` | M12 | The minimap in the overworld: `{ zone, shown (player's choice), visible (drawn), available (outdoors with an image), frame { x, y, width, height, scale } (base pixels), mapSize, tile, dot { x, y } (base pixels), dotOn (blink) }`, else `null`. |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then call `quickStart()` until it returns true

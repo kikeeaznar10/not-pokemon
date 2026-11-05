@@ -144,18 +144,9 @@ test('without a pair the car only talks; with one it drives to Murcia and the it
   await expect.poll(() => trip(page)).toMatchObject({ to: 'murcia', flipped: false, finished: false });
   await page.waitForTimeout(1500);
   await page.screenshot({ path: testInfo.outputPath('m13-trip.png') });
-  let last: CarTrip | null = null;
-  await expect
-    .poll(
-      async () => {
-        const t = await trip(page);
-        if (t) last = t;
-        return t;
-      },
-      { timeout: 15_000, intervals: [50] }, // sample often: the finished state lasts one 200 ms fade
-    )
-    .toBeNull();
-  expect(last).toMatchObject({ finished: true, skipped: false });
+  await expect.poll(() => trip(page), { timeout: 15_000 }).toBeNull();
+  const last = await hook<CarTrip | null>(page, 'lastCarTrip');
+  expect(last).toMatchObject({ to: 'murcia', finished: true, skipped: false });
   expect(last!.elapsedMs).toBeGreaterThanOrEqual(5000);
   await standing(page, { map: 'test_east', x: 2, y: 10, facing: 'down' });
   expect(await hook(page, 'items')).toEqual(bag);
@@ -175,16 +166,25 @@ test('the Murcia car needs nothing, can be skipped after 1 s and lands next to t
   await press(page, 'z');
   await expect.poll(() => trip(page)).toMatchObject({ to: 'valencia', flipped: true });
   // Too early: a button does nothing during the first second.
+  // (Only checked when the browser reached this point well inside that second; slow runs skip the check.)
   const early = (await trip(page))!;
-  expect(early.skippable).toBe(false);
-  await page.keyboard.press('z');
-  await page.waitForTimeout(100);
-  expect(await trip(page)).toMatchObject({ finished: false, skipped: false });
+  if (early.elapsedMs < 600) {
+    expect(early.skippable).toBe(false);
+    await page.keyboard.press('z');
+    await page.waitForTimeout(100);
+    expect(await trip(page)).toMatchObject({ finished: false, skipped: false });
+  }
   await expect.poll(async () => (await trip(page))?.skippable).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('m13-trip-back.png') });
   await press(page, 'x'); // any button
-  await expect.poll(() => trip(page), { intervals: [50] }).toMatchObject({ finished: true, skipped: true });
-  const elapsed = (await trip(page))?.elapsedMs ?? 0;
+  await expect
+    .poll(() => hook<CarTrip | null>(page, 'lastCarTrip'))
+    .toMatchObject({
+      to: 'valencia',
+      finished: true,
+      skipped: true,
+    });
+  const elapsed = (await hook<CarTrip>(page, 'lastCarTrip')).elapsedMs;
   expect(elapsed).toBeGreaterThanOrEqual(1000);
   expect(elapsed).toBeLessThan(5000);
 

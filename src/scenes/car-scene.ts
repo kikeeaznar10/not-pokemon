@@ -45,6 +45,14 @@ export interface CarTripView {
   flipped: boolean;
 }
 
+/** The last trip that ended (played out or skipped), kept after the scene stops; for the E2E hooks. */
+let lastTrip: CarTripView | null = null;
+
+/** The last Audi trip that ended this page load, or `null` (read by the `lastCarTrip()` E2E hook). */
+export function lastCarTrip(): CarTripView | null {
+  return lastTrip;
+}
+
 /** Scroll speeds of the layers (base pixels per second); the road moves fastest. */
 const SPEED = { far: 40, mid: 260, road: 900, lines: 1400 } as const;
 /** Horizon and road positions (base pixels). */
@@ -161,6 +169,7 @@ export class CarScene extends Phaser.Scene {
   private finish(skipped: boolean): void {
     this.finished = true;
     this.skipped = skipped;
+    lastTrip = this.view();
     log(`Car: arrived (${skipped ? 'skipped' : 'played out'} after ${Math.round(this.elapsed)} ms)`);
     const cam = this.cameras.main;
     cam.fadeOut(WARP_FADE_MS, 0, 0, 0);

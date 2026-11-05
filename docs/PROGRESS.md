@@ -368,7 +368,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   with Sí / No (B = No). Sí → fade out → `CarScene` (5 s `CAR_TRIP_MS`; parallax sky / mountains / bushes / road,
   speed lines, bobbing car, camera shake, looped engine; any button skips after 1 s `CAR_SKIP_AFTER_MS`) →
   `car:ended` → the overworld restarts at the arrival point. The Murcia car has no requirement and plays the same
-  scene in reverse (car flipped, scenery scrolling the other way). Hook `carTrip()`.
+  scene in reverse (car flipped, scenery scrolling the other way). Hooks `carTrip()` and `lastCarTrip()` (the
+  ended trip, kept after the scene stops, since the "finished" state only lasts one 200 ms fade).
 - Content: `car.json` gained `sprite` (`assets/sprites/car/audi.png`, side view; the placeholder tool draws a
   96 × 40 white car for `sprites/car/`) and `sound` (`assets/audio/sfx/car_engine.ogg`; names with `engine` get a
   1 s 90 Hz hum). Test maps (`npm run test-map -- --force`): tileset tiles 12–13 (the Audi from above, solid), the
@@ -389,7 +390,10 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   + double coffee → the question, No / B stays; Sí → the trip to Murcia (nose right) plays at least 5 s and lands
   on `test_east` (2, 10) with the bag unchanged; the Murcia car with an empty bag asks, drives back (flipped), a
   button in the first second does nothing, after it skips, and the player lands on `test` (8, 12) right under the
-  office car (facing it gives the locked line) with a `map` save.
+  office car (facing it gives the locked line) with a `map` save. The M13 spec passed 24 / 24 repeated.
+- Known flaky (not changed): `m12-mobile.spec.ts` "every action can be done by touch alone" failed once on `iphone`
+  in a full run (a D-pad tap landed on the Start menu's opening frame, which ignores input, like the M7 / M10
+  notes); it passed 5 / 5 repeated on `iphone`.
 
 ## Open questions
 

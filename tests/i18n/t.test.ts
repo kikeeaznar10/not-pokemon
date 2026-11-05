@@ -23,6 +23,6 @@ describe('t()', () => {
 
   it('shows the missing-key marker', () => {
     expect(tt('nope.missing')).toBe('⟦nope.missing⟧');
-    expect(t('battle.wild_appeared', { name: 'x' })).toBe('⟦battle.wild_appeared⟧');
+    expect(t('nope.not_in_es', { name: 'x' })).toBe('⟦nope.not_in_es⟧');
   });
 });

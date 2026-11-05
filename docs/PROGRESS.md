@@ -11,7 +11,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M3 — Overworld: one map, movement, input
 - [x] M4 — Maps, warps and interiors
 - [x] M5 — Dialogue and talking NPCs
-- [ ] M6 — Battle scene
+- [x] M6 — Battle scene
 - [ ] M7 — Wild encounters, catching and merging
 - [ ] M8 — Enemy NPCs
 - [ ] M9 — Items, team, storage, shops and healing
@@ -166,6 +166,25 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   randomly walking player never leave the rectangle or share a tile, watched 20 s per profile and once for 2 minutes
   (desktop). For M6/M7: reuse `DialogBox`/`ChoiceBox` (one per scene, call `update` each frame while open).
 
+### M6
+
+- Built: `BattleScene` (layout per plan; messages in the M5 DialogBox, A to go on), `ui/hp-bar.ts` (400 ms animation,
+  green/yellow/red), `ui/grid-menu.ts` (2 × 2 main menu, attack list + accuracy, team list with icons/HP, greyed options),
+  pure `logic/battle-view.ts` (`viewSteps(events)` → message/sound/show/hit/hp/faint steps, menu rows via `actionError`)
+  so the scene never computes a rule. Overworld: 600 ms flash, sleeps under the battle, wakes on the same tile on
+  `battle:ended` (safe steps reset). Debug menu (F2 ×2): "Combate: {name}" per flexymon. Objeto says "Pronto".
+- Files outside the M6 list: `src/core/session.ts` + `src/logic/new-game.ts` (the battle needs a live team; a new game
+  from `start.json` until M10 saves), `src/ui/cursor.ts` (`moveGridCursor`), constants (`BATTLE_FLASH_MS`, `HP_ANIM_MS`,
+  `HP_YELLOW_BELOW`, `HP_RED_BELOW`), events (`debug:battle`, `battle:ended`), `config/game.ts`, `debug-scene.ts`,
+  `main.ts` (hooks `startBattle`, `battle`, `team`, `setTeam`), `es.json`, READMEs. `tests/i18n/t.test.ts` used
+  `battle.wild_appeared` as its "missing key" example; that key exists now, so it uses another missing key.
+- Decisions (Open questions › Raised in M6): a lost battle returns to the same tile with the team healed (M8 replaces
+  this with the Losing rule); B in the main menu does nothing; the forced switch after a faint cannot be cancelled.
+- Verified with Playwright (`tests/e2e/m6-battle.spec.ts`, all four profiles) + screenshots: Portátil vs Ratón won,
+  lost and fled; after every round `shownHp == hp` and "PS hp/max" matches; B returns from attack/team menus and
+  Objeto; Huir greyed and inert against an NPC; voluntary and forced switches; debug menu battle. For M7: start wild
+  battles with `OverworldScene.startBattle({ speciesId })` and handle the catch choice on `battle:ended` (`win`).
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -177,6 +196,14 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M6 (safe assumptions in brackets)
+
+- [ ] What happens after a loss before M8's Losing rule exists? [Back on the same tile, team fully healed.]
+- [ ] Is there game state before M10 saves? [`src/core/session.ts` holds it in memory; a reload starts a new game.]
+- [ ] What does B do in the battle's main menu? [Nothing.] Can the forced replacement after a faint be cancelled? [No.]
+- [ ] Battle message wording (appear, uses, stat up/down, win/lose…) is not in the plan. [Written in `es.json`
+  under `battle.*`; easy to change.]
 
 ### Raised in M5 (safe assumptions in brackets)
 

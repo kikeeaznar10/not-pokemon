@@ -29,6 +29,9 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.dialogue()` | M5 | The open dialogue box: `{ page, pages, text (visible), full, typed, more, voicePlays }`, or `null`. |
 | `window.__E2E__.openChoice(options)` | M5 | Opens a ChoiceBox in the overworld (test helper; real uses come in M7/M9). |
 | `window.__E2E__.choice()` / `choiceResult()` | M5 | Open choice box `{ options, cursor }` or `null`; the last result (index, `null` = cancelled with B, `undefined` = none yet). |
+| `window.__E2E__.startBattle(seed, species?, kind?)` | M6 | Starts a battle from the overworld against a fresh flexymon (`raton`, `wild` by default; `kind` `npc` greys out Huir); the RNG is seeded with `seed` when the battle starts. `false` if refused (locked, mid-step, box open). |
+| `window.__E2E__.battle()` | M6 | The battle screen: `{ kind, phase, result, round, ui ('anim'/'main'/'attack'/'team'/'end'), menu { options[{label, enabled}], cursor }, message, player, opponent }`; each side `{ uid, speciesId, name, hp, maxHp (logic), shownHp (bar), hpText }`. `null` outside a battle. |
+| `window.__E2E__.team()` / `setTeam(members)` | M6 | The team in the game state; replace it with fresh flexymon `[{ speciesId, currentHp? }]`. |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
 Keys pressed with Playwright are seen on the next game frame: poll for the expected state
@@ -40,5 +43,8 @@ before the next (two presses in one frame count once). After a warp, also wait f
 no code change" is tested without touching the shipped data). Its wander watch lasts `M5_WATCH_MS` ms (default
 20000); run it once with `M5_WATCH_MS=120000 npx playwright test tests/e2e/m5-dialogue.spec.ts --project=desktop -g wandering`
 for the plan's 2-minute check.
+
+`tests/e2e/m6-battle.spec.ts` drives battles with `advance()` (presses A through messages until a menu or the overworld is
+back). Loss and forced-switch tests try seeds 1–10 until the case happens, since the opponent's attack is random.
 
 Add new helpers to the `E2EHooks` interface in `src/main.ts` and to this table.

@@ -21,6 +21,10 @@ export interface GameEvents {
   'debug:menu': { open: boolean };
   /** Debug command (M4): teleport the player to a zone's `default` spawn. */
   'debug:teleport': { map: string };
+  /** Debug command (M6): start a wild battle against one fresh flexymon of this species. */
+  'debug:battle': { speciesId: string };
+  /** The BattleScene finished (M6); the game state already holds the team after the battle. */
+  'battle:ended': { result: 'win' | 'lose' | 'fled' };
 }
 
 type Handler<P> = P extends void ? () => void : (payload: P) => void;

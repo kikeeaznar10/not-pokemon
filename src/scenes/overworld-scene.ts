@@ -24,6 +24,10 @@
  *   front) makes it turn to the player and stop; its lines (`src/logic/talk.ts`) show in the DialogBox
  *   with its `voice`. The player cannot move until the last box closes. NPCs take priority over
  *   `action` warps.
+ * - Battles (M6): {@link OverworldScene.startBattle} locks input, flashes the screen for `BATTLE_FLASH_MS`,
+ *   then launches the BattleScene and puts this scene to sleep (map, player and NPCs keep their state).
+ *   On `battle:ended` it wakes up on the same tile, fades in and resets the safe steps. The debug command
+ *   `debug:battle` starts a wild battle against a fresh flexymon of any species.
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
  *   the player and after every step.
  */
@@ -37,7 +41,9 @@ import { getGameData } from '../data/game-data';
 import type { Facing, Zone } from '../data/schemas';
 import { findSpawn, isBlocked, type MapInfo } from '../data/tiled';
 import { t } from '../i18n';
-import { WARP_FADE_MS } from '../logic/constants';
+import type { BattleKind } from '../logic/battle';
+import { BATTLE_FLASH_MS, WARP_FADE_MS } from '../logic/constants';
+import { createInstance } from '../logic/instance';
 import { resetSafeSteps } from '../logic/encounter';
 import { FACING_DELTA } from '../logic/npc-state';
 import { talkLines } from '../logic/talk';
@@ -46,6 +52,7 @@ import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
 import { DialogBox, type DialogState } from '../ui/dialog-box';
 import { cameraBounds } from '../world/camera';
 import { NpcActor, npcsOnMap } from '../world/npc';
+import { BATTLE_SCENE, type BattleSceneData } from './battle-scene';
 import { Player } from '../world/player';
 
 /** Scene key of {@link OverworldScene}. */
@@ -59,6 +66,16 @@ export interface OverworldData {
   facing?: Facing;
   fadeIn?: boolean;
 }
+
+/** What {@link OverworldScene.startBattle} needs: the opponent species, the kind and an optional seed. */
+export interface BattleRequest {
+  speciesId: string;
+  kind?: BattleKind;
+  seed?: number;
+}
+
+/** Number of white flashes in the battle transition. */
+const BATTLE_FLASHES = 3;
 
 /** Longest frame time fed to movement (ms), so a stalled tab does not teleport the player. */
 const MAX_FRAME_MS = 250;
@@ -152,6 +169,10 @@ export class OverworldScene extends Phaser.Scene {
 
     const offs = [
       events.on('debug:teleport', ({ map: zoneId }) => this.teleport(zoneId)),
+      events.on('debug:battle', ({ speciesId }) => {
+        this.startBattle({ speciesId });
+      }),
+      events.on('battle:ended', () => this.returnFromBattle()),
       events.on('debug:menu', ({ open }) => {
         this.debugMenuOpen = open;
       }),
@@ -199,6 +220,47 @@ export class OverworldScene extends Phaser.Scene {
       const warp = warpAt(this.info.warps, s.x + d.x, s.y + d.y, 'action');
       if (warp) this.warpTo(warpDestination(warp, s));
     }
+  }
+
+  /**
+   * Start a battle against one fresh flexymon of `speciesId` (zero bonus, full HP). Refused (returns
+   * false) while input is locked, a box is open or the player is mid-step; also while asleep in a battle.
+   */
+  startBattle(req: BattleRequest): boolean {
+    const player = this.player;
+    const species = getGameData().flexymon.get(req.speciesId);
+    if (!player || !species || this.isLocked() || player.state.step || !this.sys.isActive()) return false;
+    this.locked = true;
+    const data: BattleSceneData = {
+      kind: req.kind ?? 'wild',
+      opponent: [createInstance(species, rng)],
+      ...(req.seed !== undefined ? { seed: req.seed } : {}),
+    };
+    const cam = this.cameras.main;
+    const each = BATTLE_FLASH_MS / BATTLE_FLASHES;
+    for (let i = 0; i < BATTLE_FLASHES; i++) {
+      this.time.delayedCall(i * each, () => cam.flash(each, 255, 255, 255, true));
+    }
+    this.time.delayedCall(BATTLE_FLASH_MS, () => {
+      log(`Overworld: battle vs ${req.speciesId}`);
+      this.scene.launch(BATTLE_SCENE, data);
+      this.scene.sleep();
+    });
+    return true;
+  }
+
+  /** Wake up after a battle on the same tile: fade in, reset safe steps, unlock. */
+  private returnFromBattle(): void {
+    if (!this.sys.isSleeping()) return;
+    this.scene.wake();
+    this.safeSteps = resetSafeSteps();
+    const cam = this.cameras.main;
+    cam.resetFX();
+    cam.fadeIn(WARP_FADE_MS, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
+      this.locked = false;
+    });
+    this.emitMoved();
   }
 
   /** Lock input, fade out, then restart on the target (which fades in and unlocks). */
@@ -283,7 +345,7 @@ export class OverworldScene extends Phaser.Scene {
   /** Debug: go to a zone's `default` spawn (tile 0, 0 if the map has none). */
   private teleport(zoneId: string): void {
     const loaded = getGameData().maps.get(zoneId);
-    if (!loaded || !this.player) return;
+    if (!loaded || !this.player || !this.sys.isActive()) return;
     const spawn = findSpawn(loaded.info as MapInfo) ?? { x: 0, y: 0 };
     this.warpTo({ map: zoneId, x: spawn.x, y: spawn.y, facing: 'down' });
   }

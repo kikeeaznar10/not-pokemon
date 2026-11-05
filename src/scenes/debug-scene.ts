@@ -7,7 +7,9 @@
  * - Teleport menu (M4): every zone in `zones.json`; up/down choose, A teleports to that zone's `default`
  *   spawn (event `debug:teleport`), B closes the menu. While the menu is open it emits
  *   `debug:menu { open: true }` and the overworld ignores movement.
- * Later milestones add more commands here (battles, items…).
+ * - Battle entries (M6): below the zones, one "Combate: {name}" line per flexymon in `flexymon.json`;
+ *   A starts a wild battle against a fresh one (event `debug:battle`).
+ * Later milestones add more commands here (items…).
  */
 import Phaser from 'phaser';
 import { events } from '../core/events';
@@ -58,14 +60,14 @@ export class DebugScene extends Phaser.Scene {
     if (input.justPressed('debug')) {
       this.setMode(this.mode === 'hidden' ? 'info' : this.mode === 'info' ? 'menu' : 'hidden');
     } else if (this.mode === 'menu') {
-      const zones = this.zoneIds();
-      if (input.justPressed('up')) this.cursor = (this.cursor + zones.length - 1) % zones.length;
-      if (input.justPressed('down')) this.cursor = (this.cursor + 1) % zones.length;
+      const entries = this.entries();
+      if (input.justPressed('up')) this.cursor = (this.cursor + entries.length - 1) % entries.length;
+      if (input.justPressed('down')) this.cursor = (this.cursor + 1) % entries.length;
       if (input.justPressed('b')) this.setMode('info');
       else if (input.justPressed('a')) {
-        const map = zones[this.cursor];
+        const entry = entries[this.cursor];
         this.setMode('info');
-        if (map) events.emit('debug:teleport', { map });
+        entry?.run();
       }
     }
     if (!this.shown) return;
@@ -73,11 +75,24 @@ export class DebugScene extends Phaser.Scene {
     this.panel.setSize(Math.max(120, this.text.width + 8), this.text.height + 6);
   }
 
-  private zoneIds(): string[] {
-    return [...getGameData().zones.keys()];
+  /** The menu entries in order: one teleport per zone, then one battle per flexymon. */
+  private entries(): { label: string; group: 'teleport' | 'battle'; run: () => void }[] {
+    const data = getGameData();
+    return [
+      ...[...data.zones.keys()].map((map) => ({
+        label: map,
+        group: 'teleport' as const,
+        run: () => events.emit('debug:teleport', { map }),
+      })),
+      ...[...data.flexymon.values()].map((sp) => ({
+        label: t('debug.battle_entry', { name: sp.name }),
+        group: 'battle' as const,
+        run: () => events.emit('debug:battle', { speciesId: sp.id }),
+      })),
+    ];
   }
 
-  /** The overlay's text lines (info, plus the zone list with a `>` cursor in menu mode). */
+  /** The overlay's text lines (info, plus the teleport and battle entries with a `>` cursor in menu mode). */
   lines(): string[] {
     const info = [
       t('debug.map', { map: this.where.map }),
@@ -85,8 +100,14 @@ export class DebugScene extends Phaser.Scene {
       t('debug.fps', { fps: Math.round(this.game.loop.actualFps) }),
     ];
     if (this.mode !== 'menu') return info;
-    const zones = this.zoneIds().map((id, i) => `${i === this.cursor ? '>' : ' '} ${id}`);
-    return [...info, t('debug.teleport_title'), ...zones];
+    const out = [...info];
+    const list = this.entries();
+    list.forEach((e, i) => {
+      if (i === 0) out.push(t('debug.teleport_title'));
+      else if (e.group === 'battle' && list[i - 1]?.group !== 'battle') out.push(t('debug.battle_title'));
+      out.push(`${i === this.cursor ? '>' : ' '} ${e.label}`);
+    });
+    return out;
   }
 
   /** Switch mode; opening/closing the menu is announced with `debug:menu`. */

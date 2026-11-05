@@ -9,6 +9,11 @@ import { bindKeyboard, input } from './core/input';
 import { MusicPlayer, type Track } from './world/music';
 import { getGameData, hasGameData } from './data/game-data';
 import type { Facing } from './data/schemas';
+import { rng } from './core/rng';
+import { gameState, setGameState } from './core/session';
+import type { BattleKind } from './logic/battle';
+import { createInstance, type FlexymonInstance } from './logic/instance';
+import { BATTLE_SCENE, type BattleScene, type BattleView } from './scenes/battle-scene';
 import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
 import { ERROR_SCENE, type ErrorScene } from './scenes/error-scene';
 import { OVERWORLD_SCENE, type OverworldScene } from './scenes/overworld-scene';
@@ -82,6 +87,18 @@ export interface E2EHooks {
   choice(): ChoiceState | null;
   /** Index chosen in the last `openChoice`, `null` if cancelled with B, `undefined` while none. */
   choiceResult(): number | null | undefined;
+  /**
+   * Start a battle from the overworld against a fresh `speciesId` (default `raton`), `kind` `wild` (default)
+   * or `npc`; the RNG is seeded with `seed` when the battle starts. False if the overworld refused
+   * (locked, mid-step, a box open, not in the overworld).
+   */
+  startBattle(seed: number, speciesId?: string, kind?: BattleKind): boolean;
+  /** The battle screen as data (ui, menu, message, both sides' logic HP and shown HP), or `null`. */
+  battle(): BattleView | null;
+  /** The player's team in the game state. */
+  team(): FlexymonInstance[];
+  /** Replace the team with fresh flexymon of these species (optionally with `currentHp` set). */
+  setTeam(members: { speciesId: string; currentHp?: number }[]): void;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -130,6 +147,21 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     openChoice: (options) => overworld()?.openChoice(options),
     choice: () => overworld()?.choiceState() ?? null,
     choiceResult: () => overworld()?.choiceResult(),
+    startBattle: (seed, speciesId = 'raton', kind = 'wild') =>
+      overworld()?.startBattle({ speciesId, kind, seed }) ?? false,
+    battle: () =>
+      game.scene.isActive(BATTLE_SCENE) ? (game.scene.getScene(BATTLE_SCENE) as BattleScene).view() : null,
+    team: () => structuredClone(gameState().team),
+    setTeam: (members) => {
+      const data = getGameData();
+      const team = members.map((m) => {
+        const species = data.flexymon.get(m.speciesId);
+        if (!species) throw new Error(`setTeam: unknown species "${m.speciesId}"`);
+        const inst = createInstance(species, rng);
+        return m.currentHp === undefined ? inst : { ...inst, currentHp: m.currentHp };
+      });
+      setGameState({ ...gameState(), team });
+    },
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

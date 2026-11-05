@@ -60,3 +60,15 @@ export const TEXT_CPS = 30;
 
 /** The speaking NPC's `voice` plays once every this many typed characters (M5). */
 export const VOICE_EVERY_CHARS = 3;
+
+/** Overworld → battle flash transition length (ms, M6). */
+export const BATTLE_FLASH_MS = 600;
+
+/** HP bars animate to a new value over this many ms (M6). */
+export const HP_ANIM_MS = 400;
+
+/** HP bar turns yellow below this fraction of max HP (M6). */
+export const HP_YELLOW_BELOW = 0.5;
+
+/** HP bar turns red below this fraction of max HP (M6). */
+export const HP_RED_BELOW = 0.2;

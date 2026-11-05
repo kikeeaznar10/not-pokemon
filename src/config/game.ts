@@ -3,6 +3,7 @@
  * Everything in the game is positioned in units of this 512 × 288 base (16 × 9 tiles of 32 px).
  */
 import Phaser from 'phaser';
+import { BattleScene } from '../scenes/battle-scene';
 import { BootScene } from '../scenes/boot-scene';
 import { DebugScene } from '../scenes/debug-scene';
 import { ErrorScene } from '../scenes/error-scene';
@@ -34,6 +35,6 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
     input: { keyboard: false },
     // No physics: movement is grid-based and handled by the game rules.
     // DebugScene is last so it draws on top of everything.
-    scene: [BootScene, PreloadScene, ErrorScene, OverworldScene, DebugScene],
+    scene: [BootScene, PreloadScene, ErrorScene, OverworldScene, BattleScene, DebugScene],
   };
 }

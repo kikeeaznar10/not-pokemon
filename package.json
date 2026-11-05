@@ -17,6 +17,7 @@
     "test-map": "tsx tools/make-test-map.ts",
     "world": "tsx tools/make-world.ts",
     "atlas": "tsx tools/make-atlas.ts",
+    "offline": "npm run build && tsx tools/make-offline.ts",
     "art": "tsx tools/make-art.ts"
   },
   "dependencies": {

@@ -147,6 +147,7 @@ playwright.config.ts       Playwright projects: desktop, android, android-landsc
 - `npm run build` — sprite atlas (`npm run atlas`, M15) + typecheck + production build to `dist/` (deploying: `docs/deploy.md`)
 - `npm run preview` — serve `dist/`
 - `npm start` — install dependencies, build (typecheck + production build), then serve `dist/` with `vite preview`
+- `npm run offline` — build, then write `dist-offline/flexymon.html` (everything embedded, opens from disk) and `dist-offline/flexymon.zip` to share (see `tools/README.md`)
 - `npm run lint` (ESLint + `prettier --check`) / `npm run format` (Prettier write)
 - `npm run typecheck` / `npm test` (Vitest, `vitest run`) / `npm run coverage` (Vitest + v8 coverage)
 - `npm run placeholders` — generate missing placeholder assets (never overwrites; `-- --dry-run` lists them; see `tools/README.md`)

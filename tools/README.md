@@ -97,3 +97,14 @@ path, 1 px padding, shelf packing 1024 px wide). Always rewritten; a build artif
 runs it first, so production and E2E builds load one sprite image instead of ~70 (about 0.5 s less to the title on
 4G). Without it (`npm run dev` before any build) sprites load as separate files. `--dry-run` only prints the count.
 Run `npm run placeholders` first: missing files are skipped with a warning.
+
+## `npm run offline` (`make-offline.ts`)
+
+Runs `npm run build`, then packages `dist/` as **one HTML file anyone can open from disk** (double-click, no server):
+`dist-offline/flexymon.html`, zipped as `dist-offline/flexymon.zip` to share. The zip holds only that file. Browsers block
+`fetch` / XHR on `file://` pages, so a plain zip of `dist/` would not run. Instead the JS bundle is inlined and every
+shipped file of `dist/` (data, maps, art, sounds, atlas) is embedded as a `data:` URL. A small script that runs before
+the game sends its `fetch` / `XMLHttpRequest` calls for those relative paths to the embedded copies. The frozen test
+world (`test-world/`, `maps/test/`) and the `README.md` files are left out. A file with an extension not in the
+tool's `MIME` table stops the tool with an error. `dist-offline/` is git-ignored (`dist-*/`). The save lives in that
+browser's `localStorage` for local files, so it is separate from the hosted site's save.

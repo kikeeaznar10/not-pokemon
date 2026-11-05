@@ -41,16 +41,18 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
   chosen), `cancel` (B backed out), `error` (a refused action) and `money` (a purchase, a sale, an enemy's reward).
   Each is a sound path like the others (`assets/audio/sfx/ui_*.ogg`, MP3 fallback). The test world has the same file.
 
-Current content (M14, the real world): 12 flexymon, 24 attacks, 8 items, 25 NPCs (15 enemies, 6 shopkeepers, the
-office healer and storage, 2 client talkers), 18 zones (8 outdoor: `alboraya`, `huerta_norte`, `valencia`, `playa`,
-`pueblo_sur` on the Valencia side; `murcia`, `vinedos`, `poligono` on the Murcia side — plus 10 interiors), 6 shops
-(one per town and one per bar). Map layouts and landmarks: `public/maps/README.md`. Every zone must have a loadable
+Current content (M16, the redesigned world): 12 flexymon, 24 attacks, 8 items, 73 NPCs (15 enemies, 6 shopkeepers, the
+office healer and storage, 48 talkers: 2 clients, M.P., 4 station staff, 2 office coworkers and 39 townsfolk who
+wander so every outdoor zone looks alive), 19 zones (4 big outdoor maps: `alboraya`, `valencia` and `pueblo` on the
+Valencia side, `murcia` on the Murcia side — plus 15 interiors, among them the two metro stations, the Estació del
+Nord, El Pueblo's station and M.P.'s beach house `casa_mp`), 6 shops (one per town and one per bar; the south town's
+shop is now `tienda_pueblo`). Map layouts and landmarks: `public/maps/README.md`. Every zone must have a loadable
 map and every map point (NPC spawns, start spawn/respawn, car endpoints, warp targets) must be a walkable tile.
 
 M14 decisions (also in docs/PROGRESS.md):
 
 - **Audi items:** a new game starts with `llaves_audi` (`start.json › items`); `cafe_doble` is sold at Bar Las Rusas
-  (300 €) and `carnet` at the south town's shop (600 €). Both stay key items (never sold back, never consumed); they
+  (300 €) and `carnet` at El Pueblo's shop (`tienda_pueblo`, 600 €; M14's south town, reached by train since M16). Both stay key items (never sold back, never consumed); they
   now have a price so a shop can list them. `car.json › unlockPairs` is unchanged.
 - **Music:** one loop per region, `assets/audio/music/valencia.ogg` and `murcia.ogg`; every interior plays
   `interior.ogg`.

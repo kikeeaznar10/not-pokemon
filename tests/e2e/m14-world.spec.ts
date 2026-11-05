@@ -1,6 +1,9 @@
 // M14 "Done when": every landmark exists and can be entered; a tester can walk from Alboraya to the south town and
 // use the car without the debug menu; boot validation passes with zero warnings. Plus: the new game's intro plays in
 // the real office.
+// M16 (world redesign): the same checks on the new layout — Alboraya (village, industrial estate with the office,
+// tourist beach), Valencia (Turia park, Estació del Nord, CAC), El Pueblo by train only, Murcia by the Audi only;
+// the walk also takes the metro, the train, both Alboraya ↔ Valencia edges (beach and road) and M.P.'s house.
 //
 // These tests run on the REAL world: playwright.config.ts starts every profile on the frozen test world
 // (`flexymon.e2e.world = test`, src/data/world.ts), so this spec removes that key before the page loads.
@@ -87,7 +90,7 @@ async function quickStart(page: Page): Promise<void> {
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
-  await standing(page, { map: 'oficina_ahora', x: 7, y: 12 });
+  await standing(page, { map: 'oficina_ahora', x: 10, y: 13 });
   await hook(page, 'setEncounters', false);
   await strongTeam(page);
 }
@@ -286,8 +289,8 @@ test.describe('the real world (M14)', () => {
       flexymon: 12,
       attacks: 24,
       items: 8,
-      npcs: 25,
-      zones: 18,
+      npcs: 73,
+      zones: 19,
     });
     expect(await hook<string[]>(page, 'failedAssets')).toEqual([]);
 
@@ -308,8 +311,8 @@ test.describe('the real world (M14)', () => {
       )
       .toBe('¡Hola, Ana! Bienvenido a ahora.');
     const mid = (await hook<{ player: object; coworker: object }>(page, 'intro'))!;
-    expect(mid.player).toEqual({ x: 7, y: 9, facing: 'up' });
-    expect(mid.coworker).toMatchObject({ x: 7, y: 8 });
+    expect(mid.player).toEqual({ x: 10, y: 10, facing: 'up' });
+    expect(mid.coworker).toMatchObject({ x: 10, y: 9 });
     await page.screenshot({ path: testInfo.outputPath(`m14-intro-${testInfo.project.name}.png`) });
     const seen: string[] = [];
     while ((await scene(page)) === 'Intro') {
@@ -320,54 +323,67 @@ test.describe('the real world (M14)', () => {
       } else await page.waitForTimeout(50);
     }
     expect(seen).toContain('¡Recibes a Portátil!');
-    await standing(page, { map: 'oficina_ahora', x: 7, y: 9 });
+    await standing(page, { map: 'oficina_ahora', x: 10, y: 10 });
     expect(await hook(page, 'items')).toEqual({ cafe: 3, llaves_audi: 1 });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/interior.ogg');
     await page.screenshot({ path: testInfo.outputPath(`m14-office-${testInfo.project.name}.png`) });
     expect(errors).toEqual([]);
   });
 
-  test('from the office through Alboraya to the south town, every landmark entered, then the Audi to Murcia', async ({
+  test('from the office through Alboraya, the metro to Valencia, the train to El Pueblo, then the Audi to Murcia', async ({
     page,
   }, testInfo) => {
     test.skip(
       testInfo.project.name !== 'desktop',
       'one long walk on desktop is enough (the touch profiles drive the same game)',
     );
-    test.setTimeout(400_000);
+    test.setTimeout(600_000);
     const errors = await realWorld(page);
     await quickStart(page);
     const shot = (name: string) => page.screenshot({ path: testInfo.outputPath(`m14-${name}.png`) });
 
-    // Out of the office into Alboraya, then its bars and shop.
-    await walkTo(page, 'oficina_ahora', 7, 13, { map: 'alboraya' });
-    await standing(page, { map: 'alboraya', x: 7, y: 9, facing: 'down' });
+    // Out of the office into Alboraya's industrial estate: Bar Pacos in front, Las Rusas at the other end.
+    await walkTo(page, 'oficina_ahora', 10, 14, { map: 'alboraya' });
+    await standing(page, { map: 'alboraya', x: 83, y: 8, facing: 'down' });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/valencia.ogg');
-    await shot('alboraya');
-    await visit(page, 'alboraya', [16, 7], 'bar_pacos');
-    await visit(page, 'alboraya', [24, 7], 'bar_las_rusas');
-    await visit(page, 'alboraya', [21, 17], 'tienda_alboraya');
+    await shot('alboraya-office');
+    await visit(page, 'alboraya', [81, 16], 'bar_pacos');
+    await visit(page, 'alboraya', [56, 6], 'bar_las_rusas');
+    // The village: its shop; the tourist beach: M.P.'s house.
+    await visit(page, 'alboraya', [14, 18], 'tienda_alboraya');
+    await shot('alboraya-village');
+    await visit(page, 'alboraya', [94, 13], 'casa_mp');
+    await shot('alboraya-beach');
     // Back in after leaving: the office door.
-    await visit(page, 'alboraya', [7, 8], 'oficina_ahora');
+    await visit(page, 'alboraya', [83, 7], 'oficina_ahora');
 
-    // South: Huerta Norte, Valencia (shop, Àgora, the beach), the south town.
-    await walkTo(page, 'alboraya', 15, 24, { map: 'huerta_norte', y: 0 });
-    await shot('huerta');
-    await walkTo(page, 'huerta_norte', 15, 24, { map: 'valencia', y: 0 });
-    await shot('valencia');
-    await visit(page, 'valencia', [37, 5], 'tienda_valencia');
-    await visit(page, 'valencia', [39, 27], 'agora');
-    await walkTo(page, 'valencia', 48, 17, { map: 'playa', x: 0 });
-    await shot('playa');
-    await walkTo(page, 'playa', -1, 17, { map: 'valencia', x: 47 });
-    await walkTo(page, 'valencia', 15, 36, { map: 'pueblo_sur', y: 0 });
-    await shot('pueblo-sur');
-    await visit(page, 'pueblo_sur', [7, 8], 'isaval');
+    // The beach runs on into Valencia (the Malvarrosa) and back.
+    await walkTo(page, 'alboraya', 105, 44, { map: 'valencia', x: 105, y: 0 });
+    await shot('valencia-beach');
+    await walkTo(page, 'valencia', 105, -1, { map: 'alboraya', x: 105, y: 43 });
 
-    // The licence from the south town's shop (Comprar → Carnet de conducir → 1 → Sí).
-    await walkTo(page, 'pueblo_sur', 21, 8, { map: 'tienda_sur' });
+    // The metro from the village square to Xàtiva, next to the north station.
+    await walkTo(page, 'alboraya', 20, 14, { map: 'metro_alboraya' });
+    await walkTo(page, 'metro_alboraya', 5, 0, { map: 'metro_xativa', x: 6, y: 1 });
+    await walkTo(page, 'metro_xativa', 5, 8, { map: 'valencia' });
+    await standing(page, { map: 'valencia', x: 33, y: 53, facing: 'down' });
+    await shot('valencia-xativa');
+    await visit(page, 'valencia', [68, 39], 'tienda_valencia');
+    await visit(page, 'valencia', [86, 56], 'agora');
+    await shot('valencia-cac');
+
+    // The Estació del Nord: the train to El Pueblo (the only way there).
+    await walkTo(page, 'valencia', 44, 53, { map: 'estacion_norte' });
+    await walkTo(page, 'estacion_norte', 8, 0, { map: 'estacion_pueblo', x: 4, y: 1 });
+    await walkTo(page, 'estacion_pueblo', 4, 7, { map: 'pueblo' });
+    await standing(page, { map: 'pueblo', x: 8, y: 4, facing: 'down' });
+    await shot('pueblo');
+    await visit(page, 'pueblo', [18, 19], 'isaval');
+
+    // The licence from El Pueblo's shop (Comprar → Carnet de conducir → 1 → Sí).
+    await walkTo(page, 'pueblo', 22, 19, { map: 'tienda_pueblo' });
     await hook(page, 'setEuros', 700);
-    await walkTo(page, 'tienda_sur', 5, 4);
+    await walkTo(page, 'tienda_pueblo', 5, 4);
     await press(page, 'ArrowUp');
     await standing(page, { facing: 'up' });
     await press(page, 'z');
@@ -388,21 +404,22 @@ test.describe('the real world (M14)', () => {
     await expect.poll(() => shop(page)).toBeNull();
     expect(await hook(page, 'items')).toMatchObject({ llaves_audi: 1, carnet: 1 });
     expect(await hook(page, 'euros')).toBe(100);
-    await walkTo(page, 'tienda_sur', 3, 7, { map: 'pueblo_sur' });
+    await walkTo(page, 'tienda_pueblo', 3, 7, { map: 'pueblo' });
 
-    // All the way back north to the office car, and off to Murcia.
-    await walkTo(page, 'pueblo_sur', 15, -1, { map: 'valencia', y: 35 });
-    await walkTo(page, 'valencia', 15, -1, { map: 'huerta_norte', y: 23 });
-    await walkTo(page, 'huerta_norte', 15, -1, { map: 'alboraya', y: 23 });
-    await walkTo(page, 'alboraya', 9, 11);
-    await drive(page, { map: 'murcia', x: 14, y: 6 });
+    // Back by train, then north up the road out of Valencia to the office car, and off to Murcia.
+    await walkTo(page, 'pueblo', 8, 3, { map: 'estacion_pueblo' });
+    await walkTo(page, 'estacion_pueblo', 4, 0, { map: 'estacion_norte', x: 8, y: 1 });
+    await walkTo(page, 'estacion_norte', 8, 9, { map: 'valencia' });
+    await walkTo(page, 'valencia', 43, -1, { map: 'alboraya', x: 43, y: 43 });
+    await walkTo(page, 'alboraya', 85, 9);
+    await drive(page, { map: 'murcia', x: 16, y: 15 });
     expect(await hook(page, 'items')).toMatchObject({ llaves_audi: 1, carnet: 1 });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/murcia.ogg');
     await shot('murcia');
     expect(errors).toEqual([]);
   });
 
-  test('Murcia: its shop, the vineyards, the industrial estate and Ciruelo, and the car back', async ({
+  test('Murcia: El Ciruelo, the vineyards, the desert and the coastal town, and the car back', async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'one long walk on desktop is enough');
@@ -411,22 +428,21 @@ test.describe('the real world (M14)', () => {
     // Arrive in Murcia the normal way: drive from the office car with the keys and a double coffee.
     await quickStart(page);
     await hook(page, 'setItems', { llaves_audi: 1, cafe_doble: 1 });
-    await walkTo(page, 'oficina_ahora', 7, 13, { map: 'alboraya' });
-    await walkTo(page, 'alboraya', 9, 11);
-    await drive(page, { map: 'murcia', x: 14, y: 6 });
+    await walkTo(page, 'oficina_ahora', 10, 14, { map: 'alboraya' });
+    await walkTo(page, 'alboraya', 85, 9);
+    await drive(page, { map: 'murcia', x: 16, y: 15 });
 
-    await visit(page, 'murcia', [6, 6], 'tienda_murcia');
-    await walkTo(page, 'murcia', 32, 11, { map: 'vinedos', x: 0 });
+    await visit(page, 'murcia', [21, 12], 'ciruelo');
+    await walkTo(page, 'murcia', 50, 19);
     await page.screenshot({ path: testInfo.outputPath('m14-vinedos.png') });
-    await walkTo(page, 'vinedos', -1, 11, { map: 'murcia', x: 31 });
-    await walkTo(page, 'murcia', 15, 24, { map: 'poligono', y: 0 });
-    await page.screenshot({ path: testInfo.outputPath('m14-poligono.png') });
-    await visit(page, 'poligono', [7, 18], 'ciruelo');
-    await walkTo(page, 'poligono', 15, -1, { map: 'murcia', y: 23 });
+    await walkTo(page, 'murcia', 85, 19);
+    await page.screenshot({ path: testInfo.outputPath('m14-desierto.png') });
+    await visit(page, 'murcia', [117, 13], 'tienda_murcia');
+    await page.screenshot({ path: testInfo.outputPath('m14-costa.png') });
 
     // The Murcia car needs nothing and lands right under the office car.
-    await walkTo(page, 'murcia', 14, 6);
-    await drive(page, { map: 'alboraya', x: 9, y: 11 });
+    await walkTo(page, 'murcia', 16, 15);
+    await drive(page, { map: 'alboraya', x: 85, y: 9 });
     expect(await hook(page, 'items')).toEqual({ llaves_audi: 1, cafe_doble: 1 });
     expect(errors).toEqual([]);
   });

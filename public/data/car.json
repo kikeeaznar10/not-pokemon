@@ -11,14 +11,14 @@
   "sound": "assets/audio/sfx/car_engine.ogg",
   "toMurcia": {
     "map": "murcia",
-    "x": 14,
-    "y": 6,
+    "x": 16,
+    "y": 15,
     "facing": "down"
   },
   "toValencia": {
     "map": "alboraya",
-    "x": 9,
-    "y": 11,
+    "x": 85,
+    "y": 9,
     "facing": "down"
   }
 }

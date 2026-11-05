@@ -5,8 +5,8 @@
     "name": "Compañera",
     "sprite": "assets/sprites/npcs/companera.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "x": 7,
-    "y": 4,
+    "x": 10,
+    "y": 5,
     "facing": "down"
   },
   "steps": [
@@ -48,7 +48,7 @@
     {
       "type": "walk",
       "actor": "coworker",
-      "path": ["up", "up", "up", "up", "up", "up"]
+      "path": ["up", "up", "up", "up", "up", "up", "up"]
     }
   ]
 }

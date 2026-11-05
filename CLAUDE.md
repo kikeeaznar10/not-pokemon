@@ -2,7 +2,7 @@
 
 Flexymon is a browser game (desktop + mobile, landscape) in the style of the Game Boy Color
 monster-collecting RPGs, set in a cartoon Valencia region. It is built milestone by milestone
-(M0–M15) by separate, unrelated Claude Code sessions.
+(M0–M16) by separate, unrelated Claude Code sessions.
 
 **`docs/PLAN.md` is the source of truth for the game** (rules, content format, milestones). If
 anything in this file disagrees with the plan, the plan wins; record the disagreement under

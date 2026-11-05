@@ -110,7 +110,8 @@ sand and vineyard roll encounters. Encounter rectangles have `group` (a key of t
 music, `indoor`, encounter groups).
 
 In a cloud session, where Tiled cannot be used, the real world is built from text: edit `tools/world/<zone>.txt`
-(one character per tile) and `tools/world/world.json` (doors, edges, the Audi, encounter rectangles, spawn), then
+(one character per tile) and `tools/world/world.json` (doors, edges, the Audi, metro / train links, encounter
+rectangles, spawn), then
 `npm run world -- --force`. Legend and fields: `tools/README.md` › `npm run world`; the current layout, landmarks and
 tile ids: `public/maps/README.md`. After changing an outdoor map, delete its `assets/ui/minimap_<zone>.png` and run
 `npm run placeholders` to redraw the minimap.

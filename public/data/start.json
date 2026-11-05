@@ -4,14 +4,14 @@
   "teamSlots": 2,
   "spawn": {
     "map": "oficina_ahora",
-    "x": 7,
-    "y": 12,
+    "x": 10,
+    "y": 13,
     "facing": "up"
   },
   "respawn": {
     "map": "oficina_ahora",
-    "x": 7,
-    "y": 10,
+    "x": 10,
+    "y": 11,
     "facing": "down"
   },
   "items": {

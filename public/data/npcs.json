@@ -8,9 +8,9 @@
     "map": "oficina_ahora",
     "spawn": {
       "x": 5,
-      "y": 9
+      "y": 12
     },
-    "facing": "down",
+    "facing": "up",
     "wander": null,
     "dialogue": ["Vuelve cuando quieras. Aquí curamos gratis."]
   },
@@ -22,8 +22,8 @@
     "voice": "assets/audio/sfx/voice_low.ogg",
     "map": "oficina_ahora",
     "spawn": {
-      "x": 11,
-      "y": 8
+      "x": 19,
+      "y": 9
     },
     "facing": "left",
     "wander": null,
@@ -94,22 +94,6 @@
     "shop": "tienda_valencia"
   },
   {
-    "id": "tendero_sur",
-    "type": "shopkeeper",
-    "name": "Tendero",
-    "sprite": "assets/sprites/npcs/tendero.png",
-    "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "tienda_sur",
-    "spawn": {
-      "x": 5,
-      "y": 3
-    },
-    "facing": "down",
-    "wander": null,
-    "dialogue": ["Aquí también vendemos carnets. No preguntes."],
-    "shop": "tienda_sur"
-  },
-  {
     "id": "tendera_murcia",
     "type": "shopkeeper",
     "name": "Tendera",
@@ -162,6 +146,22 @@
     ]
   },
   {
+    "id": "tendero_pueblo",
+    "type": "shopkeeper",
+    "name": "Tendero",
+    "sprite": "assets/sprites/npcs/tendero.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "tienda_pueblo",
+    "spawn": {
+      "x": 5,
+      "y": 3
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["Aquí también vendemos carnets. No preguntes."],
+    "shop": "tienda_pueblo"
+  },
+  {
     "id": "becario_alboraya",
     "type": "enemy",
     "name": "Becario",
@@ -169,16 +169,16 @@
     "voice": "assets/audio/sfx/voice_high.ogg",
     "map": "alboraya",
     "spawn": {
-      "x": 12,
-      "y": 17
+      "x": 79,
+      "y": 12
     },
     "facing": "left",
     "wander": {
-      "x": 11,
-      "y": 16,
-      "width": 3,
-      "height": 4,
-      "stepEveryMs": [1200, 3000]
+      "x": 75,
+      "y": 11,
+      "width": 8,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["¡Eh! ¿Tú también eres nuevo?", "¡Vamos a ver quién despliega antes!"],
     "sight": 4,
@@ -195,12 +195,12 @@
     "name": "Hortelano",
     "sprite": "assets/sprites/npcs/hortelano.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "huerta_norte",
+    "map": "alboraya",
     "spawn": {
-      "x": 13,
-      "y": 6
+      "x": 38,
+      "y": 8
     },
-    "facing": "right",
+    "facing": "down",
     "wander": null,
     "dialogue": ["¡Fuera de mi huerta! Bueno, primero un combate."],
     "sight": 4,
@@ -217,18 +217,18 @@
     "name": "Recolectora",
     "sprite": "assets/sprites/npcs/recolectora.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "huerta_norte",
+    "map": "alboraya",
     "spawn": {
-      "x": 20,
-      "y": 10
+      "x": 90,
+      "y": 30
     },
-    "facing": "down",
+    "facing": "left",
     "wander": {
-      "x": 17,
-      "y": 9,
-      "width": 11,
-      "height": 2,
-      "stepEveryMs": [1200, 3000]
+      "x": 88,
+      "y": 28,
+      "width": 5,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["Hoy toca recoger alcachofas... y flexymon."],
     "sight": 4,
@@ -240,6 +240,28 @@
     }
   },
   {
+    "id": "socorrista_playa",
+    "type": "enemy",
+    "name": "Socorrista",
+    "sprite": "assets/sprites/npcs/socorrista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 106,
+      "y": 38
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["¡Prohibido bañarse sin combatir antes!"],
+    "sight": 4,
+    "defeatDialogue": ["Vale, ya puedes pasar. Y ponte crema."],
+    "team": ["silla", "movil"],
+    "reward": {
+      "min": 120,
+      "max": 180
+    }
+  },
+  {
     "id": "turista_turia",
     "type": "enemy",
     "name": "Turista",
@@ -247,16 +269,16 @@
     "voice": "assets/audio/sfx/voice_high.ogg",
     "map": "valencia",
     "spawn": {
-      "x": 8,
-      "y": 10
+      "x": 24,
+      "y": 21
     },
     "facing": "right",
     "wander": {
-      "x": 5,
-      "y": 9,
-      "width": 8,
+      "x": 21,
+      "y": 20,
+      "width": 6,
       "height": 3,
-      "stepEveryMs": [1200, 3000]
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["Perdona, ¿esto es el río? ¡No hay agua!"],
     "sight": 4,
@@ -275,16 +297,16 @@
     "voice": "assets/audio/sfx/voice_low.ogg",
     "map": "valencia",
     "spawn": {
-      "x": 6,
-      "y": 25
+      "x": 40,
+      "y": 43
     },
-    "facing": "right",
+    "facing": "up",
     "wander": {
-      "x": 4,
-      "y": 24,
+      "x": 36,
+      "y": 42,
       "width": 8,
       "height": 3,
-      "stepEveryMs": [1200, 3000]
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["Tengo una reunión en cinco minutos. Esto será rápido."],
     "sight": 4,
@@ -303,16 +325,16 @@
     "voice": "assets/audio/sfx/voice_high.ogg",
     "map": "valencia",
     "spawn": {
-      "x": 20,
-      "y": 24
+      "x": 37,
+      "y": 39
     },
-    "facing": "down",
+    "facing": "right",
     "wander": {
-      "x": 18,
-      "y": 23,
-      "width": 9,
-      "height": 2,
-      "stepEveryMs": [1200, 3000]
+      "x": 36,
+      "y": 37,
+      "width": 3,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["¿Tiene cita previa? No pasa nada, combatimos igual."],
     "sight": 4,
@@ -331,8 +353,8 @@
     "voice": "assets/audio/sfx/voice_low.ogg",
     "map": "valencia",
     "spawn": {
-      "x": 38,
-      "y": 19
+      "x": 86,
+      "y": 16
     },
     "facing": "left",
     "wander": null,
@@ -343,6 +365,34 @@
     "reward": {
       "min": 130,
       "max": 190
+    }
+  },
+  {
+    "id": "surfera_playa",
+    "type": "enemy",
+    "name": "Surfera",
+    "sprite": "assets/sprites/npcs/surfera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 106,
+      "y": 22
+    },
+    "facing": "up",
+    "wander": {
+      "x": 104,
+      "y": 20,
+      "width": 5,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["Hoy no hay olas. Mejor un combate."],
+    "sight": 4,
+    "defeatDialogue": ["Ya vendrá el levante."],
+    "team": ["cafetera", "movil"],
+    "reward": {
+      "min": 120,
+      "max": 180
     }
   },
   {
@@ -390,67 +440,17 @@
     }
   },
   {
-    "id": "socorrista_playa",
-    "type": "enemy",
-    "name": "Socorrista",
-    "sprite": "assets/sprites/npcs/socorrista.png",
-    "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "playa",
-    "spawn": {
-      "x": 11,
-      "y": 10
-    },
-    "facing": "left",
-    "wander": null,
-    "dialogue": ["¡Prohibido bañarse sin combatir antes!"],
-    "sight": 4,
-    "defeatDialogue": ["Vale, ya puedes pasar. Y ponte crema."],
-    "team": ["silla", "movil"],
-    "reward": {
-      "min": 120,
-      "max": 180
-    }
-  },
-  {
-    "id": "surfera_playa",
-    "type": "enemy",
-    "name": "Surfera",
-    "sprite": "assets/sprites/npcs/surfera.png",
-    "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "playa",
-    "spawn": {
-      "x": 6,
-      "y": 19
-    },
-    "facing": "down",
-    "wander": {
-      "x": 4,
-      "y": 19,
-      "width": 7,
-      "height": 2,
-      "stepEveryMs": [1200, 3000]
-    },
-    "dialogue": ["Hoy no hay olas. Mejor un combate."],
-    "sight": 4,
-    "defeatDialogue": ["Ya vendrá el levante."],
-    "team": ["cafetera", "movil"],
-    "reward": {
-      "min": 120,
-      "max": 180
-    }
-  },
-  {
     "id": "jefe_proyecto_sur",
     "type": "enemy",
     "name": "Jefe de proyecto",
     "sprite": "assets/sprites/npcs/jefe.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "pueblo_sur",
+    "map": "pueblo",
     "spawn": {
-      "x": 24,
-      "y": 12
+      "x": 21,
+      "y": 14
     },
-    "facing": "left",
+    "facing": "down",
     "wander": null,
     "dialogue": ["¿Cómo va lo tuyo? Enséñame el avance."],
     "sight": 4,
@@ -469,16 +469,16 @@
     "voice": "assets/audio/sfx/voice_low.ogg",
     "map": "murcia",
     "spawn": {
-      "x": 24,
-      "y": 9
+      "x": 85,
+      "y": 25
     },
     "facing": "left",
     "wander": {
-      "x": 20,
-      "y": 8,
+      "x": 81,
+      "y": 23,
       "width": 8,
-      "height": 3,
-      "stepEveryMs": [1200, 3000]
+      "height": 4,
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["¡Acho! ¿Tú de dónde vienes?", "¡Aquí se combate a pleno sol!"],
     "sight": 4,
@@ -495,10 +495,10 @@
     "name": "Enóloga",
     "sprite": "assets/sprites/npcs/enologa.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "vinedos",
+    "map": "murcia",
     "spawn": {
-      "x": 14,
-      "y": 12
+      "x": 51,
+      "y": 14
     },
     "facing": "down",
     "wander": null,
@@ -517,18 +517,18 @@
     "name": "Encargado",
     "sprite": "assets/sprites/npcs/encargado.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "poligono",
+    "map": "murcia",
     "spawn": {
-      "x": 15,
-      "y": 11
+      "x": 25,
+      "y": 16
     },
-    "facing": "down",
+    "facing": "left",
     "wander": {
-      "x": 14,
-      "y": 9,
+      "x": 23,
+      "y": 15,
       "width": 4,
-      "height": 4,
-      "stepEveryMs": [1200, 3000]
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
     },
     "dialogue": ["Sin chaleco no se entra en el muelle. Bueno, combatamos."],
     "sight": 4,
@@ -538,5 +538,1049 @@
       "min": 300,
       "max": 420
     }
+  },
+  {
+    "id": "companero_oficina",
+    "type": "talker",
+    "name": "Compañero",
+    "sprite": "assets/sprites/npcs/consultor.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "oficina_ahora",
+    "spawn": {
+      "x": 3,
+      "y": 9
+    },
+    "facing": "right",
+    "wander": null,
+    "dialogue": [
+      "Aquí no hay despachos: todo abierto, todo a la vista.",
+      "Si necesitas concentrarte, la sala de reuniones de cristal es tuya."
+    ]
+  },
+  {
+    "id": "companera_cafe",
+    "type": "talker",
+    "name": "Compañera",
+    "sprite": "assets/sprites/npcs/companera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "oficina_ahora",
+    "spawn": {
+      "x": 6,
+      "y": 2
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": [
+      "El café de la oficina es gratis. El de Las Rusas, doble.",
+      "Azul de ahora, naranja de flexygo... hasta las tazas van a juego."
+    ]
+  },
+  {
+    "id": "mp_casa",
+    "type": "talker",
+    "name": "M.P.",
+    "sprite": "assets/sprites/npcs/mp.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "casa_mp",
+    "spawn": {
+      "x": 5,
+      "y": 4
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": [
+      "¡Hombre! Pasa, pasa, estás en tu casa.",
+      "Desde aquí se oye el mar toda la noche. No lo cambio por nada."
+    ]
+  },
+  {
+    "id": "taquillera_alboraya",
+    "type": "talker",
+    "name": "Taquillera",
+    "sprite": "assets/sprites/npcs/maquinista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "metro_alboraya",
+    "spawn": {
+      "x": 9,
+      "y": 4
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": [
+      "Este metro va directo a Xàtiva, al lado de la Estación del Norte.",
+      "Sube al vagón cuando quieras."
+    ]
+  },
+  {
+    "id": "taquillero_xativa",
+    "type": "talker",
+    "name": "Taquillero",
+    "sprite": "assets/sprites/npcs/maquinista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "metro_xativa",
+    "spawn": {
+      "x": 3,
+      "y": 4
+    },
+    "facing": "right",
+    "wander": null,
+    "dialogue": [
+      "El metro va a Alboraya: la huerta, el polígono y la playa.",
+      "Sube al vagón cuando quieras."
+    ]
+  },
+  {
+    "id": "taquillero_norte",
+    "type": "talker",
+    "name": "Taquillero",
+    "sprite": "assets/sprites/npcs/maquinista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "estacion_norte",
+    "spawn": {
+      "x": 4,
+      "y": 6
+    },
+    "facing": "up",
+    "wander": null,
+    "dialogue": [
+      "Desde la Estación del Norte sale el tren al pueblo.",
+      "Sube al tren cuando quieras. ¡Billete gratis para flexymon!"
+    ]
+  },
+  {
+    "id": "jefa_estacion_pueblo",
+    "type": "talker",
+    "name": "Jefa de estación",
+    "sprite": "assets/sprites/npcs/maquinista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "estacion_pueblo",
+    "spawn": {
+      "x": 7,
+      "y": 4
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["El tren a Valencia sale cuando subas. Aquí no hay prisas."]
+  },
+  {
+    "id": "vecina_plaza",
+    "type": "talker",
+    "name": "Vecina",
+    "sprite": "assets/sprites/npcs/vecina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 22,
+      "y": 16
+    },
+    "facing": "down",
+    "wander": {
+      "x": 20,
+      "y": 16,
+      "width": 5,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "¿Has probado la horchata de aquí? Alboraya es la cuna de la horchata.",
+      "Con fartons, claro. Si no, no cuenta."
+    ]
+  },
+  {
+    "id": "abuelo_alboraya",
+    "type": "talker",
+    "name": "Abuelo",
+    "sprite": "assets/sprites/npcs/abuelo.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 25,
+      "y": 17
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": [
+      "Cuando yo era joven, todo esto era huerta.",
+      "¡Ahora hay metro y todo! Hasta Valencia en diez minutos."
+    ]
+  },
+  {
+    "id": "nina_alboraya",
+    "type": "talker",
+    "name": "Niña",
+    "sprite": "assets/sprites/npcs/nina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 15,
+      "y": 23
+    },
+    "facing": "down",
+    "wander": {
+      "x": 12,
+      "y": 22,
+      "width": 7,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "¡El metro de la plaza va a la Estación del Norte!",
+      "Allí se coge el tren al pueblo de mis abuelos."
+    ]
+  },
+  {
+    "id": "ciclista_alboraya",
+    "type": "talker",
+    "name": "Ciclista",
+    "sprite": "assets/sprites/npcs/ciclista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 30,
+      "y": 21
+    },
+    "facing": "down",
+    "wander": {
+      "x": 26,
+      "y": 20,
+      "width": 8,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["Bajo cada mañana a Valencia: por la carretera o por la playa, tú eliges."]
+  },
+  {
+    "id": "vecino_iglesia",
+    "type": "talker",
+    "name": "Vecino",
+    "sprite": "assets/sprites/npcs/abuelo.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 20,
+      "y": 11
+    },
+    "facing": "down",
+    "wander": {
+      "x": 17,
+      "y": 11,
+      "width": 6,
+      "height": 1,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "La iglesia de la plaza es más vieja que mi abuelo.",
+      "En fiestas aquí no cabe ni un alfiler."
+    ]
+  },
+  {
+    "id": "horchatera",
+    "type": "talker",
+    "name": "Horchatera",
+    "sprite": "assets/sprites/npcs/vecina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 12,
+      "y": 29
+    },
+    "facing": "down",
+    "wander": {
+      "x": 9,
+      "y": 28,
+      "width": 6,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "La chufa se cultiva aquí mismo, en la huerta.",
+      "Se lava, se tritura, se cuela... ¡y horchata fresquita!"
+    ]
+  },
+  {
+    "id": "operario_nave",
+    "type": "talker",
+    "name": "Operario",
+    "sprite": "assets/sprites/npcs/operario.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 63,
+      "y": 11
+    },
+    "facing": "down",
+    "wander": {
+      "x": 60,
+      "y": 10,
+      "width": 6,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Las naves del polígono no paran ni en agosto.",
+      "Dicen que en la oficina azul tienen hasta café de especialidad."
+    ]
+  },
+  {
+    "id": "transportista",
+    "type": "talker",
+    "name": "Transportista",
+    "sprite": "assets/sprites/npcs/repartidor.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 66,
+      "y": 32
+    },
+    "facing": "down",
+    "wander": {
+      "x": 62,
+      "y": 31,
+      "width": 8,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["Traigo un palé de flexymon recién empaquetados.", "Es broma. ¿O no?"]
+  },
+  {
+    "id": "desarrolladora",
+    "type": "talker",
+    "name": "Desarrolladora",
+    "sprite": "assets/sprites/npcs/companera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 80,
+      "y": 18
+    },
+    "facing": "down",
+    "wander": {
+      "x": 78,
+      "y": 18,
+      "width": 5,
+      "height": 1,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["Salgo a por un bocadillo al Bar Pacos, que está justo enfrente.", "El almuerzo es sagrado."]
+  },
+  {
+    "id": "disenador",
+    "type": "talker",
+    "name": "Diseñador",
+    "sprite": "assets/sprites/npcs/consultor.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 73,
+      "y": 10
+    },
+    "facing": "down",
+    "wander": {
+      "x": 72,
+      "y": 8,
+      "width": 3,
+      "height": 4,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "¿Has visto el logo de la fachada? El azul de ahora se ve desde la carretera.",
+      "Y el naranja de flexygo le da el toque."
+    ]
+  },
+  {
+    "id": "camionero",
+    "type": "talker",
+    "name": "Camionero",
+    "sprite": "assets/sprites/npcs/encargado.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 58,
+      "y": 21
+    },
+    "facing": "down",
+    "wander": {
+      "x": 54,
+      "y": 20,
+      "width": 8,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Las Rusas está en la otra punta del polígono, al norte.",
+      "Su café doble resucita a cualquiera."
+    ]
+  },
+  {
+    "id": "banista_patacona",
+    "type": "talker",
+    "name": "Bañista",
+    "sprite": "assets/sprites/npcs/banista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 108,
+      "y": 9
+    },
+    "facing": "down",
+    "wander": {
+      "x": 106,
+      "y": 7,
+      "width": 4,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["¡El agua está buenísima! Bueno... un poco fría."]
+  },
+  {
+    "id": "turista_patacona",
+    "type": "talker",
+    "name": "Turista",
+    "sprite": "assets/sprites/npcs/turista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 104,
+      "y": 20
+    },
+    "facing": "down",
+    "wander": {
+      "x": 102,
+      "y": 18,
+      "width": 5,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Vine una semana y me quiero quedar a vivir.",
+      "La Patacona es perfecta para pasear al atardecer."
+    ]
+  },
+  {
+    "id": "pescador_saplaya",
+    "type": "talker",
+    "name": "Pescador",
+    "sprite": "assets/sprites/npcs/pescador.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 110,
+      "y": 3
+    },
+    "facing": "right",
+    "wander": null,
+    "dialogue": [
+      "En Port Saplaya los barcos amarran entre casas de colores.",
+      "Lo llaman la pequeña Venecia."
+    ]
+  },
+  {
+    "id": "veraneante",
+    "type": "talker",
+    "name": "Veraneante",
+    "sprite": "assets/sprites/npcs/vecina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 99,
+      "y": 15
+    },
+    "facing": "down",
+    "wander": {
+      "x": 98,
+      "y": 12,
+      "width": 2,
+      "height": 6,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Alquilamos una casita en la playa todos los veranos.",
+      "La de M.P. es la que tiene la puerta abierta."
+    ]
+  },
+  {
+    "id": "nino_playa",
+    "type": "talker",
+    "name": "Niño",
+    "sprite": "assets/sprites/npcs/nina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 104,
+      "y": 33
+    },
+    "facing": "down",
+    "wander": {
+      "x": 102,
+      "y": 32,
+      "width": 4,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["¡Estoy haciendo un castillo de arena!", "Si me lo pisas, te reto a un combate. ¡Es broma!"]
+  },
+  {
+    "id": "corredora_turia",
+    "type": "talker",
+    "name": "Corredora",
+    "sprite": "assets/sprites/npcs/ciclista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 50,
+      "y": 18
+    },
+    "facing": "down",
+    "wander": {
+      "x": 46,
+      "y": 17,
+      "width": 9,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Corro todo el jardín del Turia, de Cabecera a la Ciudad de las Ciencias.",
+      "Antes aquí pasaba un río de verdad."
+    ]
+  },
+  {
+    "id": "abuelo_turia",
+    "type": "talker",
+    "name": "Abuelo",
+    "sprite": "assets/sprites/npcs/abuelo.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 12,
+      "y": 23
+    },
+    "facing": "down",
+    "wander": {
+      "x": 10,
+      "y": 22,
+      "width": 5,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Tras la riada del 57 desviaron el río.",
+      "Y el cauce se convirtió en este jardín. ¡Qué buena idea!"
+    ]
+  },
+  {
+    "id": "estudiante_blasco",
+    "type": "talker",
+    "name": "Estudiante",
+    "sprite": "assets/sprites/npcs/estudiante.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 80,
+      "y": 12
+    },
+    "facing": "down",
+    "wander": {
+      "x": 76,
+      "y": 12,
+      "width": 9,
+      "height": 1,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Voy a clase por la avenida Blasco Ibáñez.",
+      "Si sigues recto hacia el este, llegas a la Malvarrosa."
+    ]
+  },
+  {
+    "id": "guia_serranos",
+    "type": "talker",
+    "name": "Guía turística",
+    "sprite": "assets/sprites/npcs/turista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 35,
+      "y": 24
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": [
+      "Las Torres de Serranos eran una puerta de la muralla.",
+      "Desde arriba se ve todo el cauce del Turia."
+    ]
+  },
+  {
+    "id": "fallero",
+    "type": "talker",
+    "name": "Fallero",
+    "sprite": "assets/sprites/npcs/abuelo.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 46,
+      "y": 42
+    },
+    "facing": "down",
+    "wander": {
+      "x": 44,
+      "y": 40,
+      "width": 4,
+      "height": 4,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "¡En marzo llegan las Fallas! Pólvora, monumentos y buñuelos.",
+      "La mascletà de esta plaza es a las dos en punto."
+    ]
+  },
+  {
+    "id": "vendedora_mercado",
+    "type": "talker",
+    "name": "Vendedora",
+    "sprite": "assets/sprites/npcs/vecina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 28,
+      "y": 36
+    },
+    "facing": "down",
+    "wander": {
+      "x": 25,
+      "y": 35,
+      "width": 6,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "En el Mercado Central hay de todo: fruta, pescado, embutido...",
+      "Ven temprano, que a mediodía no se cabe."
+    ]
+  },
+  {
+    "id": "turista_virgen",
+    "type": "talker",
+    "name": "Turista",
+    "sprite": "assets/sprites/npcs/turista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 42,
+      "y": 30
+    },
+    "facing": "down",
+    "wander": {
+      "x": 40,
+      "y": 29,
+      "width": 5,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Dicen que en la catedral está el Santo Grial.",
+      "Y los jueves el Tribunal de las Aguas se reúne en la puerta."
+    ]
+  },
+  {
+    "id": "viajero_estacion",
+    "type": "talker",
+    "name": "Viajero",
+    "sprite": "assets/sprites/npcs/estudiante.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 47,
+      "y": 55
+    },
+    "facing": "down",
+    "wander": {
+      "x": 43,
+      "y": 55,
+      "width": 8,
+      "height": 1,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "La Estación del Norte tiene naranjas en la fachada.",
+      "Dentro sale el tren al pueblo; al lado, el metro a Alboraya."
+    ]
+  },
+  {
+    "id": "cocinero_paella",
+    "type": "talker",
+    "name": "Cocinero",
+    "sprite": "assets/sprites/npcs/camarero.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 64,
+      "y": 42
+    },
+    "facing": "down",
+    "wander": {
+      "x": 62,
+      "y": 40,
+      "width": 4,
+      "height": 4,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Una paella de verdad lleva pollo, conejo, garrofó y judía verde.",
+      "¿Chorizo? Ni se te ocurra."
+    ]
+  },
+  {
+    "id": "ciclista_valencia",
+    "type": "talker",
+    "name": "Ciclista",
+    "sprite": "assets/sprites/npcs/ciclista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 75,
+      "y": 32
+    },
+    "facing": "down",
+    "wander": {
+      "x": 72,
+      "y": 30,
+      "width": 6,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Valencia es plana: perfecta para la bici.",
+      "Por el cauce llegas a la Ciudad de las Artes y las Ciencias."
+    ]
+  },
+  {
+    "id": "asistente_congreso",
+    "type": "talker",
+    "name": "Asistente",
+    "sprite": "assets/sprites/npcs/comercial.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 88,
+      "y": 57
+    },
+    "facing": "down",
+    "wander": {
+      "x": 87,
+      "y": 57,
+      "width": 4,
+      "height": 1,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "¿Vienes al congreso de ahora? Es en el Àgora, el edificio morado.",
+      "Justo al final del jardín del Turia."
+    ]
+  },
+  {
+    "id": "paseante_malvarrosa",
+    "type": "talker",
+    "name": "Paseante",
+    "sprite": "assets/sprites/npcs/banista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 99,
+      "y": 30
+    },
+    "facing": "down",
+    "wander": {
+      "x": 98,
+      "y": 26,
+      "width": 2,
+      "height": 8,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["La Malvarrosa se llena en verano.", "Al sur están el puerto y la Marina."]
+  },
+  {
+    "id": "vecino_russafa",
+    "type": "talker",
+    "name": "Vecino",
+    "sprite": "assets/sprites/npcs/operario.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 70,
+      "y": 50
+    },
+    "facing": "down",
+    "wander": {
+      "x": 68,
+      "y": 48,
+      "width": 5,
+      "height": 4,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Por aquí los bloques no van en cuadrícula: cada calle tuerce a su manera.",
+      "Así es el centro de Valencia."
+    ]
+  },
+  {
+    "id": "labrador_pueblo",
+    "type": "talker",
+    "name": "Labrador",
+    "sprite": "assets/sprites/npcs/hortelano.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "pueblo",
+    "spawn": {
+      "x": 12,
+      "y": 23
+    },
+    "facing": "down",
+    "wander": {
+      "x": 9,
+      "y": 22,
+      "width": 6,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Naranjas, cebollas, lechugas... aquí la huerta da de todo.",
+      "Cada parcela tiene su forma: así se repartieron las tierras."
+    ]
+  },
+  {
+    "id": "vecina_pueblo",
+    "type": "talker",
+    "name": "Vecina",
+    "sprite": "assets/sprites/npcs/vecina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "pueblo",
+    "spawn": {
+      "x": 18,
+      "y": 14
+    },
+    "facing": "down",
+    "wander": {
+      "x": 16,
+      "y": 13,
+      "width": 5,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["Somos pocos, pero nos conocemos todos.", "Isaval es el edificio blanco de la plaza."]
+  },
+  {
+    "id": "pescadora_pueblo",
+    "type": "talker",
+    "name": "Pescadora",
+    "sprite": "assets/sprites/npcs/pescador.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "pueblo",
+    "spawn": {
+      "x": 37,
+      "y": 12
+    },
+    "facing": "down",
+    "wander": {
+      "x": 36,
+      "y": 9,
+      "width": 3,
+      "height": 6,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["En el pueblo el mar está a dos pasos de la huerta."]
+  },
+  {
+    "id": "nino_pueblo",
+    "type": "talker",
+    "name": "Niño",
+    "sprite": "assets/sprites/npcs/nina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "pueblo",
+    "spawn": {
+      "x": 9,
+      "y": 4
+    },
+    "facing": "down",
+    "wander": {
+      "x": 9,
+      "y": 4,
+      "width": 2,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["¡He visto llegar el tren de Valencia!", "Pita dos veces al entrar en la estación."]
+  },
+  {
+    "id": "agricultor_ciruelo",
+    "type": "talker",
+    "name": "Agricultor",
+    "sprite": "assets/sprites/npcs/hortelano.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 10,
+      "y": 10
+    },
+    "facing": "down",
+    "wander": {
+      "x": 7,
+      "y": 9,
+      "width": 6,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "En El Ciruelo cultivamos ciruelas, melocotones y uva.",
+      "La fruta de hueso madruga más que nadie."
+    ]
+  },
+  {
+    "id": "temporera_ciruelo",
+    "type": "talker",
+    "name": "Temporera",
+    "sprite": "assets/sprites/npcs/recolectora.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 10,
+      "y": 28
+    },
+    "facing": "down",
+    "wander": {
+      "x": 6,
+      "y": 27,
+      "width": 8,
+      "height": 3,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["Llevo toda la mañana recogiendo ciruelas.", "¡Prueba una, que están dulcísimas!"]
+  },
+  {
+    "id": "bodeguero",
+    "type": "talker",
+    "name": "Bodeguero",
+    "sprite": "assets/sprites/npcs/abuelo.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 48,
+      "y": 9
+    },
+    "facing": "down",
+    "wander": {
+      "x": 45,
+      "y": 8,
+      "width": 6,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Estas viñas aguantan el sol de Murcia como nadie.",
+      "De aquí sale un monastrell que quita el sentío."
+    ]
+  },
+  {
+    "id": "caminante_desierto",
+    "type": "talker",
+    "name": "Caminante",
+    "sprite": "assets/sprites/npcs/turista.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 92,
+      "y": 18
+    },
+    "facing": "down",
+    "wander": {
+      "x": 88,
+      "y": 18,
+      "width": 8,
+      "height": 1,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "Este desierto quema de verdad. Lleva agua.",
+      "Al este hay un pueblecito de costa con tienda."
+    ]
+  },
+  {
+    "id": "vecina_costa",
+    "type": "talker",
+    "name": "Vecina",
+    "sprite": "assets/sprites/npcs/vecina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 110,
+      "y": 18
+    },
+    "facing": "down",
+    "wander": {
+      "x": 107,
+      "y": 17,
+      "width": 6,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": [
+      "¿Vienes de Valencia? ¡Bienvenido a la costa murciana!",
+      "Aquí tenemos marisco, sol y mucha calma."
+    ]
+  },
+  {
+    "id": "pescador_murcia",
+    "type": "talker",
+    "name": "Pescador",
+    "sprite": "assets/sprites/npcs/pescador.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 123,
+      "y": 15
+    },
+    "facing": "right",
+    "wander": null,
+    "dialogue": ["Los barcos salen al amanecer y vuelven con la lonja llena."]
+  },
+  {
+    "id": "nino_murcia",
+    "type": "talker",
+    "name": "Niño",
+    "sprite": "assets/sprites/npcs/nina.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 107,
+      "y": 28
+    },
+    "facing": "down",
+    "wander": {
+      "x": 105,
+      "y": 27,
+      "width": 5,
+      "height": 2,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["¡Acho! ¿Tú de dónde vienes?"]
+  },
+  {
+    "id": "banista_murcia",
+    "type": "talker",
+    "name": "Bañista",
+    "sprite": "assets/sprites/npcs/banista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 123,
+      "y": 30
+    },
+    "facing": "down",
+    "wander": {
+      "x": 122,
+      "y": 28,
+      "width": 3,
+      "height": 5,
+      "stepEveryMs": [1500, 4000]
+    },
+    "dialogue": ["El agua aquí está calentita casi todo el año."]
   }
 ]

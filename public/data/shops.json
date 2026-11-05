@@ -3,6 +3,6 @@
   "bar_pacos": ["cafe", "bocadillo"],
   "bar_las_rusas": ["cafe", "cafe_doble", "bocadillo"],
   "tienda_valencia": ["cafe", "bocadillo", "ibuprofeno", "redbull", "regleta"],
-  "tienda_sur": ["cafe", "ibuprofeno", "carnet"],
-  "tienda_murcia": ["cafe", "bocadillo", "ibuprofeno", "redbull"]
+  "tienda_murcia": ["cafe", "bocadillo", "ibuprofeno", "redbull"],
+  "tienda_pueblo": ["cafe", "ibuprofeno", "carnet"]
 }

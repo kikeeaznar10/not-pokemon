@@ -5,7 +5,7 @@
  * - `tools/world/world.json`: per map the base ground under buildings and trees, doors, map-edge links, the Audi,
  *   encounter rectangles and the `default` spawn.
  *
- * Output: `public/assets/tilesets/world.png` (8 × 4 tiles of 32 px; the first 14 tiles are the test tileset's, see
+ * Output: `public/assets/tilesets/world.png` (8 × 11 tiles of 32 px: ids 32+ come from `world-tiles.ts`; the first 14 tiles are the test tileset's, see
  * `make-test-map.ts`) and `public/maps/<zone>.tmj` for every map (Tiled JSON, CSV layers, embedded tileset, layers
  * `ground`, `deco`, `collision`, `above`, `warps`, `encounters`, `spawns`).
  *
@@ -25,6 +25,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import { drawTileset as drawTestTileset } from './make-test-map';
+import { drawExtraTiles, EXTRA_ENCOUNTER, EXTRA_ROWS, EXTRA_SOLID, XT } from './world-tiles';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -32,7 +33,8 @@ const PUBLIC_DIR = join(ROOT, 'public');
 export const WORLD_DIR = join(ROOT, 'tools', 'world');
 const T = 32;
 const COLS = 8;
-const ROWS = 4;
+/** 4 rows of M14 tiles (ids 0–31) plus the extra tiles of the world redesign (`world-tiles.ts`, ids 32+). */
+const ROWS = 4 + EXTRA_ROWS;
 
 /** Local tile ids of `assets/tilesets/world.png` (0–13 are the same tiles as the test tileset). */
 export const WT = {
@@ -88,9 +90,10 @@ const SOLID: number[] = [
   WT.bush,
   WT.fountain,
   WT.whiteWall,
+  ...EXTRA_SOLID,
 ];
-/** Tiles with `encounter = true` (tall grass, dune grass, vineyard). */
-const ENCOUNTER: number[] = [WT.tallgrass, WT.dune, WT.vineyard];
+/** Tiles with `encounter = true` (tall grass, dune grass, vineyard, the huerta's crops, dry scrub). */
+const ENCOUNTER: number[] = [WT.tallgrass, WT.dune, WT.vineyard, ...EXTRA_ENCOUNTER];
 
 /**
  * Layout characters. `ground` chars are drawn in the `ground` layer; `deco` chars are drawn in `deco` over the
@@ -128,6 +131,63 @@ export const LEGEND: Record<string, { layer: 'ground' | 'deco' | 'tree'; tile: n
   '*': { layer: 'deco', tile: WT.bush },
   L: { layer: 'deco', tile: WT.fountain },
   W: { layer: 'deco', tile: WT.whiteWall },
+  // World redesign (tiles from `world-tiles.ts`).
+  u: { layer: 'ground', tile: XT.soil },
+  o: { layer: 'ground', tile: XT.onion },
+  l: { layer: 'ground', tile: XT.lettuce },
+  e: { layer: 'ground', tile: XT.eggplant },
+  w: { layer: 'ground', tile: XT.sea },
+  '<': { layer: 'ground', tile: XT.wave },
+  z: { layer: 'ground', tile: XT.shore },
+  k: { layer: 'ground', tile: XT.sidewalk },
+  x: { layer: 'ground', tile: XT.crosswalk },
+  q: { layer: 'ground', tile: XT.paseo },
+  n: { layer: 'ground', tile: XT.officeFloor },
+  N: { layer: 'ground', tile: XT.carpet },
+  P: { layer: 'ground', tile: XT.platform },
+  J: { layer: 'ground', tile: XT.rails },
+  m: { layer: 'ground', tile: XT.stationFloor },
+  '/': { layer: 'ground', tile: XT.stairs },
+  '7': { layer: 'ground', tile: XT.stoneBridge },
+  '6': { layer: 'ground', tile: XT.boat },
+  '"': { layer: 'ground', tile: XT.dryGrass },
+  O: { layer: 'deco', tile: XT.orangeTree },
+  Y: { layer: 'deco', tile: XT.palm },
+  h: { layer: 'deco', tile: XT.whiteHouse },
+  y: { layer: 'deco', tile: XT.creamHouse },
+  I: { layer: 'deco', tile: XT.industrial },
+  i: { layer: 'deco', tile: XT.industrialWindows },
+  V: { layer: 'deco', tile: XT.ahoraFacade },
+  Q: { layer: 'deco', tile: XT.logoA },
+  U: { layer: 'deco', tile: XT.logoB },
+  G: { layer: 'deco', tile: XT.logoC },
+  Z: { layer: 'deco', tile: XT.shutter },
+  B: { layer: 'deco', tile: XT.brick },
+  E: { layer: 'deco', tile: XT.metroSign },
+  X: { layer: 'deco', tile: XT.train },
+  j: { layer: 'deco', tile: XT.trainDoor },
+  g: { layer: 'deco', tile: XT.glass },
+  '(': { layer: 'deco', tile: XT.sofa },
+  '%': { layer: 'deco', tile: XT.plant },
+  t: { layer: 'deco', tile: XT.meetingTable },
+  '&': { layer: 'deco', tile: XT.modernDesk },
+  $: { layer: 'deco', tile: XT.coffeeBar },
+  '[': { layer: 'deco', tile: XT.screen },
+  '!': { layer: 'deco', tile: XT.umbrella },
+  '-': { layer: 'deco', tile: XT.towel },
+  '|': { layer: 'deco', tile: XT.bench },
+  '0': { layer: 'deco', tile: XT.bankWall },
+  '1': { layer: 'deco', tile: XT.agora },
+  '2': { layer: 'deco', tile: XT.cac },
+  '3': { layer: 'deco', tile: XT.oldStone },
+  '4': { layer: 'deco', tile: XT.plumTree },
+  '5': { layer: 'deco', tile: XT.stationFacade },
+  '+': { layer: 'deco', tile: XT.officeWall },
+  '8': { layer: 'deco', tile: XT.flatRoof },
+  '9': { layer: 'deco', tile: XT.greyRoof },
+  '@': { layer: 'deco', tile: XT.assut },
+  ')': { layer: 'deco', tile: XT.bullring },
+  ';': { layer: 'deco', tile: XT.lamp },
 };
 
 /** Base grounds a map can put under its deco tiles. */
@@ -137,6 +197,11 @@ const GROUNDS = {
   desert: WT.desert,
   road: WT.road,
   floor: WT.floor,
+  sea: XT.sea,
+  sidewalk: XT.sidewalk,
+  office: XT.officeFloor,
+  station: XT.stationFloor,
+  soil: XT.soil,
 } as const;
 
 type Side = 'north' | 'south' | 'east' | 'west';
@@ -150,6 +215,11 @@ export interface WorldMapSpec {
   doors?: { x: number; y: number; to: string }[];
   edges?: { side: Side; from: number; to: number; map: string }[];
   car?: { x: number; y: number; to: 'murcia' | 'valencia' };
+  /**
+   * One-way step warps to any tile of another map (the metro and the train): `{ x, y, to, toX, toY, facing }`.
+   * Not mirrored: the station on the other side lists its own link back.
+   */
+  links?: { x: number; y: number; to: string; toX: number; toY: number; facing: string }[];
   encounters?: {
     name: string;
     x: number;
@@ -309,6 +379,7 @@ export function drawWorldTileset(): Buffer {
   [x, y] = tile(WT.whiteWall, [236, 238, 242, 255]);
   c.rect(x, y + 28, T, 4, [190, 194, 204, 255]);
   for (let i = 4; i < T; i += 10) c.rect(x + i, y + 6, 4, 16, [150, 190, 230, 255]);
+  drawExtraTiles(c.png);
   return PNG.sync.write(c.png);
 }
 
@@ -475,6 +546,16 @@ export function buildWorld(
           map: id,
           ...edgeArrival(edge.side, w, h),
         }),
+      );
+    }
+    for (const link of spec.links ?? []) {
+      if (!world.maps[link.to]) throw new Error(`world.json › ${id}: link to unknown map "${link.to}"`);
+      map.warps.push(
+        warp(
+          `link_${link.to}`,
+          { x: link.x, y: link.y, width: 1, height: 1 },
+          { map: link.to, x: link.toX, y: link.toY, facing: link.facing },
+        ),
       );
     }
     if (spec.car) {

@@ -700,6 +700,25 @@ Sixteen milestones, M0 to M15, each one session-sized and mergeable on its own. 
 - [ ] A coworker with only the URL can play on desktop and phone without help.
 - [ ] All Definition of done checks pass on the production build (`npm run preview`).
 
+### M16 — World redesign (requested after M15)
+
+**Goal:** the map structure above replaces M14's eight outdoor zones.
+
+**Needs:** M15.
+
+**Tasks**
+
+1. Research the real places (Alboraya, Valencia, the Murcia side) and draw the four outdoor maps of the Map layout table, with their landmarks.
+2. Alboraya ↔ Valencia by the road, the beach and the metro (Alboraya ↔ Xàtiva, next to the Estació del Nord); El Pueblo only by train from the Estació del Nord; Murcia still only by the Audi.
+3. New interiors: the metro stations, the two train stations, M.P.'s beach house; the office redone as a modern open-plan space in ahora / flexygo colours.
+4. Several wandering NPCs in every part of every outdoor zone.
+
+**Done when**
+
+- [ ] Every landmark of the Map layout table exists and every door can be entered.
+- [ ] A tester can walk from the office to Valencia (both edges and the metro), take the train to El Pueblo, and use the car, without the debug menu.
+- [ ] Boot validation passes with zero warnings.
+
 ## Content guide
 
 Adding content is editing JSON and Tiled maps only; after any change, run `npm run placeholders`, then `npm run dev` and fix anything the red error screen reports.
@@ -730,18 +749,25 @@ Adding content is editing JSON and Tiled maps only; after any change, run `npm r
 5. Draw warps in `warps` with `toMap`, `toX`, `toY`, `toFacing`, `trigger`. Every door needs a matching warp back on the other map.
 6. Add the zone to `zones.json` with its music and encounter groups.
 
-**Map layout.** The world is a cartoon of the Valencia province. Mountains close the north, west and south edges; the sea is on the east. An impassable range runs east–west across the lower third: Valencia above it, Murcia below it, joined only by the Audi.
+**Map layout** (redesigned in M16 at the owner's request; M14's eight outdoor zones became four big maps):
+
+```
+   Alboraya  (village | huerta | industrial estate | huerta | tourist beach)
+    |   |__________________ (road and the whole beach lead south; plus the metro)
+    |                    |
+Valencia  (wide city map: Turia river park, Ciutat Vella, Estació del Nord, CAC)
+    |  (train from the Estació del Nord only)
+El Pueblo
+                 (Audi only, as before)
+Murcia  (El Ciruelo | vineyards | desert | small coastal town)
+```
 
 | Zone id | Region | Environment | Contains |
 | --- | --- | --- | --- |
-| `alboraya` | Valencia, top | Village, grass | Office of ahora (start), Bar Pacos, Bar Las Rusas, shop, office car |
-| `huerta_norte` | Valencia | Huerta fields, grass encounters | Path from Alboraya to the city |
-| `valencia` | Valencia, middle | City, crowd encounters | Turia river park (grass), plazas, emblematic buildings, CAC/Àgora (convention), shop, many NPCs |
-| `playa` | Valencia, east | Beach, sand encounters | Coastline from north to south |
-| `pueblo_sur` | Valencia, bottom | Village, grass | Isaval (client), shop |
-| `murcia` | Murcia | Desert town | Arrival car, shop, few NPCs |
-| `vinedos` | Murcia | Desert with vineyards | Vineyard encounters |
-| `poligono` | Murcia | Industrial estate | Ciruelo (client) |
+| `alboraya` | Valencia, top | Wide map: orange orchards on the top and bottom edges, mountains west, sea east | Village (Valencian houses, plaza with the metro station to the Estació del Nord, shop); irregular huerta plots of onions, lettuces and eggplants between the parts; industrial estate (large buildings on a couple of streets) with the ahora office at its east end (modern open-plan interior in ahora / flexygo colours), Bar Pacos in front of it and Bar Las Rusas at the other end, the office car; tourist beach with holiday houses (M.P.'s house can be entered). Two ways south to Valencia: the road and the whole beach. Several wandering NPCs in each part |
+| `valencia` | Valencia, middle | Wide city map, urban only (parks, no fields), irregular streets | Turia river park (a sunken park shaped like the old river, grass encounters) ending at the CAC, where the Àgora hosts the ahora convention; Estació del Nord (train to El Pueblo) with the Xàtiva metro beside it (to Alboraya); Ciutat Vella plazas as crowd zones; Malvarrosa beach; shop; many NPCs |
+| `pueblo` | Valencia, south | Small seaside village among orange and vegetable orchards | Small train station (the only way in), Isaval (client), shop |
+| `murcia` | Murcia | Wide map: El Ciruelo, vineyards, desert, small coastal town | Arrival car at El Ciruelo (client), vineyard and desert encounters, shop in the coastal town, a few NPCs |
 
 ## Open questions
 

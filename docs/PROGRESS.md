@@ -21,6 +21,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M13 — The Audi to Murcia
 - [x] M14 — Build the world
 - [x] M15 — Audio, polish and deployment
+- [x] M16 — World redesign (requested after M15)
 
 ## Milestone notes
 
@@ -482,6 +483,41 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   the full suite and screenshots (struck-through *Huir*, the scrolled debug menu, a plain production build with no
   hooks booting to the title and name screens on desktop and a phone profile).
 
+### M16 — World redesign
+
+- Built (owner's request after M15; plan updated: `docs/PLAN.md` › M16 and › Map layout): four big outdoor maps
+  replace M14's eight. `alboraya` 120 × 44 (village with the metro in its plaza | irregular huerta plots | industrial
+  estate with the ahora office at the east end, Bar Pacos in front, Las Rusas at the west end | tourist beach with
+  M.P.'s house), two edges south into `valencia` 128 × 64 (road x 42–44, the whole beach x 99–111); `valencia` is all
+  city with a sunken Turia park arcing round Ciutat Vella to the CAC / Àgora, the Estació del Nord + Xàtiva metro,
+  Malvarrosa and the port; `pueblo` 48 × 32 (train only); `murcia` 136 × 40 (El Ciruelo | vineyards | desert |
+  coastal town, Audi only). New interiors `casa_mp`, `metro_alboraya`, `metro_xativa`, `estacion_norte`,
+  `estacion_pueblo`; `tienda_sur` → `tienda_pueblo`; the office is a 22 × 14 open plan in ahora navy / light blue /
+  white with an orange flexygo accent. 56 new tiles (ids 32–87, `tools/world-tiles.ts`), new `world.json › links`
+  (one-way step warps for the metro and the train). 48 new NPCs (39 wandering townsfolk, M.P., 4 station staff,
+  2 office coworkers); the 15 enemies moved to the new maps. Layout and coordinates: `public/maps/README.md`.
+- Research used for the layout: Alboraya (horchata and chufa huerta, Patacona / Port Saplaya beach, Metrovalencia
+  line 3 into Valencia), Valencia (Turia garden from Parque de Cabecera to the City of Arts and Sciences, its bridges;
+  Estació del Nord beside Xàtiva metro and the bullring; Ciutat Vella landmarks), El Ciruelo (a stone-fruit and grape
+  grower from Alhama de Murcia). Not to scale; shapes are cartoon approximations.
+- How the layouts were made: a scratch composer (not committed) wrote `tools/world/*.txt`; those files and
+  `world.json` are the source from now on (`npm run world -- --force`). Huerta plots are Voronoi cells, so they are
+  irregular "the Valencian way".
+- Tests changed on purpose (new world, nothing weakened): `tests/data/world.test.ts` (zones, 73 NPCs, ≥ 3 wandering
+  talkers per outdoor zone, new link / landmark checks, carnet at `tienda_pueblo`, office may hold coworkers),
+  `tests/tools/make-world.test.ts` (8 × 11 tileset, every new tile drawn, links), `tests/tools/make-placeholders.test.ts`
+  (four minimaps), `tests/e2e/m14-world.spec.ts` (new coordinates; the walk now also takes the metro, the train,
+  both Alboraya ↔ Valencia edges and M.P.'s house). The frozen test world is untouched.
+- Files outside any list: `tools/make-world.ts`, `tools/world-tiles.ts` (new), `tools/world/*`, `public/maps/*.tmj`,
+  `public/assets/tilesets/world.png`, 4 minimaps and 10 placeholder NPC sprites (`npm run placeholders`), the content
+  JSON (`zones`, `npcs`, `shops`, `car`, `start`, `intro`), READMEs, `docs/CONTENT.md`, `docs/PLAN.md`, `CLAUDE.md`.
+- Verified with Playwright (desktop, `m14-world.spec.ts` + screenshots): boot with zero data errors / warnings / failed
+  assets; the intro in the new office (player (10, 10), coworker (10, 9)); the long walk office → both bars → village
+  shop → M.P.'s house → office → beach edge into Valencia and back → metro → Xàtiva → Valencia shop → Àgora → Estació
+  del Nord → train → El Pueblo (Isaval, buys the licence) → train back → road edge north → office Audi → Murcia; and
+  Murcia: El Ciruelo, vineyards, desert, the coastal shop, the car back. Old saves on removed maps wake at the office
+  respawn (M10's migration rule).
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -493,6 +529,20 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M16 (safe assumptions in brackets)
+
+- [ ] The diagram draws a line from Valencia down to Murcia. [Murcia stays reachable only by the Audi from the office
+  (plan, locked decision "Murcia access"); the line was read as geography. Change the locked decision first if a
+  road is wanted.]
+- [ ] The text says "M.P.'s house", the diagram "D.M. House". [M.P.; the NPC and zone names are in `npcs.json` /
+  `zones.json` (`casa_mp`) and are easy to change.]
+- [ ] "There will be a metro station to the side that will be the one that takes you to the…" (cut off). [The Xàtiva
+  metro next to the Estació del Nord, to Alboraya.]
+- [ ] Flexygo's brand colours could not be confirmed online. [ahora navy / light blue / white from the façade photo,
+  plus an orange accent for flexygo: `tools/world-tiles.ts › C.f`; change it there and run `npm run world -- --force`.]
+- [ ] Clients: Isaval stays in El Pueblo (M14's south town); Ciruelo now sits in the El Ciruelo part of Murcia. [As
+  the plan's table.]
 
 ### Raised in M15 (safe assumptions in brackets)
 

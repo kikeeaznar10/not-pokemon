@@ -7,30 +7,7 @@
     "music": "assets/audio/music/valencia.ogg",
     "indoor": false,
     "encounters": {
-      "campo_alboraya": {
-        "rate": 8,
-        "flexymon": [
-          {
-            "id": "raton",
-            "weight": 60
-          },
-          {
-            "id": "teclado",
-            "weight": 40
-          }
-        ]
-      }
-    }
-  },
-  {
-    "id": "huerta_norte",
-    "name": "Huerta Norte",
-    "file": "maps/huerta_norte.tmj",
-    "region": "valencia",
-    "music": "assets/audio/music/valencia.ogg",
-    "indoor": false,
-    "encounters": {
-      "huerta": {
+      "huerta_alboraya": {
         "rate": 10,
         "flexymon": [
           {
@@ -48,6 +25,36 @@
           {
             "id": "silla",
             "weight": 15
+          }
+        ]
+      },
+      "poligono_alboraya": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "impresora",
+            "weight": 50
+          },
+          {
+            "id": "grapadora",
+            "weight": 50
+          }
+        ]
+      },
+      "playa_patacona": {
+        "rate": 10,
+        "flexymon": [
+          {
+            "id": "movil",
+            "weight": 40
+          },
+          {
+            "id": "cafetera",
+            "weight": 30
+          },
+          {
+            "id": "silla",
+            "weight": 30
           }
         ]
       }
@@ -124,18 +131,8 @@
             "weight": 50
           }
         ]
-      }
-    }
-  },
-  {
-    "id": "playa",
-    "name": "Playa",
-    "file": "maps/playa.tmj",
-    "region": "valencia",
-    "music": "assets/audio/music/valencia.ogg",
-    "indoor": false,
-    "encounters": {
-      "dunas": {
+      },
+      "playa_malvarrosa": {
         "rate": 10,
         "flexymon": [
           {
@@ -155,14 +152,14 @@
     }
   },
   {
-    "id": "pueblo_sur",
-    "name": "Pueblo del Sur",
-    "file": "maps/pueblo_sur.tmj",
+    "id": "pueblo",
+    "name": "El Pueblo",
+    "file": "maps/pueblo.tmj",
     "region": "valencia",
     "music": "assets/audio/music/valencia.ogg",
     "indoor": false,
     "encounters": {
-      "campos_sur": {
+      "huerta_pueblo": {
         "rate": 8,
         "flexymon": [
           {
@@ -189,29 +186,19 @@
     "music": "assets/audio/music/murcia.ogg",
     "indoor": false,
     "encounters": {
-      "desierto": {
+      "huerto_ciruelo": {
         "rate": 10,
         "flexymon": [
           {
             "id": "servidor",
-            "weight": 40
+            "weight": 50
           },
           {
-            "id": "router",
-            "weight": 60
+            "id": "proyector",
+            "weight": 50
           }
         ]
-      }
-    }
-  },
-  {
-    "id": "vinedos",
-    "name": "Viñedos",
-    "file": "maps/vinedos.tmj",
-    "region": "murcia",
-    "music": "assets/audio/music/murcia.ogg",
-    "indoor": false,
-    "encounters": {
+      },
       "vinas": {
         "rate": 12,
         "flexymon": [
@@ -228,22 +215,25 @@
             "weight": 20
           }
         ]
-      }
-    }
-  },
-  {
-    "id": "poligono",
-    "name": "Polígono",
-    "file": "maps/poligono.tmj",
-    "region": "murcia",
-    "music": "assets/audio/music/murcia.ogg",
-    "indoor": false,
-    "encounters": {
-      "muelle_carga": {
-        "rate": 8,
+      },
+      "desierto": {
+        "rate": 10,
         "flexymon": [
           {
             "id": "servidor",
+            "weight": 40
+          },
+          {
+            "id": "router",
+            "weight": 60
+          }
+        ]
+      },
+      "paseo_murcia": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "router",
             "weight": 50
           },
           {
@@ -282,6 +272,51 @@
     "encounters": {}
   },
   {
+    "id": "casa_mp",
+    "name": "Casa de M.P.",
+    "file": "maps/casa_mp.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "metro_alboraya",
+    "name": "Metro Alboraya",
+    "file": "maps/metro_alboraya.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "metro_xativa",
+    "name": "Metro Xàtiva",
+    "file": "maps/metro_xativa.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "estacion_norte",
+    "name": "Estación del Norte",
+    "file": "maps/estacion_norte.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "estacion_pueblo",
+    "name": "Estación del Pueblo",
+    "file": "maps/estacion_pueblo.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
     "id": "tienda_alboraya",
     "name": "Tienda de Alboraya",
     "file": "maps/tienda_alboraya.tmj",
@@ -309,9 +344,9 @@
     "encounters": {}
   },
   {
-    "id": "tienda_sur",
-    "name": "Tienda del Sur",
-    "file": "maps/tienda_sur.tmj",
+    "id": "tienda_pueblo",
+    "name": "Tienda del Pueblo",
+    "file": "maps/tienda_pueblo.tmj",
     "region": "valencia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,
@@ -337,7 +372,7 @@
   },
   {
     "id": "ciruelo",
-    "name": "Ciruelo",
+    "name": "El Ciruelo",
     "file": "maps/ciruelo.tmj",
     "region": "murcia",
     "music": "assets/audio/music/interior.ogg",

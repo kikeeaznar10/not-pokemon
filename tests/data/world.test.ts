@@ -1,4 +1,5 @@
 // M14: the real world (public/data/ + public/maps/<zone>.tmj) and the switch to the frozen test world.
+// M16 (world redesign): four big outdoor maps — Alboraya, Valencia, El Pueblo (train only) and Murcia (Audi only).
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -64,16 +65,21 @@ const nextTo = (tiles: Set<string>, map: string, x: number, y: number) =>
     [-1, 0],
   ].some(([dx, dy]) => tiles.has(`${map}:${x + dx!},${y + dy!}`));
 
-const VALENCIA_SIDE = ['alboraya', 'huerta_norte', 'valencia', 'playa', 'pueblo_sur'];
-const MURCIA_SIDE = ['murcia', 'vinedos', 'poligono'];
+const VALENCIA_SIDE = ['alboraya', 'valencia', 'pueblo'];
+const MURCIA_SIDE = ['murcia'];
 const INTERIORS = [
   'oficina_ahora',
   'bar_pacos',
   'bar_las_rusas',
+  'casa_mp',
+  'metro_alboraya',
+  'metro_xativa',
+  'estacion_norte',
+  'estacion_pueblo',
   'tienda_alboraya',
   'tienda_valencia',
   'agora',
-  'tienda_sur',
+  'tienda_pueblo',
   'isaval',
   'tienda_murcia',
   'ciruelo',
@@ -95,12 +101,17 @@ describe('the real world (M14)', () => {
     for (const id of MURCIA_SIDE) expect(data.zones.get(id)!.region).toBe('murcia');
   });
 
-  it('meets the content target: 12 flexymon, 24 attacks, 8 items, 25 NPCs (15 enemies)', () => {
+  it('meets the content target: 12 flexymon, 24 attacks, 8 items, 15 enemy NPCs, townsfolk in every outdoor zone', () => {
     expect(data.flexymon.size).toBe(12);
     expect(data.attacks.size).toBe(24);
     expect(data.items.size).toBe(8);
-    expect(data.npcs.size).toBe(25);
+    expect(data.npcs.size).toBe(73);
     expect([...data.npcs.values()].filter((n) => n.type === 'enemy')).toHaveLength(15);
+    // M16: several wandering talkers in every outdoor zone, so the world looks alive.
+    for (const id of [...VALENCIA_SIDE, ...MURCIA_SIDE]) {
+      const walkers = [...data.npcs.values()].filter((n) => n.map === id && n.type === 'talker' && n.wander);
+      expect(walkers.length, id).toBeGreaterThanOrEqual(3);
+    }
     // Every species and attack is used somewhere.
     const used = new Set([...data.flexymon.values()].flatMap((s) => s.attacks));
     expect(used.size).toBe(24);
@@ -169,7 +180,7 @@ describe('the real world (M14)', () => {
     expect(data.start.items).toMatchObject({ llaves_audi: 1 });
     const sold = (id: string) => [...data.shops].filter(([, items]) => items.includes(id)).map(([s]) => s);
     expect(sold('cafe_doble')).toEqual(['bar_las_rusas']);
-    expect(sold('carnet')).toEqual(['tienda_sur']);
+    expect(sold('carnet')).toEqual(['tienda_pueblo']);
     expect(data.items.get('cafe_doble')!.price).toBeGreaterThan(0);
     expect(data.items.get('carnet')!.price).toBeGreaterThan(0);
     for (const pair of data.car.unlockPairs) expect(pair).toContain('llaves_audi');
@@ -182,7 +193,7 @@ describe('the real world (M14)', () => {
         'bar_pacos',
         'tienda_alboraya',
         'tienda_murcia',
-        'tienda_sur',
+        'tienda_pueblo',
         'tienda_valencia',
       ].sort(),
     );
@@ -190,9 +201,72 @@ describe('the real world (M14)', () => {
 
   it('the office has the healer and the storage box; the intro plays there', () => {
     const office = [...data.npcs.values()].filter((n) => n.map === 'oficina_ahora').map((n) => n.type);
-    expect(office.sort()).toEqual(['healer', 'storage']);
+    expect(office.filter((t) => t !== 'talker').sort()).toEqual(['healer', 'storage']);
     expect(data.start.spawn.map).toBe('oficina_ahora');
     expect(data.start.respawn.map).toBe('oficina_ahora');
+  });
+});
+
+describe('the redesigned map links (M16)', () => {
+  /** Every warp (with its map) that lands on `map`. */
+  const into = (map: string) =>
+    [...data.maps].flatMap(([from, m]) =>
+      m.info.warps.filter((w) => w.toMap === map).map((w) => ({ from, w })),
+    );
+
+  it('Alboraya joins Valencia by the road, the whole beach and the metro', () => {
+    const edges = into('valencia').filter(({ from }) => from === 'alboraya');
+    expect(edges.map(({ w }) => [w.x, w.width]).sort()).toEqual(
+      [
+        [42, 3],
+        [99, 13],
+      ].sort(),
+    );
+    // Metro: Alboraya's station ↔ Xàtiva, next to the north station.
+    expect(into('metro_xativa').map(({ from }) => from)).toContain('metro_alboraya');
+    expect(
+      into('metro_alboraya')
+        .map(({ from }) => from)
+        .sort(),
+    ).toEqual(['alboraya', 'metro_xativa']);
+  });
+
+  it('El Pueblo is reached only by the train from the Estació del Nord', () => {
+    // Only the station and the town's own interiors lead into El Pueblo: no edge, no other door.
+    expect([...new Set(into('pueblo').map(({ from }) => from))].sort()).toEqual(
+      ['estacion_pueblo', 'isaval', 'tienda_pueblo'].sort(),
+    );
+    expect(
+      into('estacion_pueblo')
+        .map(({ from }) => from)
+        .sort(),
+    ).toEqual(['estacion_norte', 'pueblo']);
+    expect(
+      into('estacion_norte')
+        .map(({ from }) => from)
+        .sort(),
+    ).toEqual(['estacion_pueblo', 'valencia']);
+  });
+
+  it('the landmarks are on the right maps', () => {
+    const doors = (map: string) =>
+      data.maps
+        .get(map)!
+        .info.warps.filter((w) => w.toMap && data.zones.get(w.toMap)?.indoor)
+        .map((w) => w.toMap)
+        .sort();
+    expect(doors('alboraya')).toEqual(
+      ['bar_las_rusas', 'bar_pacos', 'casa_mp', 'metro_alboraya', 'oficina_ahora', 'tienda_alboraya'].sort(),
+    );
+    expect(doors('valencia')).toEqual(['agora', 'estacion_norte', 'metro_xativa', 'tienda_valencia'].sort());
+    expect(doors('pueblo')).toEqual(['estacion_pueblo', 'isaval', 'tienda_pueblo'].sort());
+    expect(doors('murcia')).toEqual(['ciruelo', 'tienda_murcia'].sort());
+    // Valencia and Murcia are the big horizontal maps.
+    for (const id of ['valencia', 'murcia']) {
+      const m = data.maps.get(id)!.info;
+      expect(m.width, id).toBeGreaterThan(m.height * 2 - 1);
+      expect(m.width, id).toBeGreaterThanOrEqual(120);
+    }
   });
 });
 

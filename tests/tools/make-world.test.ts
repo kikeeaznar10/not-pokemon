@@ -10,11 +10,52 @@ import {
   WT,
   type WorldSpec,
 } from '../../tools/make-world';
+import { XT } from '../../tools/world-tiles';
 
 describe('make-world (M14)', () => {
-  it('draws an 8 × 4 tileset of 32 px tiles', () => {
+  it('draws an 8 × 11 tileset of 32 px tiles (M14 ids 0–31, world redesign ids 32–87)', () => {
     const ts = PNG.sync.read(drawWorldTileset());
-    expect([ts.width, ts.height]).toEqual([256, 128]);
+    expect([ts.width, ts.height]).toEqual([256, 352]);
+    // Every extra tile is drawn (no fully transparent slot from id 32 on).
+    for (let id = 32; id <= XT.wave; id += 1) {
+      const ox = (id % 8) * 32;
+      const oy = Math.floor(id / 8) * 32;
+      let opaque = 0;
+      for (let y = 0; y < 32; y += 1)
+        for (let x = 0; x < 32; x += 1) opaque += ts.data[((oy + y) * 256 + ox + x) * 4 + 3]! > 0 ? 1 : 0;
+      expect(opaque, `tile ${id}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('builds one-way links (metro, train) to any tile of another map', () => {
+    const world: WorldSpec = {
+      maps: {
+        a: {
+          ground: 'floor',
+          indoor: true,
+          links: [{ x: 1, y: 0, to: 'b', toX: 0, toY: 1, facing: 'down' }],
+        },
+        b: { ground: 'floor', indoor: true },
+      },
+    };
+    const built = buildWorld(world, (id) => (id === 'a' ? ['XjX', 'PPP', '#_#'] : ['jX', 'PP', '_#']));
+    const props = (o: { properties?: { name: string; value: unknown }[] }) =>
+      Object.fromEntries((o.properties ?? []).map((p) => [p.name, p.value]));
+    const link = built.get('a')!.warps.find((w) => w.name === 'link_b')!;
+    expect([link.x, link.y, props(link)]).toEqual([
+      1,
+      0,
+      { toMap: 'b', toX: 0, toY: 1, toFacing: 'down', trigger: 'step' },
+    ]);
+    expect(built.get('b')!.warps.some((w) => w.name.startsWith('link'))).toBe(false);
+    expect(() =>
+      buildWorld(
+        {
+          maps: { a: { ground: 'floor', links: [{ x: 0, y: 0, to: 'nope', toX: 0, toY: 0, facing: 'up' }] } },
+        },
+        () => ['.'],
+      ),
+    ).toThrow('world.json › a: link to unknown map "nope"');
   });
 
   it('rejects uneven rows and unknown characters', () => {
@@ -84,7 +125,7 @@ describe('make-world (M14)', () => {
   });
 
   it('the shipped layouts build, and the tool never overwrites without --force', () => {
-    expect(buildWorld(readWorld()).size).toBe(18);
+    expect(buildWorld(readWorld()).size).toBe(19);
     expect(makeWorld(false)).toEqual([]);
   });
 });

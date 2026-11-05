@@ -39,7 +39,8 @@ in Tiled, update the generator too or drop that comparison.
 
 Builds the real world's maps from plain text, since no one can draw in Tiled in a cloud session:
 `tools/world/<zone>.txt` (one character per tile) and `tools/world/world.json`. Writes
-`public/assets/tilesets/world.png` (8 × 4 tiles; tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
+`public/assets/tilesets/world.png` (8 × 11 tiles: ids 0–31 drawn in `make-world.ts`, ids 32–87 — the world
+redesign's tiles — in `tools/world-tiles.ts` as 16 × 16 pixel grids scaled 2×; tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
 every map in `world.json`. Never overwrites existing files; `npm run world -- --force` regenerates everything (after
 editing a layout). Then run `npm run placeholders` (after deleting the zone's minimap, if the map changed).
 
@@ -51,6 +52,19 @@ floor, `_` doormat (an interior's door, on its bottom row). Drawn over the map's
 `L` fountain, `C` counter, `K` desk, `H` shelf, `A` + `a` the Audi (rear, front). All of these block except `f`
 (flowers) and `D` (door).
 
+World redesign (M16) — more ground: `u` tilled soil, `o` onions / `l` lettuces / `e` eggplants (huerta crops,
+encounter), `"` dry scrub (encounter), `w` sea and `<` sea with a wave (both solid), `6` a boat on the water (solid),
+`z` shore, `k` sidewalk, `x` crosswalk, `q` paseo marítimo, `n` office floor, `N` carpet (ahora blue), `m` station
+mosaic floor, `P` station platform, `J` rails (solid), `/` stairs (into the sunken Turia park), `7` stone bridge.
+More deco (all solid unless noted): `O` orange tree, `4` plum tree, `Y` palm, `h` white Valencian house wall (blue
+trim), `y` cream house wall, `^` (M14) terracotta roof, `8` flat city roof, `9` grey industrial roof, `I` / `i`
+corrugated industrial wall (plain / with windows), `Z` roller shutter, `B` brick, `V` the ahora navy façade, `Q` `U`
+`G` the ahora logo over three tiles, `E` metro sign, `X` train, `j` train door (walkable; put a `links` entry on it),
+`0` the Turia's retaining wall, `1` the Àgora (purple), `2` the CAC's white ribs, `@` the Assut de l'Or bridge mast,
+`3` old stone (Torres de Serranos, the cathedral), `5` the Estació del Nord's orange façade, `)` the bullring, `+`
+office wall, `g` glass, `(` sofa, `%` plant, `t` meeting table, `&` modern desk, `$` coffee bar, `[` wall screen,
+`!` beach umbrella, `-` towel (walkable), `|` bench, `;` street lamp.
+
 `world.json › maps.<zone>`:
 
 | Field | Meaning |
@@ -61,6 +75,7 @@ floor, `_` doormat (an interior's door, on its bottom row). Drawn over the map's
 | `doors` | `[{ x, y, to }]`: a `D` tile leading to the interior `to`; the way back is generated. |
 | `edges` | `[{ side, from, to, map }]`: an off-map warp along `side` (`north`/`south`/`east`/`west`) over columns (or rows) `from`–`to`, keeping the column (row); the reverse warp on `map` is generated. |
 | `car` | `{ x, y, to }`: the Audi (`Aa` at (x, y)) with an `action` warp, `to` = `murcia` or `valencia`. |
+| `links` | M16: `[{ x, y, to, toX, toY, facing }]`: a one-way step warp from (x, y) to any tile of map `to` (the metro and the train: the `j` train door to the other station's platform). Not mirrored: the other station lists its own link back. |
 | `encounters` | `[{ name, x, y, width, height, group, mode }]`: encounter rectangles (`group` must be in `zones.json`). |
 
 The tool checks the layout (equal row widths, known characters) and that doors and the car stand on `D` / `Aa`.

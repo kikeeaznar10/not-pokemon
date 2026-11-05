@@ -89,9 +89,10 @@ describe('make-placeholders', () => {
 
   it('makes a minimap for every outdoor zone only (M12), of the real world and the test world (M14)', () => {
     expect(readMinimapTargets()).toEqual([
-      ...['alboraya', 'huerta_norte', 'valencia', 'playa', 'pueblo_sur', 'murcia', 'vinedos', 'poligono'].map(
-        (id) => ({ assetPath: `assets/ui/minimap_${id}.png`, mapFile: `maps/${id}.tmj` }),
-      ),
+      ...['alboraya', 'valencia', 'pueblo', 'murcia'].map((id) => ({
+        assetPath: `assets/ui/minimap_${id}.png`,
+        mapFile: `maps/${id}.tmj`,
+      })),
       { assetPath: 'assets/ui/minimap_test.png', mapFile: 'maps/test/test.tmj' },
       { assetPath: 'assets/ui/minimap_test_east.png', mapFile: 'maps/test/test_east.tmj' },
     ]);

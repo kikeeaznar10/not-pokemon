@@ -1,4 +1,4 @@
-// Shared e2e helper (M11). The intro in `intro.json` plays on the `start.json › spawn` map, and the boot checks
+// Shared e2e helper. The intro in `intro.json` plays on the `start.json › spawn` map, and the boot checks
 // reject an intro whose coworker or walks do not fit that map. Tests that move the spawn for convenience (and
 // then enter with `quickStart()`, skipping the intro) serve this neutral intro with it: the coworker stands on a
 // known free tile of the spawn's map and the script is only the handover.

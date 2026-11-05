@@ -12,7 +12,7 @@ afterEach(() => {
   clearUiSounds();
 });
 
-describe('uiSound (M15)', () => {
+describe('uiSound', () => {
   it('records every call and hands it to the installed player', () => {
     const play = vi.fn();
     uiSound('cursor');

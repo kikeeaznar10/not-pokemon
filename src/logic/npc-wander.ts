@@ -1,5 +1,5 @@
 /**
- * NPC movement in the overworld (docs/PLAN.md › npcs.json and M5), pure so it can be unit-tested.
+ * NPC movement in the overworld (docs/CONTENT.md › NPCs), pure so it can be unit-tested.
  *
  * Rules:
  * - `wander: null` → the NPC stands still (it still turns to face the player when talked to).
@@ -11,7 +11,7 @@
  *   ({@link occupiedTiles}), and so does the player, so the two can never end up on the same tile.
  * - Talking pauses the NPC ({@link startTalk}): a step in progress finishes, then it turns to face the
  *   player and stays still until {@link endTalk}, which starts a fresh wait.
- * - Enemy approach (M8): {@link engage} pauses the NPC without turning it, and {@link forceStep} walks it
+ * - Enemy approach: {@link engage} pauses the NPC without turning it, and {@link forceStep} walks it
  *   one tile (the scene checks the tile is free), so it can leave its rectangle to reach the player.
  * - An NPC outside its rectangle (after such an approach) only steps in directions that bring it closer
  *   to the rectangle, so it wanders back in by itself.
@@ -90,7 +90,7 @@ export function distanceToArea(area: WanderArea, x: number, y: number): number {
 }
 
 /**
- * Directions the NPC could step in now: target not blocked and inside the area. Outside the area (M8,
+ * Directions the NPC could step in now: target not blocked and inside the area. Outside the area (e.g.
  * after walking up to the player) only directions that bring it closer to the area count.
  */
 export function wanderChoices(s: Pick<NpcMove, 'x' | 'y'>, area: WanderArea, blocked: BlockedFn): Facing[] {
@@ -157,7 +157,7 @@ export function startTalk(s: NpcMove, playerFacing: Facing): NpcMove {
 }
 
 /**
- * Enemy approach (M8): stop wandering without turning (a step in progress finishes first). Ended by
+ * Enemy approach: stop wandering without turning (a step in progress finishes first). Ended by
  * {@link endTalk}, like a conversation.
  */
 export function engage(s: NpcMove): NpcMove {
@@ -165,7 +165,7 @@ export function engage(s: NpcMove): NpcMove {
 }
 
 /**
- * Start a scripted step onto the adjacent tile `to` (M8: walking up to the player), facing it. Only for a
+ * Start a scripted step onto the adjacent tile `to` (walking up to the player), facing it. Only for a
  * standing NPC; the caller checks the tile is free. Returns the state unchanged while a step is running.
  */
 export function forceStep(s: NpcMove, to: Point): NpcMove {
@@ -176,7 +176,7 @@ export function forceStep(s: NpcMove, to: Point): NpcMove {
   return { ...s, facing: dir, turnTo: null, step: { from, to: { ...to }, elapsed: 0 } };
 }
 
-/** Turn a standing NPC to `facing` (M8: an approaching enemy faces the player). */
+/** Turn a standing NPC to `facing` (an approaching enemy faces the player). */
 export function faceTo(s: NpcMove, facing: Facing): NpcMove {
   return s.step ? { ...s, turnTo: facing } : { ...s, facing, turnTo: null };
 }

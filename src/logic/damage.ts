@@ -1,5 +1,5 @@
 /**
- * Hit and damage rules (docs/PLAN.md › Hit and damage).
+ * Hit and damage rules (docs/GAME-RULES.md › Hit and damage).
  * - Hit: `rng.int(1, 100) <= accuracy`.
  * - Damage: `max(1, floor(power × Atk_eff / Def_eff × DAMAGE_SCALE × r))`, `r = rng.float(0.85, 1.0)`.
  * - Heal attacks: `floor(maxHp × percent / 100)`, never above max HP (clamping is done by the caller).

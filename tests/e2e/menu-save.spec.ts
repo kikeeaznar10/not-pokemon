@@ -1,4 +1,4 @@
-// M10 "Done when": reloading the page at any time brings back the position, team, bonuses, items, euros and
+// Checks: reloading the page at any time brings back the position, team, bonuses, items, euros and
 // NPC states; garbage in `flexymon.save.v1` does not crash the game: it starts fresh and keeps the broken copy.
 // Plus: Start opens the menu and pauses the game (NPCs freeze); Equipo shows base + bonus and reorders the
 // team; Mochila uses a Café and a Regleta; Opciones change and survive a reload; every save point shows
@@ -77,7 +77,7 @@ async function startAt(page: Page, spawn: object): Promise<void> {
     const start = (await res.json()) as Record<string, unknown>;
     await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
   });
-  // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+  // The intro must fit the spawn's map at boot (see neutral-intro.ts).
   await neutralIntro(page, (spawn as { map: string }).map);
 }
 
@@ -91,13 +91,13 @@ function watchErrors(page: Page): string[] {
   return errors;
 }
 
-/** Wait for the title, quick-start (continue / new game, M11) and wait until the player stands free in the overworld. */
+/** Wait for the title, quick-start (continue / new game) and wait until the player stands free in the overworld. */
 async function enterGame(page: Page, expected: Partial<Tile> = {}): Promise<void> {
   await page.waitForFunction(
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
@@ -223,7 +223,7 @@ test('reloading at any time keeps position, team, bonuses, items, euros and NPC 
   await hook(page, 'setEuros', 123);
   await reloadAndContinue(page, { map: 'test', x: 13, y: 11 });
   expect(await hook(page, 'euros')).toBe(123);
-  await page.screenshot({ path: testInfo.outputPath('m10-after-reload.png') });
+  await page.screenshot({ path: testInfo.outputPath('after-reload.png') });
   expect(errors).toEqual([]);
 });
 
@@ -294,7 +294,7 @@ test('Start menu: pauses the game; Equipo shows base + bonus and reorders; closi
   const npcsBefore = await hook(page, 'npcs');
   await page.waitForTimeout(3500);
   expect(await hook(page, 'npcs')).toEqual(npcsBefore);
-  await page.screenshot({ path: testInfo.outputPath('m10-menu.png') });
+  await page.screenshot({ path: testInfo.outputPath('menu.png') });
 
   // Equipo → Portátil's detail page: every stat as base + bonus, and its attacks.
   await press(page, 'z');
@@ -311,7 +311,7 @@ test('Start menu: pauses the game; Equipo shows base + bonus and reorders; closi
     { stat: 'speed', base: 11, bonus: 1, value: 12 },
   ]);
   expect(detail.attacks.map((a) => a.id)).toEqual(['compilar', 'pantallazo_azul', 'actualizacion']);
-  await page.screenshot({ path: testInfo.outputPath('m10-detail.png') });
+  await page.screenshot({ path: testInfo.outputPath('detail.png') });
 
   // Mover → second place: Ratón is now sent into battle first.
   await press(page, 'z');
@@ -329,7 +329,7 @@ test('Start menu: pauses the game; Equipo shows base + bonus and reorders; closi
   await expect.poll(() => menu(page)).toBeNull();
   await expect.poll(() => hook<boolean>(page, 'saveIcon')).toBe(true);
   expect((await hook<string[]>(page, 'savesWritten')).slice(savesBefore)).toEqual(['menu']);
-  await page.screenshot({ path: testInfo.outputPath('m10-saving.png') });
+  await page.screenshot({ path: testInfo.outputPath('saving.png') });
   await expect.poll(() => hook<boolean>(page, 'saveIcon'), { timeout: 3000 }).toBe(false);
   expect(JSON.parse((await stored(page, SAVE_KEY))!).team.map((m: Inst) => m.uid)).toEqual(['u2', 'u1']);
   await standing(page, { x: 3, y: 3 });
@@ -363,7 +363,7 @@ test('Mochila: a Café heals a team member, a Regleta adds a slot, others are gr
     { label: 'Regleta', enabled: true },
   ]);
   expect(bag.description).toBe('Recupera 20 PS.');
-  await page.screenshot({ path: testInfo.outputPath('m10-bag.png') });
+  await page.screenshot({ path: testInfo.outputPath('bag.png') });
 
   // Café → Portátil: +20 HP, one Café used.
   await press(page, 'z');
@@ -387,7 +387,7 @@ test('Mochila: a Café heals a team member, a Regleta adds a slot, others are gr
   expect((await party(page)).teamSlots).toBe(3);
   expect(await hook(page, 'items')).toEqual({ cafe: 1, redbull: 1 });
 
-  // B back, then Mapa (M12: no longer a placeholder) toggles the minimap off outdoors.
+  // B back, then Mapa (no longer a placeholder) toggles the minimap off outdoors.
   await expect.poll(async () => (await menu(page))?.ui).toBe('bag');
   await press(page, 'x');
   await expect.poll(async () => (await menu(page))?.ui).toBe('main');
@@ -428,7 +428,7 @@ test('Opciones: volumes and text speed change, apply and survive a reload', asyn
     sfx: 9,
     textSpeed: 'fast',
   });
-  await page.screenshot({ path: testInfo.outputPath('m10-options.png') });
+  await page.screenshot({ path: testInfo.outputPath('options.png') });
 
   // Volver (A) returns to the main menu; B closes.
   await press(page, 'ArrowDown');
@@ -506,7 +506,7 @@ test('debug "Borrar partida" deletes the save and the next start is a new game',
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
   expect(await stored(page, SAVE_KEY)).toBeNull();
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );

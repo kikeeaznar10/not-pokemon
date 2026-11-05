@@ -1,4 +1,4 @@
-// M7 "Done when": with rate 100 every step on grass starts a battle except the 3 safe steps after one;
+// Checks: with rate 100 every step on grass starts a battle except the 3 safe steps after one;
 // catching a second Ratón merges and shows which stat rose; with a full team a caught flexymon goes to
 // storage with a message. Plus: an `all` (crowd) rectangle rolls on any tile, a `tiles` rectangle only
 // on tall grass, a new species joins the team, and the debug option switches encounters off.
@@ -85,7 +85,7 @@ async function patchData(page: Page, rate: number | null, spawn?: object): Promi
       const start = (await res.json()) as Record<string, unknown>;
       await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
     });
-    // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+    // The intro must fit the spawn's map at boot (see neutral-intro.ts).
     await neutralIntro(page, (spawn as { map: string }).map);
   }
 }
@@ -101,7 +101,7 @@ async function enterOverworld(page: Page, expected: Partial<Tile>, url = '/'): P
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  // The title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
@@ -112,7 +112,7 @@ async function enterOverworld(page: Page, expected: Partial<Tile>, url = '/'): P
 /**
  * Press a key and give the game a few frames to see it. First wait two animation frames, so at least one
  * game update ran since the last state read: a menu ignores input on the frame it opens, and a press
- * landing in that frame would be lost (this made the M6 tests flaky under load).
+ * landing in that frame would be lost (this made the tests flaky under load).
  */
 async function press(page: Page, key: string): Promise<void> {
   await page.evaluate(
@@ -281,8 +281,8 @@ test('the debug menu switches encounters off', async ({ page }) => {
   await press(page, 'F2');
   await press(page, 'F2');
   await expect.poll(() => hook<string>(page, 'debugMode')).toBe('menu');
-  await press(page, 'ArrowUp'); // wraps to the last entry (M8's "NPC: todos listos")…
-  await press(page, 'ArrowUp'); // …the one above it is the encounters option (M10's "Borrar partida" is first)
+  await press(page, 'ArrowUp'); // wraps to the last entry (the "NPC: todos listos")…
+  await press(page, 'ArrowUp'); // …the one above it is the encounters option (the "Borrar partida" is first)
   await expect
     .poll(async () => (await hook<string[]>(page, 'debugLines'))!.slice(-4))
     .toEqual(['Opciones', '  Borrar partida', '> Encuentros: sí', '  NPC: todos listos']);

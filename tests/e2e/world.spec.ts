@@ -1,4 +1,4 @@
-// M14 "Done when": every landmark exists and can be entered; a tester can walk from Alboraya to the south town and
+// Checks: every landmark exists and can be entered; a tester can walk from Alboraya to the south town and
 // use the car without the debug menu; boot validation passes with zero warnings. Plus: the new game's intro plays in
 // the real office.
 //
@@ -273,7 +273,7 @@ async function drive(page: Page, to: Partial<Tile>): Promise<void> {
   await standing(page, to);
 }
 
-test.describe('the real world (M14)', () => {
+test.describe('the real world', () => {
   test('boot validation passes with zero warnings and the intro plays in the office', async ({
     page,
   }, testInfo) => {
@@ -310,7 +310,7 @@ test.describe('the real world (M14)', () => {
     const mid = (await hook<{ player: object; coworker: object }>(page, 'intro'))!;
     expect(mid.player).toEqual({ x: 7, y: 9, facing: 'up' });
     expect(mid.coworker).toMatchObject({ x: 7, y: 8 });
-    await page.screenshot({ path: testInfo.outputPath(`m14-intro-${testInfo.project.name}.png`) });
+    await page.screenshot({ path: testInfo.outputPath(`intro-${testInfo.project.name}.png`) });
     const seen: string[] = [];
     while ((await scene(page)) === 'Intro') {
       const d = (await hook<{ dialogue: { full: string } | null } | null>(page, 'intro'))?.dialogue;
@@ -323,7 +323,7 @@ test.describe('the real world (M14)', () => {
     await standing(page, { map: 'oficina_ahora', x: 7, y: 9 });
     expect(await hook(page, 'items')).toEqual({ cafe: 3, llaves_audi: 1 });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/interior.ogg');
-    await page.screenshot({ path: testInfo.outputPath(`m14-office-${testInfo.project.name}.png`) });
+    await page.screenshot({ path: testInfo.outputPath(`office-${testInfo.project.name}.png`) });
     expect(errors).toEqual([]);
   });
 
@@ -337,7 +337,7 @@ test.describe('the real world (M14)', () => {
     test.setTimeout(400_000);
     const errors = await realWorld(page);
     await quickStart(page);
-    const shot = (name: string) => page.screenshot({ path: testInfo.outputPath(`m14-${name}.png`) });
+    const shot = (name: string) => page.screenshot({ path: testInfo.outputPath(`${name}.png`) });
 
     // Out of the office into Alboraya, then its bars and shop.
     await walkTo(page, 'oficina_ahora', 7, 13, { map: 'alboraya' });
@@ -417,10 +417,10 @@ test.describe('the real world (M14)', () => {
 
     await visit(page, 'murcia', [6, 6], 'tienda_murcia');
     await walkTo(page, 'murcia', 32, 11, { map: 'vinedos', x: 0 });
-    await page.screenshot({ path: testInfo.outputPath('m14-vinedos.png') });
+    await page.screenshot({ path: testInfo.outputPath('vinedos.png') });
     await walkTo(page, 'vinedos', -1, 11, { map: 'murcia', x: 31 });
     await walkTo(page, 'murcia', 15, 24, { map: 'poligono', y: 0 });
-    await page.screenshot({ path: testInfo.outputPath('m14-poligono.png') });
+    await page.screenshot({ path: testInfo.outputPath('poligono.png') });
     await visit(page, 'poligono', [7, 18], 'ciruelo');
     await walkTo(page, 'poligono', 15, -1, { map: 'murcia', y: 23 });
 

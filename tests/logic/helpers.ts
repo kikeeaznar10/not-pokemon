@@ -6,7 +6,7 @@ import type { Species } from '../../src/data/schemas';
 import type { FlexymonInstance } from '../../src/logic/instance';
 import { validFiles } from '../data/fixture';
 
-/** The frozen test-world content (`public/test-world/data/`, M14), validated. */
+/** The frozen test-world content (`public/test-world/data/`), validated. */
 export function gameData(): GameData {
   const result = validateGameData(validFiles());
   if (!result.ok) throw new Error('fixture data is invalid');

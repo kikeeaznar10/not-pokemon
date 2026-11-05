@@ -5,7 +5,7 @@
  * - `public/maps/test/test.tmj` (30 × 20, outdoor), `test_house.tmj` (10 × 8, indoor) and `test_east.tmj`
  *   (30 × 20, joined to `test` by the east edge): Tiled JSON maps (CSV layers, embedded tileset) with
  *   the layers `ground`, `deco`, `above`, `collision` and the object layers `warps`, `encounters`,
- *   `spawns`. Layouts: `public/maps/README.md`. Since M14 they belong to the frozen test world
+ *   `spawns`. Layouts: `docs/TESTING.md` › The test world. They belong to the frozen test world
  *   (`public/test-world/data/`, `src/data/world.ts`), not to the real game.
  * - `public/assets/sprites/player.png`: the player sheet (`tools/art/characters.ts`), 2 columns (stand, stride) × 4 rows
  *   (down, left, right, up) of 32 × 32 frames.
@@ -132,7 +132,7 @@ export function drawTileset(): Buffer {
   [x, y] = at(TILES.doormat);
   c.rect(x, y, T, T, [196, 150, 100, 255]);
   c.rect(x + 3, y + 6, 26, 20, [170, 40, 50, 255]);
-  // M13: the white Audi seen from above, nose to the right, over two tiles (both solid).
+  // The white Audi seen from above, nose to the right, over two tiles (both solid).
   const white: Rgba = [244, 244, 240, 255];
   const glass: Rgba = [70, 90, 120, 255];
   const tyre: Rgba = [30, 30, 34, 255];
@@ -160,7 +160,7 @@ export function drawTileset(): Buffer {
 }
 
 /**
- * Draw the player sheet: rows down, left, right, up; columns stand, stride. Since the post-M15 restyle this is the
+ * Draw the player sheet: rows down, left, right, up; columns stand, stride. This is the
  * styled player of `tools/art/characters.ts` (the same file `npm run art` writes).
  */
 export function drawPlayer(): Buffer {
@@ -199,7 +199,7 @@ function encounterRect(
 }
 
 /**
- * The Audi (M13): its two solid tiles at (x, y) and (x + 1, y) in `deco`, and an `action` warp over them with
+ * The Audi: its two solid tiles at (x, y) and (x + 1, y) in `deco`, and an `action` warp over them with
  * `car` = the destination (car.json holds the arrival point).
  */
 function audi(g: ReturnType<typeof grids>, x: number, y: number, to: 'murcia' | 'valencia'): ObjSpec {
@@ -367,10 +367,10 @@ export function buildTestMap(): object {
     [9, 18],
   ] as const)
     g.set(deco, x, y, TILES.flowers);
-  // Tall grass (M7): encounter tiles inside the `jardin_turia` rectangle (x 19–23, y 1–5), which
+  // Tall grass: encounter tiles inside the `jardin_turia` rectangle (x 19–23, y 1–5), which
   // also covers plain grass (column 19, row 1) so the `tiles` mode can be seen to need the grass.
   for (let y = 2; y <= 5; y += 1) for (let x = 20; x <= 23; x += 1) g.set(ground, x, y, TILES.tallgrass);
-  // M13: the office Audi on (8–9, 11), just below the path; car.json › toValencia lands on (8, 12) below it.
+  // The office Audi on (8–9, 11), just below the path; car.json › toValencia lands on (8, 12) below it.
   const car = audi(g, 8, 11, 'murcia');
   return tiledMap(30, 20, g.layers, {
     encounters: [
@@ -429,7 +429,7 @@ export function buildTestEast(): object {
     [26, 13],
   ] as const)
     tree(g, x, y);
-  // M13: the "Murcia" Audi on (2–3, 9), just above the path; car.json › toMurcia lands on (2, 10) below it.
+  // The "Murcia" Audi on (2–3, 9), just above the path; car.json › toMurcia lands on (2, 10) below it.
   const car = audi(g, 2, 9, 'valencia');
   return tiledMap(30, 20, g.layers, {
     warps: [warp('west_edge', { x: -1, y: 0, width: 1, height: 20 }, { map: 'test', x: 29 }), car],

@@ -1,7 +1,7 @@
 /**
- * Accessibility rules (M15, plan task 4) as pure helpers, so the timing constants can be unit-tested.
+ * Accessibility rules as pure helpers, so the timing constants can be unit-tested.
  *
- * A "flash" is one on → off cycle. The plan asks for flashing effects under 3 per second
+ * A "flash" is one on → off cycle. Flashing effects must stay under 3 per second
  * (`MAX_FLASHES_PER_SECOND`): every blink and flash in the game is checked against it in
  * `tests/logic/accessibility.test.ts`.
  */

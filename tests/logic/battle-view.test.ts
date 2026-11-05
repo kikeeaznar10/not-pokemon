@@ -247,7 +247,7 @@ describe('battle-view: hpColor', () => {
   });
 });
 
-describe('battle-view: catching (M7)', () => {
+describe('battle-view: catching', () => {
   it('words every outcome of taking a wild flexymon', () => {
     expect(catchMessages({ type: 'added', to: 'team', uid: 'u' }, 'Ratón', t)).toEqual([
       '¡Ratón se une a tu equipo!',
@@ -265,7 +265,7 @@ describe('battle-view: catching (M7)', () => {
   });
 });
 
-describe('battle-view: Objeto lists (M9)', () => {
+describe('battle-view: Objeto lists', () => {
   it('lists battle items in the bag with counts; greyed when no target accepts it', () => {
     const s = createBattle([inst('portatil', 'p', { currentHp: 10 })], [inst('raton', 'w')], 'wild', {
       cafe: 3,

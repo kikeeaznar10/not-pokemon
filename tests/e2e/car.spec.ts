@@ -1,4 +1,4 @@
-// M13 "Done when": without the items the car only talks; with any valid pair it drives; the items are still in
+// Checks: without the items the car only talks; with any valid pair it drives; the items are still in
 // the bag afterwards; returning from Murcia lands next to the office car. Plus: "¿Subir al Audi?" with Sí / No
 // (B = No), the trip scene (direction, 4–6 s, not skippable in the first second, any button skips after it).
 // Test maps (public/maps/README.md): the office Audi is on `test` (8–9, 11); the "Murcia" Audi on `test_east`
@@ -116,7 +116,7 @@ test('without a pair the car only talks; with one it drives to Murcia and the it
     expect(await choice(page)).toBeNull();
     await standing(page, { map: 'test', x: 8, y: 10 });
   }
-  await page.screenshot({ path: testInfo.outputPath('m13-locked.png') });
+  await page.screenshot({ path: testInfo.outputPath('locked.png') });
 
   // Either pair opens it. Keys + licence: the question; No (B) keeps the player here.
   await hook(page, 'setItems', { llaves_audi: 1, carnet: 1 });
@@ -129,7 +129,7 @@ test('without a pair the car only talks; with one it drives to Murcia and the it
   const bag = { llaves_audi: 1, cafe_doble: 2, cafe: 3 };
   await hook(page, 'setItems', bag);
   await askForCar(page);
-  await page.screenshot({ path: testInfo.outputPath('m13-ask.png') });
+  await page.screenshot({ path: testInfo.outputPath('ask.png') });
   await press(page, 'ArrowDown');
   await expect.poll(() => choice(page)).toMatchObject({ cursor: 1 });
   await press(page, 'z');
@@ -143,14 +143,14 @@ test('without a pair the car only talks; with one it drives to Murcia and the it
   await press(page, 'z');
   await expect.poll(() => trip(page)).toMatchObject({ to: 'murcia', flipped: false, finished: false });
   await page.waitForTimeout(1500);
-  await page.screenshot({ path: testInfo.outputPath('m13-trip.png') });
+  await page.screenshot({ path: testInfo.outputPath('trip.png') });
   await expect.poll(() => trip(page), { timeout: 15_000 }).toBeNull();
   const last = await hook<CarTrip | null>(page, 'lastCarTrip');
   expect(last).toMatchObject({ to: 'murcia', finished: true, skipped: false });
   expect(last!.elapsedMs).toBeGreaterThanOrEqual(5000);
   await standing(page, { map: 'test_east', x: 2, y: 10, facing: 'down' });
   expect(await hook(page, 'items')).toEqual(bag);
-  await page.screenshot({ path: testInfo.outputPath('m13-murcia.png') });
+  await page.screenshot({ path: testInfo.outputPath('murcia.png') });
   expect(errors).toEqual([]);
 });
 
@@ -175,7 +175,7 @@ test('the Murcia car needs nothing, can be skipped after 1 s and lands next to t
     expect(await trip(page)).toMatchObject({ finished: false, skipped: false });
   }
   await expect.poll(async () => (await trip(page))?.skippable).toBe(true);
-  await page.screenshot({ path: testInfo.outputPath('m13-trip-back.png') });
+  await page.screenshot({ path: testInfo.outputPath('trip-back.png') });
   await press(page, 'x'); // any button
   await expect
     .poll(() => hook<CarTrip | null>(page, 'lastCarTrip'))
@@ -195,8 +195,8 @@ test('the Murcia car needs nothing, can be skipped after 1 s and lands next to t
   await standing(page, { x: 8, y: 12, facing: 'up' });
   await press(page, 'z');
   expect(await readDialogue(page)).toEqual([LOCKED]); // it is the office car, and the bag is empty
-  await page.screenshot({ path: testInfo.outputPath('m13-back-office.png') });
-  // The trip back saved the new position (M10 map save on arrival).
+  await page.screenshot({ path: testInfo.outputPath('back-office.png') });
+  // The trip back saved the new position (map save on arrival).
   expect(await hook<string[]>(page, 'saveRequests')).toContain('map');
   expect(errors).toEqual([]);
 });

@@ -1,9 +1,9 @@
 /**
- * New-game intro rules (M11, pure). The IntroScene plays `intro.json`'s steps; this file holds the parts
+ * New-game intro rules (pure). The IntroScene plays `intro.json`'s steps; this file holds the parts
  * that are rules, not drawing:
  * - {@link fillIntroText}: `{name}` (the player's name) and `{starter}` (the starter's species name) in the
  *   coworker's lines;
- * - {@link findSecretName} / {@link applySecretName}: docs/PLAN.md › `secret-names.json` — matching ignores
+ * - {@link findSecretName} / {@link applySecretName}: docs/CONTENT.md › Secret names — matching ignores
  *   case, accents and surrounding spaces (`normalizeName`), at most one entry matches, its items go into the
  *   bag (capped at `ITEM_COUNT_MAX` per item, like any other gain);
  * - {@link traceIntro}: every tile each actor stands on while the script runs, so the boot checks can

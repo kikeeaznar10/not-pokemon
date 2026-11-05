@@ -1,5 +1,5 @@
 /**
- * Menu cursor movement, shared by the ChoiceBox (M5) and later menus. Pure (no Phaser) so it can be
+ * Menu cursor movement, shared by the ChoiceBox and later menus. Pure (no Phaser) so it can be
  * unit-tested.
  */
 

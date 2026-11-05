@@ -1,5 +1,5 @@
 /**
- * Options store (M10): the live player options (music volume, effects volume, text speed), kept in
+ * Options store: the live player options (music volume, effects volume, text speed), kept in
  * `localStorage` key {@link OPTIONS_KEY} (`flexymon.options`), apart from the game save, so deleting or
  * breaking the save never resets them. Rules and parsing: `src/logic/options.ts`.
  *

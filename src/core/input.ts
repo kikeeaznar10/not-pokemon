@@ -1,7 +1,7 @@
 /**
  * The Input service: the ONLY way game code reads controls. Scenes ask `input.isDown('a')` or
  * `input.justPressed('start')`; they never read the keyboard directly. The keyboard (desktop, bound in
- * `main.ts` with {@link bindKeyboard}) and, from M12, the touch controls feed the same service through
+ * `main.ts` with {@link bindKeyboard}) and the touch controls feed the same service through
  * `keyDown/keyUp` and `press/release`.
  *
  * Rules:
@@ -13,10 +13,10 @@
  *   pressed one wins. A tap shorter than one frame still shows for that one frame.
  * - Losing focus releases everything (no stuck keys).
  *
- * Keyboard (docs/PLAN.md › Locked decisions): arrows/WASD move, Z = A, X = B, Enter = Start, M = map.
+ * Keyboard (docs/GAME-RULES.md › Locked decisions): arrows/WASD move, Z = A, X = B, Enter = Start, M = map.
  * F2 = `debug` (only used by the DebugScene). No gamepad.
  *
- * Text mode (M11, name entry): while {@link Input.setTextMode} is on, a key that types one character
+ * Text mode (name entry): while {@link Input.setTextMode} is on, a key that types one character
  * (`KeyboardEvent.key` of length 1: letters, digits, space…) is queued as text and does NOT press its
  * action, so Z / X / WASD / M type letters; Backspace is queued as `'\b'`. Arrows, Enter and F2 keep their
  * actions. Scenes read the queue with {@link Input.takeTyped}.
@@ -70,7 +70,7 @@ export class Input {
   private current = new Set<Action>();
   /** Held directions, most recent last. */
   private dirOrder: Direction[] = [];
-  /** Text mode (M11): typed characters are queued instead of pressing actions. */
+  /** Text mode: typed characters are queued instead of pressing actions. */
   private textMode = false;
   private typed: string[] = [];
 
@@ -129,7 +129,7 @@ export class Input {
     this.dirOrder = this.dirOrder.filter((d) => d !== action);
   }
 
-  /** Switch text mode on or off (M11); the queue is emptied either way. */
+  /** Switch text mode on or off; the queue is emptied either way. */
   setTextMode(on: boolean): void {
     this.textMode = on;
     this.typed = [];

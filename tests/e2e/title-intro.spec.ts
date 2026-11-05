@@ -1,4 +1,4 @@
-// M11 "Done when": a first-time player reaches free movement in under 60 s; the name "PACO" receives the
+// Checks: a first-time player reaches free movement in under 60 s; the name "PACO" receives the
 // bonus items and "Pacoo" does not; Continuar is hidden with no save and restores the game when present.
 // Also: the name screen (keyboard typing, grid by click, Borrar, the 10-character limit, empty name), the
 // new-game confirmation over a save, and the intro script (walks, dialogue, handover, jingle).
@@ -153,10 +153,10 @@ test('a first-time player goes title → name → intro → free movement in und
     logo: 'Flexymon',
     hint: 'Pulsa START',
   });
-  await page.screenshot({ path: testInfo.outputPath(`m11-title-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`title-${testInfo.project.name}.png`) });
   await press(page, 'Enter');
   await expect.poll(() => title(page)).toMatchObject({ ui: 'menu', options: ['Nueva partida'], cursor: 0 });
-  await page.screenshot({ path: testInfo.outputPath(`m11-title-menu-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`title-menu-${testInfo.project.name}.png`) });
   await press(page, 'z');
 
   await expect.poll(() => scene(page)).toBe('Name');
@@ -165,7 +165,7 @@ test('a first-time player goes title → name → intro → free movement in und
   );
   for (const k of ['A', 'n', 'a']) await press(page, k);
   await expect.poll(async () => (await nameEntry(page))?.name).toBe('Ana');
-  await page.screenshot({ path: testInfo.outputPath(`m11-name-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`name-${testInfo.project.name}.png`) });
   await press(page, 'Enter');
 
   await expect.poll(() => scene(page)).toBe('Intro');
@@ -176,7 +176,7 @@ test('a first-time player goes title → name → intro → free movement in und
   const mid = (await intro(page))!;
   expect(mid.player).toEqual({ x: 15, y: 8, facing: 'up' });
   expect(mid.coworker).toMatchObject({ x: 15, y: 7 });
-  await page.screenshot({ path: testInfo.outputPath(`m11-intro-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`intro-${testInfo.project.name}.png`) });
   const texts = await playIntro(page);
   expect(texts).toEqual([
     '¡Hola, Ana! Bienvenido a ahora.',
@@ -199,7 +199,7 @@ test('a first-time player goes title → name → intro → free movement in und
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');
   await standing(page, { x: 14, y: 8 });
-  await page.screenshot({ path: testInfo.outputPath(`m11-free-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`free-${testInfo.project.name}.png`) });
   expect(errors).toEqual([]);
 });
 
@@ -286,7 +286,7 @@ test('Nueva partida over a save asks first: No keeps the save, Sí starts a new 
   const saved = await page.evaluate((k) => localStorage.getItem(k), SAVE_KEY);
   await chooseNewGame(page);
   await expect.poll(async () => (await title(page))?.confirm).toEqual({ options: ['Sí', 'No'], cursor: 1 });
-  await page.screenshot({ path: testInfo.outputPath(`m11-confirm-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`confirm-${testInfo.project.name}.png`) });
   await press(page, 'z'); // No
   await expect.poll(async () => (await title(page))?.ui).toBe('press');
   expect(await page.evaluate((k) => localStorage.getItem(k), SAVE_KEY)).toBe(saved);
@@ -341,7 +341,7 @@ test('name screen: keyboard letters (Z and X too), Backspace, 10 characters, gri
   await expect.poll(async () => (await nameEntry(page))?.name).toBe('Ñ');
   await press(page, 'o');
   await expect.poll(async () => (await nameEntry(page))?.name).toBe('Ño');
-  await page.screenshot({ path: testInfo.outputPath(`m11-name-grid-${testInfo.project.name}.png`) });
+  await page.screenshot({ path: testInfo.outputPath(`name-grid-${testInfo.project.name}.png`) });
   await clickCell(page, 'OK');
   await expect.poll(() => scene(page)).toBe('Intro');
   await expect.poll(async () => (await intro(page))?.name).toBe('Ño');

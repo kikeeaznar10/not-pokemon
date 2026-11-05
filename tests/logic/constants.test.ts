@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as C from '../../src/logic/constants';
 
 describe('constants', () => {
-  it('match the values in docs/PLAN.md › M2', () => {
+  it('match the documented rule values', () => {
     expect(C.DAMAGE_SCALE).toBe(0.3);
     expect(C.DAMAGE_ROLL).toEqual([0.85, 1]);
     expect(C.MOD_MIN).toBe(0.25);
@@ -16,7 +16,7 @@ describe('constants', () => {
     expect(C.NPC_LOW_HP).toBe(0.25);
   });
 
-  it('match docs/PLAN.md › M6 (flash 600 ms, HP bar 400 ms)', () => {
+  it('match the battle timings (flash 600 ms, HP bar 400 ms)', () => {
     expect(C.BATTLE_FLASH_MS).toBe(600);
     expect(C.HP_ANIM_MS).toBe(400);
     expect(C.HP_RED_BELOW).toBeLessThan(C.HP_YELLOW_BELOW);

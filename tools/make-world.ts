@@ -1,5 +1,5 @@
 /**
- * `npm run world` (M14) — builds the real world's Tiled maps from plain-text layouts, since no human can draw them in
+ * `npm run world` — builds the real world's Tiled maps from plain-text layouts, since no human can draw them in
  * Tiled in a cloud session:
  * - `tools/world/<zone>.txt`: one character per tile (legend: {@link LEGEND}, documented in `tools/README.md`);
  * - `tools/world/world.json`: per map the base ground under buildings and trees, doors, map-edge links, the Audi,

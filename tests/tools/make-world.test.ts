@@ -15,7 +15,7 @@ import {
 } from '../../tools/make-world';
 import { SIDE, VARIANT_TILES } from '../../tools/art/tiles';
 
-describe('make-world (M14)', () => {
+describe('make-world', () => {
   it('draws an 8-column tileset of 32 px tiles: 32 base tiles, then the variants', () => {
     const ts = PNG.sync.read(drawWorldTileset());
     expect(ts.width).toBe(256);

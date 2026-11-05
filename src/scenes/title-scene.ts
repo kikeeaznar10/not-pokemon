@@ -1,5 +1,5 @@
 /**
- * TitleScene (M11) — the first screen after loading: the pixel office (`intro.json › titleImage`), the logo
+ * TitleScene — the first screen after loading: the pixel office (`intro.json › titleImage`), the logo
  * (`app.title`) and a blinking "Pulsa START".
  *
  * - Start, A or a tap shows the menu: *Continuar* (only when `flexymon.save.v1` holds a valid save) and
@@ -11,9 +11,9 @@
  * - *Nueva partida* with a save asks for confirmation first (Sí / No, the cursor starts on No); with no save it
  *   goes straight on. A new game continues in the NameScene, then the IntroScene. The old save is only
  *   overwritten when the new game enters its first map (auto-save).
- * - Sounds (M15): opening the menu (Start, A or a tap) and choosing with Start play `confirm`; the menu and the Sí /
+ * - Sounds: opening the menu (Start, A or a tap) and choosing with Start play `confirm`; the menu and the Sí /
  *   No box play their own.
- * - {@link TitleScene.quickStart} (E2E hooks only) does what Start did before M11: continue a valid save,
+ * - {@link TitleScene.quickStart} (E2E hooks only) does what Start did : continue a valid save,
  *   or start a new game with the default name at `start.json › spawn`, skipping the name and the intro.
  */
 import Phaser from 'phaser';

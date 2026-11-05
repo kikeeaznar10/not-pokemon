@@ -1,5 +1,5 @@
 /**
- * The Audi to Murcia (docs/PLAN.md › M13, car.json). Pure rules, no Phaser:
+ * The Audi to Murcia (docs/CONTENT.md › The Audi). Pure rules, no Phaser:
  * - The office car (a map warp with `car = murcia`) opens only if the player owns BOTH items of ANY pair in
  *   `car.json › unlockPairs`. Owning means a count of at least 1; the items are only checked, never consumed.
  * - The Murcia car (`car = valencia`) has no requirement.

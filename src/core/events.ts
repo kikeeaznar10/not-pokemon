@@ -6,7 +6,7 @@
  */
 import type { Options } from '../logic/options';
 
-/** Every game-wide event and its payload. Milestones add entries here. */
+/** Every game-wide event and its payload. New events are added here, each with a doc comment. */
 export interface GameEvents {
   /** Content JSON loaded and validated; `getGameData()` is available. */
   'data:loaded': void;
@@ -14,37 +14,37 @@ export interface GameEvents {
   'data:error': string[];
   /** Preload finished; all assets are in the cache. */
   'game:ready': void;
-  /** The overworld finished building a zone's map (M3). */
+  /** The overworld finished building a zone's map. */
   'zone:entered': { zone: string };
-  /** The player finished a step, was placed on a map (M3) or turned on the spot (M10). Tile coordinates match Tiled. */
+  /** The player finished a step, was placed on a map or turned on the spot. Tile coordinates match Tiled. */
   'player:moved': { map: string; x: number; y: number; facing: 'up' | 'down' | 'left' | 'right' };
-  /** Debug menu (M4): opened/closed. While open the overworld ignores movement. */
+  /** Debug menu: opened/closed. While open the overworld ignores movement. */
   'debug:menu': { open: boolean };
-  /** Debug command (M4): teleport the player to a zone's `default` spawn. */
+  /** Debug command: teleport the player to a zone's `default` spawn. */
   'debug:teleport': { map: string };
-  /** Debug command (M6): start a wild battle against one fresh flexymon of this species. */
+  /** Debug command: start a wild battle against one fresh flexymon of this species. */
   'debug:battle': { speciesId: string };
-  /** The BattleScene finished (M6); the game state already holds the team after the battle. */
+  /** The BattleScene finished; the game state already holds the team after the battle. */
   'battle:ended': { result: 'win' | 'lose' | 'fled' };
   /**
-   * A point where the game auto-saves (M9 emits `healer` and `shop`; M10 adds `map` (overworld entered a
+   * A point where the game auto-saves (`healer`, `shop`, `map` (overworld entered a
    * map), `battle` (battle ended) and `menu` (Start menu closed); `src/core/autosave.ts` writes the save).
    */
   'save:request': { reason: 'healer' | 'shop' | 'map' | 'battle' | 'menu' };
-  /** An overlay scene opened from the overworld (M9: Shop, Storage; M10: Menu) closed; the overworld resumes. */
+  /** An overlay scene opened from the overworld (Shop, Storage; Menu) closed; the overworld resumes. */
   'overlay:closed': { scene: string };
-  /** A save was written for this reason (M10; the HUD shows "Guardando…"). Quiet saves on page hide are not announced. */
+  /** A save was written for this reason (the HUD shows "Guardando…"). Quiet saves on page hide are not announced. */
   'save:done': { reason: 'healer' | 'shop' | 'map' | 'battle' | 'menu' };
-  /** The player changed an option (M10); payload = the new options. */
+  /** The player changed an option; payload = the new options. */
   'options:changed': Options;
-  /** Debug command (M10): delete the save and reload the page. */
+  /** Debug command: delete the save and reload the page. */
   'debug:delete_save': void;
   /**
-   * Debug command (M15): the content was reloaded ("Recargar datos") and the game state checked against it; the
+   * Debug command: the content was reloaded ("Recargar datos") and the game state checked against it; the
    * overworld rebuilds the current map where the player stands.
    */
   'debug:reloaded': void;
-  /** The CarScene (M13) finished the trip (played out or skipped); the overworld moves to the arrival point. */
+  /** The CarScene finished the trip (played out or skipped); the overworld moves to the arrival point. */
   'car:ended': { to: 'murcia' | 'valencia' };
 }
 

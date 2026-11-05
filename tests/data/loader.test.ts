@@ -58,7 +58,7 @@ describe('loader', () => {
 });
 
 describe('formatPath', () => {
-  it('formats like the plan', () => {
+  it('formats file › path › message', () => {
     expect(formatPath([3, 'team', 0])).toBe('[3].team[0]');
     expect(formatPath(['spawn', 'map'])).toBe('spawn.map');
     expect(formatPath(['unlockPairs', 1, 1])).toBe('unlockPairs[1][1]');

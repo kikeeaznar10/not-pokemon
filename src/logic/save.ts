@@ -1,6 +1,6 @@
 /**
- * Save format (docs/PLAN.md › Saving): serialize the game state, and parse + validate + migrate a saved
- * JSON string. Pure: no `localStorage` here (the save store wrapper in `src/core/` comes in M10) and no
+ * Save format (docs/GAME-RULES.md › Saving): serialize the game state, and parse + validate + migrate a saved
+ * JSON string. Pure: no `localStorage` here (the save store wrapper lives in `src/core/`) and no
  * logging (warnings are returned for the caller to log).
  *
  * Migration on load (each change adds a warning; nothing throws):

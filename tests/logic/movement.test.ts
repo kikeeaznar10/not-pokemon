@@ -121,7 +121,7 @@ describe('grid movement', () => {
   });
 });
 
-describe('haltAt (M7: stop for a wild encounter)', () => {
+describe('haltAt (stop for a wild encounter)', () => {
   it('drops a step that started in the same frame and keeps the facing', () => {
     // Holding right: the first step ends and the next one starts in the same update.
     const s = run(createMoveState(0, 0, 'right'), 'right', Math.ceil(WALK_MS / 16) + 1).state;

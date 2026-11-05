@@ -1,5 +1,5 @@
 /**
- * World tile art (see `docs/STYLE-REFERENCE.md`): every tile is drawn at 16 × 16 design pixels and scaled ×2 into
+ * World tile art (see `docs/ART.md`): every tile is drawn at 16 × 16 design pixels and scaled ×2 into
  * the 32 px tileset by `make-world.ts`.
  *
  * {@link BASE_TILES} are the 32 tiles whose local ids (`WT` in `make-world.ts`, 0–31) the maps have always used.

@@ -1,5 +1,5 @@
 /**
- * NPCs in the overworld (M5): a sprite per `npcs.json` entry whose `map` is the current zone, driven by
+ * NPCs in the overworld: a sprite per `npcs.json` entry whose `map` is the current zone, driven by
  * the pure wander rules in `src/logic/npc-wander.ts`. This class only draws and holds state; the
  * OverworldScene decides what is blocked.
  *
@@ -7,7 +7,7 @@
  * 4 rows down/left/right/up, the player's layout) the NPC shows its facing and walk frames; any other
  * size (e.g. the 32 × 32 placeholders) is drawn as a single still image.
  *
- * Enemy NPCs (M8): {@link NpcActor.showAlert} draws the "!" bubble (text `npc.alert`) above the NPC
+ * Enemy NPCs: {@link NpcActor.showAlert} draws the "!" bubble (text `npc.alert`) above the NPC
  * (lowered over its head when that would be above the camera view);
  * {@link NpcActor.engage}, {@link NpcActor.stepTo} and {@link NpcActor.face} walk it up to the player.
  */
@@ -119,7 +119,7 @@ export class NpcActor {
     this.draw();
   }
 
-  /** Enemy approach (M8): stop wandering without turning. Ended by {@link finishTalk}. */
+  /** Enemy approach: stop wandering without turning. Ended by {@link finishTalk}. */
   engage(): void {
     this.move = engage(this.move);
   }

@@ -1,4 +1,4 @@
-// M14: the real world (public/data/ + public/maps/<zone>.tmj) and the switch to the frozen test world.
+// The real world (public/data/ + public/maps/<zone>.tmj) and the switch to the frozen test world.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -79,12 +79,12 @@ const INTERIORS = [
   'ciruelo',
 ];
 
-describe('the real world (M14)', () => {
+describe('the real world', () => {
   it('loads with zero errors and zero warnings', () => {
     expect(warnings).toEqual([]);
   });
 
-  it('has every planned zone and no test map', () => {
+  it('has every shipped zone and no test map', () => {
     expect([...data.zones.keys()].sort()).toEqual([...VALENCIA_SIDE, ...MURCIA_SIDE, ...INTERIORS].sort());
     expect(
       [...data.zones.values()]
@@ -95,21 +95,22 @@ describe('the real world (M14)', () => {
     for (const id of MURCIA_SIDE) expect(data.zones.get(id)!.region).toBe('murcia');
   });
 
-  it('meets the content target: 12 flexymon, 24 attacks, 8 items, 25 NPCs (15 enemies)', () => {
-    expect(data.flexymon.size).toBe(12);
-    expect(data.attacks.size).toBe(24);
-    expect(data.items.size).toBe(8);
-    expect(data.npcs.size).toBe(25);
-    expect([...data.npcs.values()].filter((n) => n.type === 'enemy')).toHaveLength(15);
-    // Every species and attack is used somewhere.
+  it('uses all its content: at least the shipped amounts, every attack used, every species obtainable', () => {
+    // Minimums, not exact counts, so new content does not break this test.
+    expect(data.flexymon.size).toBeGreaterThanOrEqual(12);
+    expect(data.attacks.size).toBeGreaterThanOrEqual(24);
+    expect(data.items.size).toBeGreaterThanOrEqual(8);
+    expect(data.npcs.size).toBeGreaterThanOrEqual(25);
+    expect([...data.npcs.values()].filter((n) => n.type === 'enemy').length).toBeGreaterThanOrEqual(15);
+    // Every attack is known by some species.
     const used = new Set([...data.flexymon.values()].flatMap((s) => s.attacks));
-    expect(used.size).toBe(24);
+    expect([...data.attacks.keys()].filter((id) => !used.has(id))).toEqual([]);
+    // Every species but the starter (handed over in the intro) is met in the wild.
     const met = new Set<string>();
     for (const z of data.zones.values())
       for (const g of Object.values(z.encounters)) for (const f of g.flexymon) met.add(f.id);
-    // Every species but the starter (handed over in the intro) is met in the wild.
     met.add(data.start.starter);
-    expect(met.size).toBe(12);
+    expect([...data.flexymon.keys()].filter((id) => !met.has(id))).toEqual([]);
   });
 
   it('follows the balance guide: totals 60–100 in Valencia, 100–140 for the Murcia species', () => {
@@ -196,7 +197,7 @@ describe('the real world (M14)', () => {
   });
 });
 
-describe('chooseDataDir (M14)', () => {
+describe('chooseDataDir', () => {
   it('uses the real world unless a dev / E2E build asks for the test world', () => {
     expect(chooseDataDir(false, '?world=test', 'test')).toBe(WORLD_DATA_DIR);
     expect(chooseDataDir(true, '', null)).toBe(WORLD_DATA_DIR);

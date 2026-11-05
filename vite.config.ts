@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 
 /**
  * Vite + Vitest configuration.
- * - `base: './'` keeps the build relocatable on any static host (M15 may set a sub-path).
+ * - `base: './'` keeps the build relocatable on any static host.
  * - Vitest only runs unit tests under `tests/`; Playwright specs in `tests/e2e/` are excluded.
  */
 export default defineConfig({

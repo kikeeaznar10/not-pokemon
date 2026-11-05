@@ -1,5 +1,5 @@
 /**
- * Shop rules for the ShopScene (M9, docs/PLAN.md › Euros and shops). The money rules themselves live in
+ * Shop rules for the ShopScene (docs/GAME-RULES.md › Euros and shops). The money rules themselves live in
  * `economy.ts` (`buy`, `sell`, `maxBuyQuantity`, `sellPrice`); this module turns them into the rows and
  * limits the shop screen shows, so the scene never computes a price or a limit.
  *

@@ -11,7 +11,7 @@ const car = {
   toValencia: { map: 'oficina_exterior', x: 8, y: 12, facing: 'down' as const },
 };
 
-describe('car (M13)', () => {
+describe('car', () => {
   it('opens with both items of any pair, not with one item or an empty bag', () => {
     expect(ownsUnlockPair(car.unlockPairs, { llaves_audi: 1, carnet: 1 })).toBe(true);
     expect(ownsUnlockPair(car.unlockPairs, { llaves_audi: 2, cafe_doble: 5 })).toBe(true);

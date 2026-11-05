@@ -8,10 +8,10 @@ describe('talkLines', () => {
   it.each(['talker', 'shopkeeper', 'enemy', 'storage'] as const)('%s says its dialogue', (type) => {
     expect(talkLines({ type, dialogue }, t)).toEqual(dialogue);
   });
-  it('healer says it healed the team first (M9)', () => {
+  it('healer says it healed the team first', () => {
     expect(talkLines({ type: 'healer', dialogue }, t)).toEqual(['<healer.done>', ...dialogue]);
   });
-  it('an enemy in cooldown only says its defeatDialogue (M8)', () => {
+  it('an enemy in cooldown only says its defeatDialogue', () => {
     const enemy = { type: 'enemy' as const, dialogue, defeatDialogue: ['Vale, vale...'] };
     expect(talkLines(enemy, t, 'cooldown')).toEqual(['Vale, vale...']);
     expect(talkLines(enemy, t, 'ready')).toEqual(dialogue);
@@ -23,7 +23,7 @@ describe('talkLines', () => {
   });
 });
 
-describe('talkAction (M9)', () => {
+describe('talkAction', () => {
   it('healer heals, storage opens the box, shopkeeper opens the shop, others nothing', () => {
     expect(talkAction({ type: 'healer' })).toBe('heal');
     expect(talkAction({ type: 'storage' })).toBe('storage');

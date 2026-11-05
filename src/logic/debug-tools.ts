@@ -1,5 +1,5 @@
 /**
- * Debug menu commands that change the game state (M15). Pure: they take the state and return a new one.
+ * Debug menu commands that change the game state. Pure: they take the state and return a new one.
  *
  * - {@link giveEuros}: "Dar {n} €" adds `DEBUG_GIVE_EUROS`, clamped to `EUROS_MAX` like every gain.
  * - {@link giveItem}: "Dar: {item}" adds `DEBUG_GIVE_ITEMS` of one item, capped at `ITEM_COUNT_MAX`. Any item can be

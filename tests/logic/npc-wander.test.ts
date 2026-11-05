@@ -163,7 +163,7 @@ describe('player and NPC never share a tile', () => {
   });
 });
 
-describe('enemy approach (M8)', () => {
+describe('enemy approach', () => {
   it('engage pauses wandering without turning; endTalk resumes', () => {
     const s = engage(createNpcMove(3, 4, 'left', area, scriptedRng({ int: [100] })));
     expect(s).toMatchObject({ talking: true, facing: 'left', turnTo: null });

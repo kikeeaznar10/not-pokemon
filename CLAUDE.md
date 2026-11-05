@@ -1,68 +1,74 @@
 # Flexymon — rules for Claude Code sessions
 
-Flexymon is a browser game (desktop + mobile, landscape) in the style of the Game Boy Color
-monster-collecting RPGs, set in a cartoon Valencia region. It is built milestone by milestone
-(M0–M15) by separate, unrelated Claude Code sessions.
+Flexymon is an open-source browser game (desktop + mobile, landscape) in the style of the Game Boy Color
+monster-collecting RPGs, set in a cartoon Valencia region. The game is complete; sessions now add features, content
+and fixes.
 
-**`docs/PLAN.md` is the source of truth for the game** (rules, content format, milestones). If
-anything in this file disagrees with the plan, the plan wins; record the disagreement under
-"Open questions" in `docs/PROGRESS.md`. **Exception:** the workflow rules in "How to work" below
-(testing, documentation, pushing to `main`) replace the plan's branch/PR rules.
+**The documentation is the source of truth:** `README.md`, `CONTRIBUTING.md` and `docs/`:
+
+| Doc | Covers |
+| --- | --- |
+| `docs/ARCHITECTURE.md` | How the code fits together. |
+| `docs/GAME-RULES.md` | Every game rule and the design pillars. |
+| `docs/CONTENT.md` | Content JSON: flexymon, attacks, items, NPCs, dialogue, enemies, encounters, shops, debug menu. |
+| `docs/MAPS.md` | Maps, zones, the world builder, Tiled format, tileset ids. |
+| `docs/ART.md` | Art style, the code-drawn art pipeline, asset sizes, audio. |
+| `docs/TESTING.md` | Unit and browser tests, the frozen test world. |
+| `docs/DEPLOY.md` | Building and hosting. |
+
+Folder `README.md` files are the file-by-file reference (`src/*/README.md`, `public/*/README.md`, `tools/README.md`,
+`tests/README.md` for the `__E2E__` hooks).
 
 ## How to work (every session)
 
-1. Before writing any code, read this file, `docs/PLAN.md` and `docs/PROGRESS.md`.
-2. Work on **exactly one milestone**: the first unticked one in `docs/PROGRESS.md` (or the one
-   the user names). Do not start the next one, even if there is time left.
-3. Branch: develop on `m<number>-<short-name>` (e.g. `m4-dialogue`), or on the branch the
-   harness assigned to the session. Commit there while working.
-4. Only change files listed in the milestone, plus tests. If you must touch another file,
-   explain why in the milestone summary in `docs/PROGRESS.md`.
-5. Never hard-code game content (creature names, numbers, dialogue, prices) in TypeScript.
-   Content lives in `public/data/*.json`; UI strings live in `src/i18n/es.json`. Code reads them.
-   Tunable rule numbers live in `src/logic/constants.ts`.
-6. If the plan is unclear or wrong, stop, write the question in `docs/PROGRESS.md` under
-   "Open questions", and finish the milestone with the safest assumption. Never silently invent rules.
-7. When finished, tick the milestone in `docs/PROGRESS.md` and add a 3–5 line summary: what was
-   built, any deviation, anything the next session must know.
-8. **Document everything.** Every feature ships with its documentation in the same commit:
-   - a short doc comment (`/** ... */`) on every exported function, class, type and scene,
-     saying what it does and any non-obvious rule it follows;
-   - every new JSON field, map property, debug command, `__E2E__` helper or npm script described
-     in the relevant doc (`docs/PROGRESS.md` summary, the folder's `README.md`, and from M15
-     `docs/CONTENT.md`);
-   - any decision or deviation from the plan written in `docs/PROGRESS.md`.
-   Undocumented work is not done.
-9. **Test before pushing to `main`.** A milestone may only reach `main` when every check of the
-   Definition of done below passes: lint, typecheck, unit tests, build, Playwright, and every
-   "Done when" item verified in the running game. If anything fails, fix it first; never push a
-   red build to `main`, and never skip, disable or weaken a test to get green.
-10. **When a feature (milestone) is finished and tested, push it to `main`.** Bring the branch
-    up to date with `origin/main` first (`git fetch origin main` then rebase or merge), re-run the
-    checks if anything changed, then push: `git push origin HEAD:main`. Also push the working
-    branch. `main` must always contain only finished, tested, documented milestones.
+1. Before writing code, read this file, `CONTRIBUTING.md` and the docs relevant to the task.
+2. Develop on the branch the harness assigned (or a short descriptive branch). Commit there while working.
+3. Keep the change focused on what was asked.
+4. Never hard-code game content (creature names, numbers, dialogue, prices) in TypeScript. Content lives in
+   `public/data/*.json`; UI strings live in `src/i18n/es.json`; tunable rule numbers live in
+   `src/logic/constants.ts`.
+5. If a rule is unclear, don't silently invent one: pick the safest behaviour, document it in the relevant doc, and
+   tell the user.
+6. **Every feature or change includes its documentation update, in the same commit.** Undocumented work is not done:
+   - a short doc comment (`/** ... */`) on every exported function, class, type and scene, saying what it does and
+     any non-obvious rule it follows;
+   - rules → `docs/GAME-RULES.md`; content fields, NPC types, debug commands → `docs/CONTENT.md`; maps, zones, tiles,
+     world builder → `docs/MAPS.md`; art, sizes, audio → `docs/ART.md`; scenes, events, modules, patterns →
+     `docs/ARCHITECTURE.md`; tests and `__E2E__` hooks → `docs/TESTING.md` and `tests/README.md`; npm scripts →
+     `README.md` and `tools/README.md`; validation rules → `public/data/README.md`; new files → the folder's
+     `README.md`;
+   - any doc made wrong by the change is fixed, even if not listed above;
+   - if this file (`CLAUDE.md`) or `CONTRIBUTING.md` no longer matches how the project works, update them too.
+   Don't write change logs or history ("added in…") into docs or comments: describe how things work now.
+7. **Test before pushing to `main`.** A change may only reach `main` when every check of the Definition of done
+   passes. If anything fails, fix it first; never push a red build to `main`, and never skip, disable or weaken a test
+   to get green (a test that pins something changed on purpose is updated, and the reason told to the user).
+8. **When a change is finished and tested, push it to `main`.** Bring the branch up to date with `origin/main` first
+   (`git fetch origin main`, then rebase or merge), re-run the checks if anything changed, then
+   `git push origin HEAD:main`. Also push the working branch. `main` must always contain only finished, tested,
+   documented work.
 
-### Definition of done (every milestone)
+### Definition of done (every change)
 
 - `npm run lint`, `npm run typecheck`, `npm test` and `npm run build` pass with zero errors.
-- Every item of the milestone's "Done when" list was checked in the running game. In a cloud
-  session with no human at the browser, check it with Playwright (via the `window.__E2E__` hooks)
-  and look at screenshots; say in the milestone summary which items were verified that way.
-- `npx playwright test` passes (from M0 on, at least the smoke test).
+- `npx playwright test` passes.
+- The change was checked in the running game. In a cloud session with no human at the browser, check it with
+  Playwright (via the `window.__E2E__` hooks) and look at screenshots; tell the user what was verified that way.
 - No `console.log` except through `log()` in `src/core/log.ts`.
 - No new hard-coded content; no Spanish text inside `.ts` files.
-- Everything documented (rule 8); `docs/PROGRESS.md` updated.
-- Pushed to `main` (rule 10).
+- Documentation updated in the same commit (rule 6).
+- Pushed to `main` (rule 8).
 
-## Locked decisions (summary — full table in `docs/PLAN.md`)
+## Design pillars (summary — full table in `docs/GAME-RULES.md`)
 
-- Spanish only. The creatures are called **flexymon** (singular and plural). Never use the word
-  "Pokémon" or any Nintendo asset in the game.
+- Spanish only. The creatures are called **flexymon** (singular and plural). Never use the word "Pokémon" or any
+  Nintendo asset in the game, and never copy assets from existing games.
 - Stats HP / Ataque / Defensa / Velocidad. No types, no levels, no XP. Max 3 attacks.
-- Controls: desktop arrows/WASD, Z = A, X = B, Enter = Start, M = minimap. Mobile: on-screen
-  D-pad, A, B, Start, Mapa; landscape only. **No gamepad.**
-- Saving: `localStorage`, one slot, key `flexymon.save.v1`. No backend.
-- Static site only.
+- Controls: desktop arrows/WASD, Z = A, X = B, Enter = Start, M = minimap. Mobile: on-screen D-pad, A, B, Start, Mapa;
+  landscape only. **No gamepad.**
+- Saving: `localStorage`, one slot, key `flexymon.save.v1`. No backend. Static site only.
+
+Changing a pillar is a design decision: ask the user first.
 
 ## Stack
 
@@ -70,107 +76,72 @@ anything in this file disagrees with the plan, the plan wins; record the disagre
 | --- | --- |
 | Node.js LTS + npm | Node 22 (`.nvmrc`). |
 | TypeScript 6.0, `strict: true` | No `any` without a comment explaining why. Stay on 6.0 until `typescript-eslint` supports 7. |
-| Vite | Vanilla TS template; output `dist/`, fully static. |
+| Vite | Output `dist/`, fully static, `base: './'`. |
 | Phaser | Pinned exactly (`4.2.1`, no `^`); all dependencies are pinned with `npm install -E`. |
 | Zod | One schema per JSON file in `src/data/schemas/`. |
 | Vitest | Unit tests; required for everything in `src/logic/`. |
 | Playwright (`@playwright/test` 1.64.1) | Browser tests in `tests/e2e/`. The version matches the browsers pre-installed in cloud sessions. |
 | ESLint (flat config, `eslint.config.js`) + Prettier | `npm run lint` runs both; `npm run format` fixes formatting. |
-| Tiled | Maps as `.tmj` (Tiled JSON, CSV layers, embedded tilesets). |
+| Tiled | Maps as `.tmj` (Tiled JSON, CSV layers, embedded tilesets); the real world is generated from `tools/world/`. |
 
-Screen: base resolution **512 × 288** (16 × 9 tiles of 32 px), `pixelArt: true`,
-`roundPixels: true`, scale `FIT` + `CENTER_BOTH`. Position everything in tile/base-pixel units.
+Screen: base resolution **512 × 288** (16 × 9 tiles of 32 px), `pixelArt: true`, `roundPixels: true`, scale `FIT` +
+`CENTER_BOTH`. Position everything in tile/base-pixel units.
 
 ## Repo layout
 
 ```
-CLAUDE.md                  this file
-docs/PLAN.md               the milestone plan (source of truth)
-docs/PROGRESS.md           milestone checklist, summaries, open questions
-public/
-  assets/sprites/          flexymon, characters, NPCs, items (PNG)
-  assets/tilesets/         tileset PNGs used by Tiled
-  assets/ui/               boxes, buttons, cursor, fonts, title, minimaps
-  assets/audio/sfx/        attack and UI sounds (OGG + MP3)
-  assets/audio/music/      one loop per region
-  maps/                    Tiled maps (.tmj), one per zone
-  data/                    game content JSON (the plan's nine + intro.json + sounds.json; guide: docs/CONTENT.md)
-src/
-  main.ts                  creates the Phaser game
-  config/game.ts           resolution, scene list
-  core/                    log, save store, input, event bus, rng (infrastructure)
-  data/                    loader + schemas/ (zod)
-  logic/                   pure game rules, NO Phaser imports, 100% unit-tested
-  scenes/                  Boot, Preload, Error, Title, Name, Intro, Overworld, Battle, Menu, Shop, Car, Debug
-  ui/                      DialogBox, ChoiceBox, Menu, HpBar, TouchControls, Minimap
-  world/                   Player, Npc, MapLoader, Warp, EncounterZone
-  i18n/es.json             every visible UI string
-tools/make-placeholders.ts generates placeholder art and sounds
-tests/
-  logic/ (etc.)            Vitest unit tests mirroring src/logic (and src/core, src/data)
-  e2e/                     Playwright browser tests
-playwright.config.ts       Playwright projects: desktop, android, android-landscape, iphone
+README.md, CONTRIBUTING.md   overview and contributor workflow
+docs/                        the guides listed above
+public/data/                 game content JSON (11 files; guide: docs/CONTENT.md)
+public/maps/                 Tiled maps, one per zone (generated from tools/world/); test/ = frozen test maps
+public/assets/               sprites, tilesets, ui (title, minimaps), audio (sfx, music)
+public/test-world/data/      frozen test content (do not add real content)
+src/main.ts                  creates the Phaser game, wiring, __E2E__ hooks
+src/config/game.ts           resolution, scene list
+src/core/                    log, rng, events, input, save store, autosave, session, options, ui sounds
+src/data/                    loader, schemas/ (zod), cross-refs, map checks, Tiled parser, atlas
+src/logic/                   pure game rules, NO Phaser imports, 100% unit-tested
+src/scenes/                  Boot, Preload, Error, Title, Name, Intro, Overworld, Battle, Car, Shop, Storage, Menu, Hud, Debug
+src/ui/                      DialogBox, ChoiceBox, GridMenu, HpBar, frame, Minimap, TouchControls, RotateScreen
+src/world/                   Player, NpcActor, zone map drawing, camera, music
+src/i18n/                    es.json (every UI string) and t()
+tools/                       art/, world/, make-*.ts generators (README.md)
+tests/                       Vitest unit tests mirroring src/ and tools/; e2e/ Playwright specs
 ```
 
 ## Architecture rules
 
-- **Game rules are plain TypeScript in `src/logic/`, with no Phaser imports.** They take plain
-  data and return plain data (battle resolution returns an `events[]` list the scene animates).
-  Scenes never compute rules.
+- **Game rules are plain TypeScript in `src/logic/`, with no Phaser imports.** They take plain data and return plain
+  data (battle resolution returns an `events[]` list the scene animates). Scenes never compute rules.
 - **Phaser code is presentation and input only** (`src/scenes/`, `src/ui/`, `src/world/`).
-- **Content is data**, validated with zod at boot, plus cross-reference checks. Any error stops the
-  game on the red ErrorScene listing file › JSON path › message.
-- **Randomness only through `src/core/rng.ts`** (seedable: `int`, `float`, `chance`, `pick`,
-  `weighted`, `id`), so tests can fix the seed.
-- **Input**: one service in `src/core/input.ts` (`isDown`, `justPressed` for
-  `up/down/left/right/a/b/start/map`). Keyboard and touch both feed it; no scene reads the
-  keyboard directly.
+- **Content is data**, validated with zod at boot, plus cross-reference and map checks. Any error stops the game on
+  the red ErrorScene listing file › JSON path › message.
+- **Randomness only through `src/core/rng.ts`** (seedable), so tests can fix the seed.
+- **Input**: one service in `src/core/input.ts` (`isDown`, `justPressed`). Keyboard and touch both feed it; no scene
+  reads the keyboard directly.
 - **Scenes talk through `src/core/events.ts`** (typed event bus), not by reaching into each other.
-- **Saves** go through a small save-store wrapper over `localStorage`, with a `version` field,
-  schema validation and migration (drop unknown ids with a warning; broken JSON is copied to
-  `flexymon.save.broken`).
-- **Text**: `t('battle.wild_appeared', { name })` reads `src/i18n/es.json`; a missing key shows
-  `⟦key⟧` and logs a warning.
-- Browser hygiene: start audio only after the first user gesture; pause audio and the game loop on
-  `visibilitychange` (hidden).
+- **Saves** go through the save store over `localStorage`, with a `version` field, schema validation and migration.
+- **Text**: `t('battle.wild_appeared', { name })` reads `src/i18n/es.json`; a missing key shows `⟦key⟧`.
+- Browser hygiene: audio only after the first user gesture; pause on `visibilitychange` (hidden).
 
-## Conventions
+## Commands
 
-- Files `kebab-case.ts`, classes `PascalCase`, functions/variables `camelCase`, content ids
-  `snake_case` (`portatil`, `bar_pacos`).
-- Commits in English, imperative, small and focused ("Add dialogue box").
-- Do not add dependencies beyond the plan's stack without saying why in the milestone summary.
-
-## Commands (scripts are created in M0)
-
-- `npm run dev` — dev server
-- `npm run build` — sprite atlas (`npm run atlas`, M15) + typecheck + production build to `dist/` (deploying: `docs/deploy.md`)
-- `npm run preview` — serve `dist/`
-- `npm start` — install dependencies, build (typecheck + production build), then serve `dist/` with `vite preview`
-- `npm run offline` — build, then write `dist-offline/flexymon.html` (everything embedded, opens from disk) and `dist-offline/flexymon.zip` to share (see `tools/README.md`)
-- `npm run lint` (ESLint + `prettier --check`) / `npm run format` (Prettier write)
-- `npm run typecheck` / `npm test` (Vitest, `vitest run`) / `npm run coverage` (Vitest + v8 coverage)
-- `npm run placeholders` — generate missing placeholder assets (never overwrites; `-- --dry-run` lists them; see `tools/README.md`)
-- `npm run atlas` — pack the content sprites into `public/assets/atlas/` (M15; a build artifact, not committed)
-- `npm run world` — build the real world's maps and tileset from `tools/world/` (M14; never overwrites, `-- --force` regenerates)
-- `npm run art` — draw the styled player, NPC, flexymon, item, car and title art (post-M15 restyle, `tools/art/`; never overwrites, `-- --force` redraws, `-- --dry-run` lists)
-- `npm run dev` then `?world=test` in the URL — the frozen M0–M13 test world (dev / E2E builds only, `src/data/world.ts`)
-- `npx playwright test` — browser tests (builds with `VITE_E2E=1` and serves `dist/` automatically)
-- `npx playwright test --project=iphone` — a single device profile
-
-Vitest only runs `tests/**/*.test.ts` and excludes `tests/e2e/**` (in `vite.config.ts`).
+- `npm run dev` — dev server (`?world=test` loads the frozen test world; F2 = debug overlay/menu)
+- `npm run build` — sprite atlas + typecheck + production build to `dist/` (deploying: `docs/DEPLOY.md`)
+- `npm run preview` / `npm start` — serve `dist/` / install + build + serve
+- `npm run offline` — one self-contained `dist-offline/flexymon.html` + zip
+- `npm run lint` / `npm run format` / `npm run typecheck` / `npm test` / `npm run coverage`
+- `npm run art` / `npm run world` / `npm run placeholders` / `npm run atlas` / `npm run test-map` — generators
+  (never overwrite; `-- --force` regenerates; see `tools/README.md`)
+- `npx playwright test` — browser tests (builds with `VITE_E2E=1` and serves `dist/` automatically);
+  `--project=iphone` for one device profile
 
 ## Test hooks and Playwright
 
-- When `import.meta.env.DEV` is true or `VITE_E2E=1`, expose `window.__GAME__` (the
-  `Phaser.Game` instance) and `window.__E2E__` helpers. Helpers grow with the milestones; at least
-  `currentScene()`, `playerTile()` and `startBattle(seed)` once those systems exist.
-- Playwright tests read state through these hooks, never by pixel-guessing. Screenshots are for
-  visual review, not assertions, unless a test is explicitly a visual snapshot.
-- Headless Chromium uses software WebGL (SwiftShader, set in `playwright.config.ts`). A black
-  canvas usually means a WebGL init failure; check the console first.
-- In cloud sessions Chromium is pre-installed: do not run `playwright install`. If the pinned
-  `@playwright/test` version cannot find the browser, launch with
-  `executablePath: '/opt/pw-browsers/chromium'`.
-- When changing visuals, take a Playwright screenshot (desktop + `iphone` projects) and look at it
-  before calling the task done.
+- With `import.meta.env.DEV` or `VITE_E2E=1`, `window.__GAME__` and `window.__E2E__` helpers are exposed (declared in
+  `E2EHooks` in `src/main.ts`, listed in `tests/README.md`). Add a helper there when a test needs one.
+- Playwright tests read state through these hooks, never by pixel-guessing. Screenshots are for visual review.
+- Headless Chromium uses software WebGL (SwiftShader). A black canvas usually means a WebGL init failure.
+- In cloud sessions Chromium is pre-installed: do not run `playwright install`. If the pinned version cannot find
+  the browser, launch with `executablePath: '/opt/pw-browsers/chromium'`.
+- When changing visuals, take a Playwright screenshot (desktop + `iphone` projects) and look at it.

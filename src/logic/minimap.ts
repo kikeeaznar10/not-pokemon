@@ -1,5 +1,5 @@
 /**
- * Minimap rules (docs/PLAN.md › M12), with no Phaser so they are unit-tested.
+ * Minimap rules, with no Phaser so they are unit-tested.
  *
  * - Each outdoor zone has a pre-drawn image at {@link minimapPath} (`assets/ui/minimap_<zone>.png`). The
  *   placeholder tool draws it from the map's collision data with {@link minimapCells}: one square of

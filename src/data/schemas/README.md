@@ -1,5 +1,5 @@
-# src/data/schemas — one zod schema per file in public/data/ (M1).
+# src/data/schemas — one zod schema per file in public/data/
 
-`intro.ts` (M11) validates `intro.json`, the one content file not in the plan's list of nine: the title image, the
-handover jingle, the intro coworker and the intro `steps` (`fade_in`, `wait`, `walk`, `face`, `say`, exactly one
-`handover`). See `public/data/README.md` for the fields.
+`index.ts` maps each content file name to its schema (`FILE_SCHEMAS`, `DATA_FILES`); `common.ts` holds the shared
+pieces (ids, asset paths, points, dialogue). Every object is strict. Adding a field to the content means adding it
+here first, then documenting it in `docs/CONTENT.md` and `public/data/README.md`.

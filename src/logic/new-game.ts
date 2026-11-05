@@ -1,5 +1,5 @@
 /**
- * The state of a new game (docs/PLAN.md › Config specification › `start.json`): the starter flexymon
+ * The state of a new game (docs/CONTENT.md › The new game): the starter flexymon
  * (zero bonus, full HP) alone in the team, the starting euros, team slots and items, the player on
  * the spawn point, no NPC states (every NPC starts `ready`). Pure; the starter's `uid` comes from `rng.id()`.
  */

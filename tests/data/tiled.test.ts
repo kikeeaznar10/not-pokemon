@@ -39,7 +39,7 @@ describe('Tiled maps', () => {
     expect(isBlocked(info, 0, 20)).toBe(true);
   });
 
-  it('the shipped test map has tall grass and two encounter rectangles (M7)', () => {
+  it('the shipped test map has tall grass and two encounter rectangles', () => {
     const info = parseTiledMap(shipped(), 'maps/test/test.tmj');
     const grass = (x: number, y: number) => info.encounter[y * info.width + x];
     expect(grass(20, 2)).toBe(true);
@@ -79,7 +79,7 @@ describe('Tiled maps', () => {
     expect(shipped('test_east')).toEqual(JSON.parse(JSON.stringify(buildTestEast())));
   });
 
-  it('reads warps: door, off-map edge (row kept), interior exit, the Audi (M13)', () => {
+  it('reads warps: door, off-map edge (row kept), interior exit, the Audi', () => {
     const test = parseTiledMap(shipped(), 'maps/test/test.tmj');
     expect(test.warps).toEqual([
       {
@@ -133,7 +133,7 @@ describe('Tiled maps', () => {
     expect(isBlocked(east, 2, 9) && isBlocked(east, 3, 9)).toBe(true);
   });
 
-  it('a car warp (M13) needs no toMap but must use trigger = action and a known destination', () => {
+  it('a car warp needs no toMap but must use trigger = action and a known destination', () => {
     const map = buildTestMap() as {
       layers: { name: string; objects?: { name: string; properties?: object[] }[] }[];
     };

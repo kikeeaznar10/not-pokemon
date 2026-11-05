@@ -1,6 +1,6 @@
 /**
- * ChoiceBox (M5): a small framed list of options with a cursor, fixed to the camera. Used for Sí/No,
- * Llevármelo/Dejarlo and shop lists (from M7/M9).
+ * ChoiceBox: a small framed list of options with a cursor, fixed to the camera. Used for Sí/No,
+ * Llevármelo/Dejarlo and shop lists.
  *
  * - Up/Down move the cursor (wrapping around), A chooses, B cancels (when `cancelable`, the default)
  *   and chooses `null`. Either way the box closes and `onChoose` is called once.
@@ -8,7 +8,7 @@
  *   underneath.
  * - The owner calls {@link ChoiceBox.update} every frame while {@link ChoiceBox.isOpen}; the frame it
  *   opens it ignores input (so the press that opened it does not also choose).
- * - Sounds (M15, `src/core/ui-sound.ts`): `cursor` on a move, `confirm` on A, `cancel` on B.
+ * - Sounds (`src/core/ui-sound.ts`): `cursor` on a move, `confirm` on A, `cancel` on B.
  * Option texts come from the caller (i18n keys or content), never from this file.
  */
 import Phaser from 'phaser';

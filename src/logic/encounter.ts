@@ -1,5 +1,5 @@
 /**
- * Wild encounters (docs/PLAN.md › Wild encounters). Checked once each time the player *finishes* a
+ * Wild encounters (docs/GAME-RULES.md › Wild encounters). Checked once each time the player *finishes* a
  * step. A step can start an encounter when its tile is inside an encounter rectangle of the map and the
  * rectangle's mode is `all` (urban crowd) or the tile has the Tiled property `encounter = true`. Then
  * `rng.chance(rate)`; on success a species is picked by weight. After any battle or map change the next

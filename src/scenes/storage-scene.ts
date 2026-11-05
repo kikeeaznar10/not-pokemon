@@ -1,5 +1,5 @@
 /**
- * StorageScene (M9) — the storage box opened by a `storage` NPC, drawn over the paused overworld.
+ * StorageScene — the storage box opened by a `storage` NPC, drawn over the paused overworld.
  *
  * - Two columns: *Equipo* (left, "Equipo (n/slots)") and *Caja* (right, "Caja (n)"), each row with the
  *   flexymon's icon, name and "PS hp/max" (fainted ones greyed). Long columns scroll (`scrollTop`).
@@ -8,7 +8,7 @@
  *   last team member ("No puedes dejar tu equipo vacío.") and when the team is full ("Tu equipo está
  *   lleno."). Every move is written to the game state at once.
  * - B closes the box: emits `overlay:closed` and stops; the overworld resumes.
- * - Sounds (M15): `cursor` on a move, `confirm` when a flexymon moves, `error` with a refusal, `cancel` on B.
+ * - Sounds: `cursor` on a move, `confirm` when a flexymon moves, `error` with a refusal, `cancel` on B.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';

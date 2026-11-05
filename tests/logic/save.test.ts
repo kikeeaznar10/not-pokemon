@@ -22,7 +22,7 @@ const saved = (edit: (raw: Record<string, unknown> & ReturnType<typeof state>) =
 };
 
 describe('save', () => {
-  it('round-trips the plan example format', () => {
+  it('round-trips the documented save format', () => {
     const text = serializeSave(state(), new Date('2026-11-04T21:00:00Z'));
     expect(JSON.parse(text)).toMatchObject({ version: 1, savedAt: '2026-11-04T21:00:00.000Z', euros: 340 });
     const r = parseSave(text, data);

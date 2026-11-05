@@ -3,7 +3,7 @@
  *
  * Art is drawn at **design resolution** (16 × 16 per tile, 16 × 16 per character frame, 32 × 32 per flexymon) and
  * scaled ×2 when written, so one design pixel is 2 × 2 game pixels: the chunky handheld look described in
- * `docs/STYLE-REFERENCE.md`. Every colour is a solid RGBA; there is no anti-aliasing.
+ * `docs/ART.md`. Every colour is a solid RGBA; there is no anti-aliasing.
  */
 import { PNG } from 'pngjs';
 

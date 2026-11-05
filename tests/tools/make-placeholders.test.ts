@@ -33,7 +33,7 @@ describe('make-placeholders', () => {
     ]);
   });
 
-  it('chooses sizes from the plan', () => {
+  it('chooses sizes by asset kind', () => {
     expect(pngSize('assets/sprites/flexymon/portatil_front.png')).toBe(64);
     expect(pngSize('assets/sprites/flexymon/portatil_back.png')).toBe(64);
     expect(pngSize('assets/sprites/flexymon/portatil_icon.png')).toBe(16);
@@ -53,14 +53,14 @@ describe('make-placeholders', () => {
     expect(png.data[3]).toBe(255);
   });
 
-  it('M11: the title placeholder fills the 512 × 288 screen, opaque', () => {
+  it('the title placeholder fills the 512 × 288 screen, opaque', () => {
     expect(TITLE_IMAGE).toBe('assets/ui/title.png');
     const png = PNG.sync.read(makeTitlePng());
     expect([png.width, png.height]).toEqual([512, 288]);
     for (let i = 3; i < png.data.length; i += 4 * 997) expect(png.data[i]).toBe(255);
   });
 
-  it('draws the car (M13) as a 96 × 40 side view with a transparent background', () => {
+  it('draws the car as a 96 × 40 side view with a transparent background', () => {
     expect(isCarSprite('assets/sprites/car/audi.png')).toBe(true);
     expect(isCarSprite('assets/sprites/npcs/becario.png')).toBe(false);
     const png = PNG.sync.read(makeCarPng());
@@ -70,7 +70,7 @@ describe('make-placeholders', () => {
     expect(at(40, 24)).toEqual([244, 244, 240, 255]); // white body
   });
 
-  it('draws a minimap from the collision data, one square per tile (M12)', () => {
+  it('draws a minimap from the collision data, one square per tile', () => {
     const map = {
       width: 3,
       height: 2,
@@ -87,7 +87,7 @@ describe('make-placeholders', () => {
     expect(at(5, 3)).toEqual(MINIMAP_COLOURS.solid);
   });
 
-  it('makes a minimap for every outdoor zone only (M12), of the real world and the test world (M14)', () => {
+  it('makes a minimap for every outdoor zone only, of the real world and the test world', () => {
     expect(readMinimapTargets()).toEqual([
       ...['alboraya', 'huerta_norte', 'valencia', 'playa', 'pueblo_sur', 'murcia', 'vinedos', 'poligono'].map(
         (id) => ({ assetPath: `assets/ui/minimap_${id}.png`, mapFile: `maps/${id}.tmj` }),

@@ -1,4 +1,4 @@
-// M12 — mobile controls and minimap (docs/PLAN.md › M12 › Done when):
+// Mobile controls and minimap:
 // - every action in the game can be done by touch alone (title, name, intro, walking, Start menu, Mapa, battle);
 // - no browser zoom, scroll or text selection happens when tapping fast;
 // - the minimap dot matches the player's position (and M / Mapa toggle it; hidden indoors).
@@ -56,7 +56,7 @@ async function tap(page: Page, id: string, dir?: 'up' | 'down' | 'left' | 'right
   const c = await centre(page, id);
   const off = { up: [0, -52], down: [0, 52], left: [-52, 0], right: [52, 0] } as const;
   const [dx, dy] = dir ? off[dir] : [0, 0];
-  // M15: wait two frames first, as the keyboard press() helpers do since M7 — a menu or box ignores input on the
+  // Wait two frames first, as the keyboard press() helpers do — a menu or box ignores input on the
   // frame it opens, and under load a tap could land in exactly that frame.
   await frames(page, 2);
   await page.touchscreen.tap(c.x + dx, c.y + dy);
@@ -153,7 +153,7 @@ test('touch controls: only on touch devices, every target at least 48 px, inside
     expect(at[id]!.x).toBeGreaterThan(vp.width / 2);
     expect(at[id]!.y).toBeLessThan(vp.height / 2);
   }
-  await page.screenshot({ path: testInfo.outputPath('m12-touch-title.png') });
+  await page.screenshot({ path: testInfo.outputPath('touch-title.png') });
 });
 
 test('every action can be done by touch alone: title, name, intro, walking, menu, Mapa, battle', async ({
@@ -245,7 +245,7 @@ test('every action can be done by touch alone: title, name, intro, walking, menu
     await page.waitForTimeout(150);
   }
   await expect.poll(() => hook(page, (e) => e.currentScene()), { timeout: 10_000 }).toBe('Overworld');
-  await page.screenshot({ path: testInfo.outputPath('m12-touch-overworld.png') });
+  await page.screenshot({ path: testInfo.outputPath('touch-overworld.png') });
 });
 
 test('D-pad: holding walks, sliding the thumb changes direction without lifting, multi-touch with A', async ({
@@ -357,7 +357,7 @@ test('portrait shows "Gira el móvil" and pauses the game; landscape resumes it'
   // Paused from the start: nothing loads while the phone is upright.
   await page.waitForTimeout(800);
   expect(await hook(page, (e) => e.preloadComplete())).toBe(false);
-  await page.screenshot({ path: testInfo.outputPath('m12-rotate.png') });
+  await page.screenshot({ path: testInfo.outputPath('rotate.png') });
 
   await page.setViewportSize(wide);
   await expect(screen).toBeHidden();
@@ -416,7 +416,7 @@ function expectedDot(m: NonNullable<ReturnType<E2EHooks['minimap']>>): { x: numb
 async function walk(page: Page, key: string, expected: Partial<Tile>): Promise<void> {
   await page.keyboard.press(key);
   await expect.poll(() => hook(page, (e) => e.playerTile())).toMatchObject({ ...expected, moving: false });
-  // M15: the minimap follows the player in the overworld's next update, so let a frame pass before reading it.
+  // The minimap follows the player in the overworld's next update, so let a frame pass before reading it.
   await frames(page, 2);
 }
 
@@ -458,7 +458,7 @@ test('minimap: the dot matches the player, M toggles it, hidden indoors, Mapa in
     await page.waitForTimeout(80);
   }
   expect([...seen].sort()).toEqual([false, true]);
-  await page.screenshot({ path: testInfo.outputPath('m12-minimap.png') });
+  await page.screenshot({ path: testInfo.outputPath('minimap.png') });
 
   // M toggles it.
   await page.keyboard.press('m');

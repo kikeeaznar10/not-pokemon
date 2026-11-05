@@ -1,6 +1,6 @@
 /**
  * Schema for `public/data/car.json`: item pairs that unlock the Audi, the locked dialogue, trip endpoints, and
- * (M13) the art and sound of the trip scene: `sprite` is the Audi seen from the side, nose to the right
+ * the art and sound of the trip scene: `sprite` is the Audi seen from the side, nose to the right
  * (placeholder 96 × 40), `sound` the engine, looped during the trip.
  */
 import { z } from 'zod';

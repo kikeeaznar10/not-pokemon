@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { atlasJson, packShelves } from '../../tools/make-atlas';
 import { parseAtlas } from '../../src/data/atlas';
 
-describe('make-atlas (M15)', () => {
+describe('make-atlas', () => {
   it('packs tallest first in rows, with padding, never overlapping or leaving the width', () => {
     const sizes = [
       { path: 'a', w: 16, h: 16 },

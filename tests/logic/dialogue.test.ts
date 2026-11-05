@@ -61,7 +61,7 @@ describe('typing', () => {
     expect(t.shown).toBe(TEXT_CPS);
     expect(visibleText(t)).toBe('x'.repeat(TEXT_CPS));
   });
-  it('types at another speed when one is given (M10 text speed option)', () => {
+  it('types at another speed when one is given', () => {
     const slow = typeTick(startTyping('x'.repeat(100)), 1000, 15).typing;
     expect(slow.shown).toBe(15);
     const fast = typeTick(startTyping('x'.repeat(100)), 1000, 60).typing;

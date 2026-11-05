@@ -1,21 +1,21 @@
 /**
  * `npm run placeholders` — generates placeholder art and sound for every asset path referenced by
- * the content JSON in `public/data/` and (M14) the frozen test world `public/test-world/data/` ({@link DATA_DIRS}). It NEVER overwrites an existing file, so running it twice
+ * the content JSON in `public/data/` and the frozen test world `public/test-world/data/` ({@link DATA_DIRS}). It NEVER overwrites an existing file, so running it twice
  * creates nothing the second time, and real assets dropped at the same paths are left alone.
  *
  * Rules:
  * - Any JSON string value of the form `assets/….png|ogg|mp3` is an asset path (relative to `public/`).
  * - PNG: a solid colour square (colour derived from the file name) with the name written on it
  *   in a tiny pixel font. Size: `*_front` / `*_back` 64×64, `*_icon` and `sprites/items/` 16×16,
- *   anything else 32×32. `assets/ui/title.png` (M11) is a 512×288 pixel office scene instead (sky, a building
+ *   anything else 32×32. `assets/ui/title.png` is a 512×288 pixel office scene instead (sky, a building
  *   with windows and a door, a path), so the title screen has something to show until real art exists.
- *   Anything in `sprites/car/` (M13, `car.json › sprite`) is a 96×40 white car seen from the side, nose right.
+ *   Anything in `sprites/car/` (`car.json › sprite`) is a 96×40 white car seen from the side, nose right.
  * - Audio: an `.ogg` or `.mp3` path produces BOTH `<name>.ogg` and `<name>.mp3` (0.2 s beep made with
  *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`). A name containing
- *   `engine` (M13, the car) gets a 1 s low 90 Hz hum instead, so it can loop during the trip. The interface
- *   sounds `ui_cursor`, `ui_confirm`, `ui_cancel`, `ui_error`, `ui_money` (M15, `sounds.json`) get short tones of
+ *   `engine` (the car) gets a 1 s low 90 Hz hum instead, so it can loop during the trip. The interface
+ *   sounds `ui_cursor`, `ui_confirm`, `ui_cancel`, `ui_error`, `ui_money` (`sounds.json`) get short tones of
  *   their own pitch and length ({@link audioSource}).
- * - Minimaps (M12): every outdoor zone in `zones.json` (`indoor: false`) gets `assets/ui/minimap_<zone>.png`, a
+ * - Minimaps: every outdoor zone in `zones.json` (`indoor: false`) gets `assets/ui/minimap_<zone>.png`, a
  *   scaled-down render of its map's collision data (`MINIMAP_TILE_PX` pixels per tile: solid dark, encounter
  *   tiles green, the rest sand). Like everything else it is never overwritten: after editing a map, delete its
  *   minimap and run the tool again.
@@ -34,7 +34,7 @@ import { minimapCells, minimapPath, type MinimapCell } from '../src/logic/minima
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = join(ROOT, 'public');
 const DATA_DIR = join(PUBLIC_DIR, 'data');
-/** Content folders the tool reads (M14): the real world, then the frozen test world (`src/data/world.ts`). */
+/** Content folders the tool reads: the real world, then the frozen test world (`src/data/world.ts`). */
 export const DATA_DIRS = [DATA_DIR, join(PUBLIC_DIR, 'test-world', 'data')];
 const FALLBACK_DIR = join(ROOT, 'tools', 'fallback');
 
@@ -104,16 +104,16 @@ export function pngSize(assetPath: string): number {
   return 32;
 }
 
-/** Placeholder size of a car sprite (M13, any PNG under `sprites/car/`): the side view drawn by {@link makeCarPng}. */
+/** Placeholder size of a car sprite (any PNG under `sprites/car/`): the side view drawn by {@link makeCarPng}. */
 export const CAR_SIZE = { width: 96, height: 40 } as const;
 
-/** True for an asset path that gets the side-view car placeholder (M13). */
+/** True for an asset path that gets the side-view car placeholder. */
 export function isCarSprite(assetPath: string): boolean {
   return assetPath.includes('sprites/car/');
 }
 
 /**
- * Build the car placeholder (M13): a white hatchback seen from the side, nose to the right, with dark windows,
+ * Build the car placeholder: a white hatchback seen from the side, nose to the right, with dark windows,
  * two wheels, a headlight and a tail light, on a transparent background. Real art replaces the file.
  */
 export function makeCarPng(width: number = CAR_SIZE.width, height: number = CAR_SIZE.height): Buffer {
@@ -149,7 +149,7 @@ export function makeCarPng(width: number = CAR_SIZE.width, height: number = CAR_
   return PNG.sync.write(png);
 }
 
-/** Path of the title image (M11, `intro.json › titleImage`); it gets {@link makeTitlePng} instead of a square. */
+/** Path of the title image (`intro.json › titleImage`); it gets {@link makeTitlePng} instead of a square. */
 export const TITLE_IMAGE = 'assets/ui/title.png';
 
 /** Title placeholder size: the whole 512 × 288 screen. */
@@ -212,7 +212,7 @@ export function makeTitlePng(width: number = TITLE_SIZE.width, height: number = 
   return PNG.sync.write(png);
 }
 
-/** Minimap colours (M12) per cell kind. */
+/** Minimap colours per cell kind. */
 export const MINIMAP_COLOURS: Readonly<Record<MinimapCell, [number, number, number]>> = {
   solid: [56, 64, 88],
   encounter: [88, 168, 72],
@@ -220,7 +220,7 @@ export const MINIMAP_COLOURS: Readonly<Record<MinimapCell, [number, number, numb
 };
 
 /**
- * Build a minimap placeholder (M12): each of the map's cells as a `tilePx` square in its {@link MINIMAP_COLOURS}
+ * Build a minimap placeholder: each of the map's cells as a `tilePx` square in its {@link MINIMAP_COLOURS}
  * colour (cells from `minimapCells`), so the image is `width × tilePx` by `height × tilePx` pixels.
  */
 export function makeMinimapPng(
@@ -244,7 +244,7 @@ export function makeMinimapPng(
   return PNG.sync.write(png);
 }
 
-/** A minimap the tool should make (M12): its asset path and the map file it is drawn from (both under `public/`). */
+/** A minimap the tool should make: its asset path and the map file it is drawn from (both under `public/`). */
 export interface MinimapTarget {
   assetPath: string;
   mapFile: string;
@@ -355,7 +355,7 @@ export function makePng(label: string, size: number): Buffer {
 }
 
 /**
- * Short tones for the interface sounds (M15, `sounds.json`): a file named `ui_<kind>` gets its own pitch and
+ * Short tones for the interface sounds (`sounds.json`): a file named `ui_<kind>` gets its own pitch and
  * length so cursor, confirm, cancel, error and money can be told apart before real sounds exist.
  */
 const UI_TONES: Record<string, { hz: number; seconds: number }> = {
@@ -367,8 +367,8 @@ const UI_TONES: Record<string, { hz: number; seconds: number }> = {
 };
 
 /**
- * The ffmpeg `lavfi` source for a placeholder sound file: a 1 s 90 Hz hum for names with `engine` (M13), a short
- * tone per interface sound (`ui_cursor`, `ui_confirm`, `ui_cancel`, `ui_error`, `ui_money`; M15), else a 0.2 s
+ * The ffmpeg `lavfi` source for a placeholder sound file: a 1 s 90 Hz hum for names with `engine`, a short
+ * tone per interface sound (`ui_cursor`, `ui_confirm`, `ui_cancel`, `ui_error`, `ui_money`), else a 0.2 s
  * 880 Hz beep.
  */
 export function audioSource(file: string): string {
@@ -449,7 +449,7 @@ function main(): void {
     }
   }
 
-  // Minimaps (M12): drawn from the maps, not listed in the JSON.
+  // Minimaps: drawn from the maps, not listed in the JSON.
   for (const target of readMinimapTargets()) {
     const file = join(PUBLIC_DIR, target.assetPath);
     if (existsSync(file)) continue;

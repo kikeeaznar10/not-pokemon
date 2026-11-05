@@ -1,13 +1,13 @@
 /**
- * Map-dependent load checks (M4), run after the content passed its schemas and cross-references and
+ * Map-dependent load checks, run after the content passed its schemas and cross-references and
  * every zone's map was loaded:
  * - every NPC spawn, the start spawn/respawn and both car endpoints are walkable tiles of their map;
  * - every named spawn point in a map's `spawns` layer is walkable;
  * - every warp points at an existing zone, and every tile it can land on there is walkable (for edge
- *   warps that keep the row/column, every tile of the rectangle is checked). Car warps (M13) have no target
+ *   warps that keep the row/column, every tile of the rectangle is checked). Car warps have no target
  *   of their own: they use the car.json endpoints checked above.
- * - every encounter rectangle's `group` exists in its zone's `encounters` in zones.json (M7).
- * - the intro (M11, `intro.json`) plays on the `start.json › spawn` map: the coworker's start tile and every
+ * - every encounter rectangle's `group` exists in its zone's `encounters` in zones.json.
+ * - the intro (`intro.json`) plays on the `start.json › spawn` map: the coworker's start tile and every
  *   tile either actor walks onto are walkable, and no walk enters the tile where the other actor stands.
  * {@link mapWarnings} lists the opposite case (a group in zones.json drawn on no rectangle): a warning,
  * not an error, so content can be added to zones.json before the map is drawn.
@@ -47,7 +47,7 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
   point('car.json', ['toMurcia'], data.car.toMurcia);
   point('car.json', ['toValencia'], data.car.toValencia);
 
-  // M11: the intro script walks on the start map.
+  // The intro script walks on the start map.
   const { spawn } = data.start;
   const { coworker } = data.intro;
   const trace = traceIntro(data.intro.steps, spawn, coworker);
@@ -82,7 +82,7 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
     });
     for (const warp of info.warps) {
       const path = ['warps', warp.name];
-      if (warp.car) continue; // M13: the Audi drives to car.json › toMurcia / toValencia (checked above).
+      if (warp.car) continue; // The Audi drives to car.json › toMurcia / toValencia (checked above).
       if (!data.zones.has(warp.toMap)) {
         errors.push({ file: zone.file, path, message: `unknown map "${warp.toMap}"` });
         continue;
@@ -97,7 +97,7 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
 }
 
 /**
- * Encounter groups in zones.json that no rectangle of the zone's map uses (M7). Logged as warnings at
+ * Encounter groups in zones.json that no rectangle of the zone's map uses. Logged as warnings at
  * boot, e.g. `zones.json › test.encounters.playa › group not used by any rectangle in maps/test.tmj`.
  */
 export function mapWarnings(data: GameData, maps: ReadonlyMap<string, MapInfo>): DataError[] {

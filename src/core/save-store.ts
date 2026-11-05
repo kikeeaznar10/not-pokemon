@@ -1,5 +1,5 @@
 /**
- * Save store (M10, docs/PLAN.md › Saving): the small wrapper over `localStorage` that keeps the one save
+ * Save store (docs/GAME-RULES.md › Saving): the small wrapper over `localStorage` that keeps the one save
  * slot. The format, validation and migration are `src/logic/save.ts`; this file only reads and writes.
  *
  * - The save lives under {@link SAVE_KEY} (`flexymon.save.v1`).

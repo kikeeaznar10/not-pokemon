@@ -1,4 +1,4 @@
-// ESLint flat config (ESLint 9+). Replaces the plan's `.eslintrc.cjs`; see docs/PROGRESS.md M0.
+// ESLint flat config (ESLint 9+). Replaces the legacy `.eslintrc`.
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';

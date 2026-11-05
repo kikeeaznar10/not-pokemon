@@ -1,4 +1,3 @@
-// Place at tests/e2e/smoke.spec.ts
 import { test, expect } from '@playwright/test';
 
 declare global {

@@ -1,5 +1,5 @@
 /**
- * GridMenu (M6): a framed menu of options laid out in `cols` columns with a cursor, fixed to the camera.
+ * GridMenu: a framed menu of options laid out in `cols` columns with a cursor, fixed to the camera.
  * The battle uses it for the 2 × 2 main menu, the attack list and the team list.
  *
  * - Arrows move the cursor on the grid (`moveGridCursor`, no wrapping); A chooses the option under the
@@ -8,13 +8,13 @@
  * - Each option may have an icon (a texture key) and a right-aligned text (e.g. "PS 31/40").
  * - `onMove` is called with the cursor index on open and after every move (for side panels such as
  *   the attack's accuracy).
- * - Lists longer than the frame scroll (M9): only the rows that fit are drawn, the window follows the
+ * - Lists longer than the frame scroll: only the rows that fit are drawn, the window follows the
  *   cursor, and small arrows on the right edge show that rows are hidden above / below.
  * - The owner calls {@link GridMenu.update} every frame while {@link GridMenu.isOpen}; the frame it
  *   opens it ignores input, so the press that opened it does not also choose.
- * - Sounds (M15, `src/core/ui-sound.ts`): `cursor` on a move, `confirm` on A, `error` on A over a disabled option,
+ * - Sounds (`src/core/ui-sound.ts`): `cursor` on a move, `confirm` on A, `error` on A over a disabled option,
  *   `cancel` on B.
- * - A disabled option is greyed AND struck through (M15), so it is not told apart by colour alone.
+ * - A disabled option is greyed AND struck through, so it is not told apart by colour alone.
  * Texts come from the caller (i18n or content), never from this file.
  */
 import Phaser from 'phaser';
@@ -31,7 +31,7 @@ const ICON_W = 20;
 const COLOR_BORDER = FRAME.border;
 const COLOR_TEXT = '#202028';
 const COLOR_DISABLED = '#9898a0';
-/** Line through a disabled label (M15). */
+/** Line through a disabled label. */
 const COLOR_STRIKE = 0x606068;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
@@ -74,7 +74,7 @@ export interface GridMenuOptions {
 export interface GridMenuState {
   options: { label: string; enabled: boolean }[];
   cursor: number;
-  /** First visible row (0 unless the list scrolled, M9). */
+  /** First visible row (0 unless the list scrolled). */
   firstRow?: number;
 }
 
@@ -92,7 +92,7 @@ export class GridMenu {
   private opts: GridMenuOptions | null = null;
   private skipInput = false;
   private layout: GridMenuLayout | null = null;
-  /** Rows that fit in the frame, and the first one shown (M9: long lists scroll). */
+  /** Rows that fit in the frame, and the first one shown (long lists scroll). */
   private visibleRows = 1;
   private firstRow = 0;
 
@@ -162,7 +162,7 @@ export class GridMenu {
       }
       const label = this.scene.add.text(lx, cy, o.label, { ...TEXT_STYLE, color });
       parts.push(label);
-      // M15: strike disabled labels through, so "not available" does not rely on colour alone.
+      // Strike disabled labels through, so "not available" does not rely on colour alone.
       if (!o.enabled) {
         parts.push(
           this.scene.add

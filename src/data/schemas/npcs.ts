@@ -1,7 +1,7 @@
 /**
  * Schema for `public/data/npcs.json`. Types: talker, enemy (needs sight, team 1–6, reward,
  * defeatDialogue), shopkeeper (needs shop), healer, storage. `wander: null` = stands still; otherwise
- * the spawn must lie inside the wander rectangle (checked here; walkability is checked in M4).
+ * the spawn must lie inside the wander rectangle (checked here; walkability is checked against the map).
  */
 import { z } from 'zod';
 import { EUROS_MAX, TEAM_MAX } from '../../logic/constants';

@@ -1,5 +1,5 @@
 /**
- * ShopScene (M9) — the shop opened by a `shopkeeper` NPC, drawn over the paused overworld.
+ * ShopScene — the shop opened by a `shopkeeper` NPC, drawn over the paused overworld.
  *
  * - Start it with {@link ShopSceneData} (`shopId`, a key of `shops.json`). Money and bag come from the
  *   game state (`src/core/session.ts`) and every purchase / sale is written back at once.
@@ -16,7 +16,7 @@
  *   shop: it asks for an auto-save (`save:request` `shop`), emits `overlay:closed` and stops; the
  *   overworld resumes.
  * - The scene computes no price or limit: rows, limits and totals come from `src/logic/shop.ts`.
- * - Sounds (M15): menus and the Sí / No box play their own; the picker plays `cursor` / `confirm` / `cancel`; a
+ * - Sounds: menus and the Sí / No box play their own; the picker plays `cursor` / `confirm` / `cancel`; a
  *   refusal ("No tienes suficiente dinero.") plays `error`; a done purchase or sale plays `money`.
  */
 import Phaser from 'phaser';

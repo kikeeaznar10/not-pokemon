@@ -1,5 +1,5 @@
 /**
- * Player options (M10, docs/PLAN.md › M10 task 4): music volume, effects volume and text speed, saved
+ * Player options: music volume, effects volume and text speed, saved
  * apart from the game in `localStorage` key `flexymon.options` (the store is `src/core/options.ts`).
  *
  * Rules:

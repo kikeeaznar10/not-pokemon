@@ -1,5 +1,5 @@
 /**
- * Battle presentation rules (M6): how the BattleScene shows the battle, as plain data, so the scene
+ * Battle presentation rules: how the BattleScene shows the battle, as plain data, so the scene
  * stays a thin player of steps and never computes a rule.
  *
  * - {@link viewSteps} turns one logic {@link BattleEvent} into the ordered steps the scene animates:
@@ -10,8 +10,8 @@
  * - {@link mainMenu} says which of Atacar / Objeto / Cambiar / Huir is enabled (Huir only against wild
  *   flexymon, through `actionError`), {@link attackMenu} and {@link teamMenu} list the sub-menu rows.
  * - {@link hpColor} picks the HP bar colour band.
- * - {@link catchMessages} (M7) words the outcome of taking a beaten wild flexymon.
- * - {@link itemMenu} and {@link itemTargetMenu} (M9) list the battle items in the bag and the team members
+ * - {@link catchMessages} words the outcome of taking a beaten wild flexymon.
+ * - {@link itemMenu} and {@link itemTargetMenu} list the battle items in the bag and the team members
  *   an item can be used on (enabled via `actionError`); {@link itemNeedsTarget} says whether the player
  *   picks a target (heal / heal_full / revive) or the item goes on the active flexymon (buff).
  * Every visible text comes from `src/i18n/es.json` or the content files.
@@ -317,7 +317,7 @@ export function hpColor(hp: number, max: number): 'green' | 'yellow' | 'red' {
 }
 
 /**
- * Messages after taking a beaten wild flexymon of species `name` (M7, docs/PLAN.md › Catching and
+ * Messages after taking a beaten wild flexymon of species `name` (docs/GAME-RULES.md › Catching and
  * merging): joined the team, sent to storage because the team is full, merged ("{stat} +{n}", stat name
  * from `stat.*`), or already at the maximum.
  */
@@ -332,7 +332,7 @@ export function catchMessages(outcome: CatchOutcome, name: string, t: Translate)
   }
 }
 
-/** A row of the battle item list (M9): the item, how many are left ("x3") and its description. */
+/** A row of the battle item list: the item, how many are left ("x3") and its description. */
 export interface ItemOption extends MenuOption {
   count: number;
   countText: string;
@@ -367,7 +367,7 @@ export function itemMenu(state: BattleState, data: ViewData, t: Translate): Item
   });
 }
 
-/** The team as targets for `itemId` (M9): the rows of {@link teamMenu}, enabled when the item works on it. */
+/** The team as targets for `itemId`: the rows of {@link teamMenu}, enabled when the item works on it. */
 export function itemTargetMenu(
   state: BattleState,
   itemId: string,

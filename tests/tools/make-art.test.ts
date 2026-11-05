@@ -12,7 +12,7 @@ const size = (png: Buffer | null) => {
   return [p.width, p.height];
 };
 
-describe('make-art (post-M15 restyle)', () => {
+describe('make-art', () => {
   it('draws every sprite at the size the game reads', () => {
     expect(size(artFor(PLAYER_PATH))).toEqual([64, 128]);
     expect(size(artFor('assets/sprites/npcs/jefe.png'))).toEqual([64, 128]);

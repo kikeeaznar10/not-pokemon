@@ -1,5 +1,5 @@
 /**
- * `npm run art` (post-M15 restyle) — draws the game's styled sprites (see `docs/STYLE-REFERENCE.md` and
+ * `npm run art` — draws the game's styled sprites (see `docs/ART.md` and
  * `tools/art/`) at the asset paths the content JSON names, replacing the labelled placeholder squares:
  * - `assets/sprites/player.png` and every `assets/sprites/npcs/<name>.png`: 64 × 128 character sheets
  *   (`tools/art/characters.ts`; a sprite name without a hand-picked look gets one made from its name);

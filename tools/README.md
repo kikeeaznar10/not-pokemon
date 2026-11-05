@@ -2,42 +2,40 @@
 
 ## `npm run placeholders` (`make-placeholders.ts`)
 
-Scans every JSON file in `public/data/` and (M14) in the frozen test world `public/test-world/data/` for asset paths (`assets/….png|ogg|mp3`, relative to `public/`) and
+Scans every JSON file in `public/data/` and in the frozen test world `public/test-world/data/` for asset paths (`assets/….png|ogg|mp3`, relative to `public/`) and
 creates any missing file. **Never overwrites** an existing file, so a second run creates nothing and real art
 dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-run`) only lists what is missing.
 
 - PNG: solid colour square (colour from the file name) with the file name in a pixel font.
   `*_front` / `*_back` → 64×64, `*_icon` and anything in `sprites/items/` → 16×16, everything else → 32×32.
-  Exception (M11): `assets/ui/title.png` (the title image named in `intro.json`) is a 512×288 pixel office front
+  Exception: `assets/ui/title.png` (the title image named in `intro.json`) is a 512×288 pixel office front
   (sky, building with windows and a door, path, grass) so the title screen has a picture until real art exists.
-  Exception (M13): anything under `sprites/car/` (`car.json › sprite`) is a 96×40 white car seen from the side, nose
+  Exception: anything under `sprites/car/` (`car.json › sprite`) is a 96×40 white car seen from the side, nose
   to the right, on a transparent background.
 - Audio: an `.ogg` or `.mp3` path creates both `<name>.ogg` and `<name>.mp3`, a 0.2 s 880 Hz beep made with
-  `ffmpeg` (libvorbis / libmp3lame); a name containing `engine` (M13, `car.json › sound`) gets a 1 s 90 Hz hum instead,
-  so it loops well during the car trip. The interface sounds of `sounds.json` (M15: `ui_cursor`, `ui_confirm`,
+  `ffmpeg` (libvorbis / libmp3lame); a name containing `engine` (`car.json › sound`) gets a 1 s 90 Hz hum instead,
+  so it loops well during the car trip. The interface sounds of `sounds.json` (`ui_cursor`, `ui_confirm`,
   `ui_cancel`, `ui_error`, `ui_money`) get short tones of their own pitch and length (`audioSource()`), so they can be
   told apart. If `ffmpeg` is not on the PATH, it copies the silent files in
   `tools/fallback/` instead and says how many audio files are silent.
-- Minimaps (M12): every outdoor zone in either `zones.json` gets `assets/ui/minimap_<zone>.png`, drawn from its `.tmj`
+- Minimaps: every outdoor zone in either `zones.json` gets `assets/ui/minimap_<zone>.png`, drawn from its `.tmj`
   (`parseTiledMap` → `minimapCells`): 3 px per tile (`MINIMAP_TILE_PX`), solid tiles dark blue, `encounter` tiles
   green, the rest sand. These paths are not in the JSON (they follow the zone id), so `--dry-run` lists them too.
   Not overwritten either: delete a minimap after editing its map to redraw it.
 
 ## `npm run test-map` (`make-test-map.ts`)
 
-Writes the test maps and the art they need (no one can draw in Tiled in a cloud session):
-`public/maps/test/test.tmj`, `test_house.tmj` and `test_east.tmj` (since M14 in `public/maps/test/`, for the frozen test world) (layouts, warps and, from M7, tall grass and encounter rectangles in `public/maps/README.md`), the
-placeholder tileset `public/assets/tilesets/test.png`
-(8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties; M13 added the two solid Audi tiles and the cars on
-`test` and `test_east`) and the player sheet
-`public/assets/sprites/player.png` (since the post-M15 restyle the styled player of `npm run art`; 2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).
-Never overwrites existing files (so maps edited in Tiled are safe); `npm run test-map -- --force` regenerates all
-all five files. A unit test checks that the shipped maps still equal the generator's output — after editing a map
+Writes the frozen test world's maps and the art they need: `public/maps/test/test.tmj`, `test_house.tmj` and
+`test_east.tmj` (layouts in `public/maps/test/README.md`), the placeholder tileset `public/assets/tilesets/test.png`
+(8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties) and the player sheet
+`public/assets/sprites/player.png` (the same drawing as `npm run art`; 2 columns stand/stride × 4 rows
+down/left/right/up, 32 × 32 frames). Never overwrites existing files; `npm run test-map -- --force` regenerates all
+five files. A unit test checks that the shipped maps still equal the generator's output — after editing a map
 in Tiled, update the generator too or drop that comparison.
 
-## `npm run world` (`make-world.ts`, M14)
+## `npm run world` (`make-world.ts`)
 
-Builds the real world's maps from plain text, since no one can draw in Tiled in a cloud session:
+Builds the real world's maps from plain text (reviewable diffs, no Tiled needed):
 `tools/world/<zone>.txt` (one character per tile) and `tools/world/world.json`. Writes
 `public/assets/tilesets/world.png` (8 columns; the 32 base tiles, then their variants; art in `tools/art/tiles.ts`;
 tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
@@ -66,14 +64,14 @@ floor, `_` doormat (an interior's door, on its bottom row). Drawn over the map's
 
 The tool checks the layout (equal row widths, known characters) and that doors and the car stand on `D` / `Aa`.
 
-Post-M15 restyle: after placing the base tiles, `autotile()` swaps them for look-alike **variants** chosen from the
+after placing the base tiles, `autotile()` swaps them for look-alike **variants** chosen from the
 neighbours (roof ridge / eave / edges and one of four roof colours per building, facade edges and windows, indoor
 wall face / top, cliff face, grass borders on `:` `r` `p` `s`, shore foam on `~`). A variant keeps its base tile's
 `solid` / `encounter` property, so only the picture changes; the rules are in `autotile`'s doc comment.
 
-## `npm run art` (`make-art.ts`, post-M15 restyle)
+## `npm run art` (`make-art.ts`)
 
-Draws the game's sprites in the style of `docs/STYLE-REFERENCE.md` at the paths the content JSON names (both content
+Draws the game's sprites in the style of `docs/ART.md` at the paths the content JSON names (both content
 folders), plus `assets/sprites/player.png`:
 
 | Path | Drawn by | Size |
@@ -89,7 +87,7 @@ would be written. Other PNG paths (minimaps) are left to `npm run placeholders`.
 painter: art is drawn at design size (16 px tiles and characters, 32 px flexymon), auto-outlined with `outline()` and
 scaled ×2 with `scale()`. `npm run test-map`'s player sheet is the same drawing.
 
-## `npm run atlas` (`make-atlas.ts`, M15)
+## `npm run atlas` (`make-atlas.ts`)
 
 Packs every content sprite (PNG paths under `assets/sprites/` in either content folder, at most 128 × 128) into one
 texture atlas: `public/assets/atlas/sprites.png` + `sprites.json` (Phaser JSON hash, each frame named by its asset

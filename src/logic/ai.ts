@@ -1,5 +1,5 @@
 /**
- * Opponent AI (docs/PLAN.md › Opponent AI).
+ * Opponent AI (docs/GAME-RULES.md › Opponent AI).
  * - Wild: a random attack, equal chance (`rng.pick`).
  * - NPC enemy: below `NPC_LOW_HP` of max HP with a heal attack → heals (first heal attack in its list).
  *   Otherwise the damage attack with the highest `power × accuracy` (first one on a tie). No damage

@@ -1,5 +1,5 @@
 /**
- * Euros, rewards, shops and the loss penalty (docs/PLAN.md › Euros and shops, Enemy NPCs, Losing).
+ * Euros, rewards, shops and the loss penalty (docs/GAME-RULES.md › Euros and shops, Enemy NPCs, Losing).
  * Euros are whole numbers 0–`EUROS_MAX`. Buying checks money first; selling gives `floor(price / 2)`.
  * Key items and `price: null` items cannot be bought or sold.
  */

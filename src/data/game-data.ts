@@ -24,11 +24,11 @@ export interface GameData {
   readonly start: Readonly<Start>;
   readonly secretNames: readonly Readonly<SecretName>[];
   readonly car: Readonly<Car>;
-  /** Title image and new-game intro script (M11, `intro.json`). */
+  /** Title image and new-game intro script (`intro.json`). */
   readonly intro: Readonly<Intro>;
-  /** Interface sounds by kind (M15, `sounds.json`). */
+  /** Interface sounds by kind (`sounds.json`). */
   readonly sounds: Readonly<Sounds>;
-  /** Zone id → its loaded map (M4). Empty when only the JSON content was validated (unit tests). */
+  /** Zone id → its loaded map. Empty when only the JSON content was validated (unit tests). */
   readonly maps: ReadonlyMap<string, LoadedMap>;
 }
 

@@ -29,8 +29,8 @@ Writes the test maps and the art they need (no one can draw in Tiled in a cloud 
 `public/maps/test/test.tmj`, `test_house.tmj` and `test_east.tmj` (since M14 in `public/maps/test/`, for the frozen test world) (layouts, warps and, from M7, tall grass and encounter rectangles in `public/maps/README.md`), the
 placeholder tileset `public/assets/tilesets/test.png`
 (8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties; M13 added the two solid Audi tiles and the cars on
-`test` and `test_east`) and the placeholder player sheet
-`public/assets/sprites/player.png` (2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).
+`test` and `test_east`) and the player sheet
+`public/assets/sprites/player.png` (since the post-M15 restyle the styled player of `npm run art`; 2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).
 Never overwrites existing files (so maps edited in Tiled are safe); `npm run test-map -- --force` regenerates all
 all five files. A unit test checks that the shipped maps still equal the generator's output — after editing a map
 in Tiled, update the generator too or drop that comparison.
@@ -39,7 +39,8 @@ in Tiled, update the generator too or drop that comparison.
 
 Builds the real world's maps from plain text, since no one can draw in Tiled in a cloud session:
 `tools/world/<zone>.txt` (one character per tile) and `tools/world/world.json`. Writes
-`public/assets/tilesets/world.png` (8 × 4 tiles; tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
+`public/assets/tilesets/world.png` (8 columns; the 32 base tiles, then their variants; art in `tools/art/tiles.ts`;
+tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
 every map in `world.json`. Never overwrites existing files; `npm run world -- --force` regenerates everything (after
 editing a layout). Then run `npm run placeholders` (after deleting the zone's minimap, if the map changed).
 
@@ -64,6 +65,29 @@ floor, `_` doormat (an interior's door, on its bottom row). Drawn over the map's
 | `encounters` | `[{ name, x, y, width, height, group, mode }]`: encounter rectangles (`group` must be in `zones.json`). |
 
 The tool checks the layout (equal row widths, known characters) and that doors and the car stand on `D` / `Aa`.
+
+Post-M15 restyle: after placing the base tiles, `autotile()` swaps them for look-alike **variants** chosen from the
+neighbours (roof ridge / eave / edges and one of four roof colours per building, facade edges and windows, indoor
+wall face / top, cliff face, grass borders on `:` `r` `p` `s`, shore foam on `~`). A variant keeps its base tile's
+`solid` / `encounter` property, so only the picture changes; the rules are in `autotile`'s doc comment.
+
+## `npm run art` (`make-art.ts`, post-M15 restyle)
+
+Draws the game's sprites in the style of `docs/STYLE-REFERENCE.md` at the paths the content JSON names (both content
+folders), plus `assets/sprites/player.png`:
+
+| Path | Drawn by | Size |
+| --- | --- | --- |
+| `player.png`, `sprites/npcs/<name>.png` | `art/characters.ts` (look per name in `NPC_LOOKS`; unknown names get one from the name) | 64 × 128 walk sheet |
+| `sprites/flexymon/<id>_front/_back.png`, `_icon.png` | `art/flexymon.ts` (hand-made per id; unknown ids get a round creature) | 64 × 64, 16 × 16 |
+| `sprites/items/<id>.png` | `art/sprites.ts` (unknown ids get a parcel) | 16 × 16 |
+| `sprites/car/*.png` | `art/sprites.ts` | 96 × 40 |
+| the title (`intro.json › titleImage`) | `art/sprites.ts` (built from the world tiles) | 512 × 288 |
+
+Never overwrites: `npm run art -- --force` redraws everything after changing the art code, `-- --dry-run` lists what
+would be written. Other PNG paths (minimaps) are left to `npm run placeholders`. `tools/art/pixels.ts` is the shared
+painter: art is drawn at design size (16 px tiles and characters, 32 px flexymon), auto-outlined with `outline()` and
+scaled ×2 with `scale()`. `npm run test-map`'s player sheet is the same drawing.
 
 ## `npm run atlas` (`make-atlas.ts`, M15)
 

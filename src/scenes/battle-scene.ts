@@ -73,6 +73,7 @@ import { maxHp, type FlexymonInstance } from '../logic/instance';
 import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
 import { GridMenu, type GridMenuState } from '../ui/grid-menu';
 import { HpBar } from '../ui/hp-bar';
+import { framedBox } from '../ui/frame';
 
 /** Scene key of {@link BattleScene}. */
 export const BATTLE_SCENE = 'Battle';
@@ -126,10 +127,17 @@ const HOME: Record<Side, { x: number; y: number }> = {
   player: { x: 120, y: 144 },
 };
 const MENU_TOP = GAME_HEIGHT - DIALOG_HEIGHT;
-const COLOR_BG = 0xe8f0d8;
-const COLOR_PLATFORM = 0xb8c890;
-const COLOR_PANEL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
+/** Backdrop bands from the top: `[y, colour]`, each drawn to the bottom of the screen. */
+const BACKDROP_BANDS: readonly (readonly [number, number])[] = [
+  [0, 0xd8f0f8],
+  [40, 0xe4f4f0],
+  [80, 0xeef8e4],
+  [150, 0xd8f0c8],
+  [190, 0xc8e8b4],
+];
+const COLOR_PLATFORM = 0x90d088;
+const COLOR_PLATFORM_RIM = 0x58a060;
+const COLOR_PLATFORM_LIGHT = 0xb8e8a8;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -178,9 +186,7 @@ export class BattleScene extends Phaser.Scene {
     this.battle = createBattle(gs.team, data.opponent, data.kind, gs.items);
 
     this.cameras.main.resetFX();
-    this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, COLOR_BG).setOrigin(0);
-    this.add.ellipse(HOME.opponent.x, HOME.opponent.y + 58, 168, 32, COLOR_PLATFORM);
-    this.add.ellipse(HOME.player.x, HOME.player.y + 56, 184, 28, COLOR_PLATFORM);
+    this.drawBackdrop();
     this.sides = {
       opponent: this.makeSide('opponent', 12, 12, 220, 46),
       player: this.makeSide('player', 272, 142, 228, 62),
@@ -215,10 +221,26 @@ export class BattleScene extends Phaser.Scene {
     else if (this.choice.isOpen) this.choice.update();
   }
 
+  /**
+   * The battle backdrop (post-M15 restyle): a pale sky fading into a grass band, and a grassy platform with a dark
+   * rim and a light top under each side's flexymon.
+   */
+  private drawBackdrop(): void {
+    BACKDROP_BANDS.forEach(([y, colour]) =>
+      this.add.rectangle(0, y, GAME_WIDTH, GAME_HEIGHT - y, colour).setOrigin(0),
+    );
+    const platform = (x: number, y: number, w: number, h: number) => {
+      this.add.ellipse(x, y + 3, w, h, COLOR_PLATFORM_RIM);
+      this.add.ellipse(x, y, w, h, COLOR_PLATFORM);
+      this.add.ellipse(x - w / 8, y - h / 6, w / 2, h / 3, COLOR_PLATFORM_LIGHT);
+    };
+    platform(HOME.opponent.x, HOME.opponent.y + 56, 176, 36);
+    platform(HOME.player.x, HOME.player.y + 54, 196, 32);
+  }
+
   /** A framed panel at (`x`, `y`) holding `children`. */
   private panel(x: number, y: number, w: number, h: number, children: Phaser.GameObjects.GameObject[]) {
-    const bg = this.add.rectangle(0, 0, w, h, COLOR_PANEL).setOrigin(0).setStrokeStyle(2, COLOR_BORDER);
-    return this.add.container(x, y, [bg, ...children]).setDepth(90);
+    return this.add.container(x, y, [...framedBox(this, 0, 0, w, h), ...children]).setDepth(90);
   }
 
   /** Sprite, name and HP bar of one side; the info panel is at (`x`, `y`). */

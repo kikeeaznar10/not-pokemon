@@ -30,6 +30,7 @@ import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
 import { GridMenu } from '../ui/grid-menu';
 import { NAME_SCENE } from './name-scene';
 import { OVERWORLD_SCENE, type OverworldData } from './overworld-scene';
+import { framedBox } from '../ui/frame';
 
 /** Scene key of {@link TitleScene}. */
 export const TITLE_SCENE = 'Title';
@@ -183,14 +184,14 @@ export class TitleScene extends Phaser.Scene {
   private askNewGame(): void {
     this.ui = 'confirm';
     const w = GAME_WIDTH - 16;
-    const bg = this.add.rectangle(0, 0, w, CONFIRM_H, 0xf8f8f0).setOrigin(0).setStrokeStyle(2, 0x202028);
+    const bg = framedBox(this, 0, 0, w, CONFIRM_H);
     const text = this.add.text(10, 8, t('title.confirm_new'), {
       fontFamily: 'monospace',
       fontSize: '14px',
       color: '#202028',
       wordWrap: { width: w - 20 },
     });
-    this.confirmPanel = this.add.container(8, GAME_HEIGHT - CONFIRM_H - 8, [bg, text]).setDepth(100);
+    this.confirmPanel = this.add.container(8, GAME_HEIGHT - CONFIRM_H - 8, [...bg, text]).setDepth(100);
     this.choice.open([t('title.yes'), t('title.no')], {
       initial: 1,
       y: GAME_HEIGHT - CONFIRM_H - 8 - 62,

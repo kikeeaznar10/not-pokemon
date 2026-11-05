@@ -24,6 +24,7 @@ import { canConfirm, deleteChar, finalName, nameGrid, typeChar, type NameCell } 
 import { moveGridCursor } from '../ui/cursor';
 import { INTRO_SCENE, type IntroSceneData } from './intro-scene';
 import { TITLE_SCENE } from './title-scene';
+import { framedBox } from '../ui/frame';
 
 /** Scene key of {@link NameScene}. */
 export const NAME_SCENE = 'Name';
@@ -50,7 +51,6 @@ const GRID_LEFT = (GAME_WIDTH - COLS * CELL_W) / 2;
 /** Borrar and OK sit on their own row, wider than a letter cell. */
 const BUTTON_W = [100, 60] as const;
 const COLOR_BG = 0x283048;
-const COLOR_PANEL = 0xf8f8f0;
 const COLOR_INK = '#202028';
 const COLOR_LIGHT = '#f8f8f0';
 const COLOR_CURSOR = 0xd84838;
@@ -92,15 +92,12 @@ export class NameScene extends Phaser.Scene {
     );
     this.cameras.main.setBackgroundColor(COLOR_BG);
     this.add.text(GAME_WIDTH / 2, 14, t('name.title'), { ...STYLE, color: COLOR_LIGHT }).setOrigin(0.5, 0);
-    this.add.rectangle(GAME_WIDTH / 2, 56, 220, 30, COLOR_PANEL).setStrokeStyle(2, 0x202028);
+    framedBox(this, GAME_WIDTH / 2 - 110, 41, 220, 30);
     this.nameText = this.add.text(GAME_WIDTH / 2, 56, '', { ...STYLE, fontSize: '18px' }).setOrigin(0.5);
     this.messageText = this.add
       .text(GAME_WIDTH / 2, 80, '', { ...STYLE, fontSize: '12px', color: '#f8a088' })
       .setOrigin(0.5, 0);
-    this.add
-      .rectangle(GRID_LEFT - 6, GRID_TOP - 6, COLS * CELL_W + 12, this.gridHeight() + 12, COLOR_PANEL)
-      .setOrigin(0)
-      .setStrokeStyle(2, 0x202028);
+    framedBox(this, GRID_LEFT - 6, GRID_TOP - 6, COLS * CELL_W + 12, this.gridHeight() + 12);
     this.boxes = this.cells.map((_, i) => this.cellBox(i));
     this.cursorBox = this.add.rectangle(0, 0, CELL_W, CELL_H).setOrigin(0).setStrokeStyle(2, COLOR_CURSOR);
     this.labels.forEach((label, i) => {

@@ -31,6 +31,7 @@ import {
   visibleText,
   type Typing,
 } from '../logic/dialogue';
+import { FRAME, framedBox } from './frame';
 
 /** Box height in base pixels (the plan's 512 × 80). */
 export const DIALOG_HEIGHT = 80;
@@ -40,8 +41,7 @@ const PAD_X = 12;
 const PAD_Y = 10;
 const FONT_PX = 14;
 const LINE_SPACING = 6;
-const COLOR_FILL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
+const COLOR_BORDER = FRAME.border;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
   fontSize: `${FONT_PX}px`,
@@ -97,16 +97,13 @@ export class DialogBox {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     const top = GAME_HEIGHT - DIALOG_HEIGHT;
-    const bg = scene.add
-      .rectangle(2, 2, GAME_WIDTH - 4, DIALOG_HEIGHT - 4, COLOR_FILL)
-      .setOrigin(0)
-      .setStrokeStyle(2, COLOR_BORDER);
+    const bg = framedBox(scene, 2, 2, GAME_WIDTH - 4, DIALOG_HEIGHT - 4);
     this.text = scene.add.text(PAD_X, PAD_Y, '', TEXT_STYLE);
     const ax = GAME_WIDTH - PAD_X - 4;
     const ay = DIALOG_HEIGHT - PAD_Y;
     this.arrow = scene.add.triangle(ax - 5, ay - 6, 0, 0, 10, 0, 5, 6, COLOR_BORDER).setOrigin(0);
     this.root = scene.add
-      .container(0, top, [bg, this.text, this.arrow])
+      .container(0, top, [...bg, this.text, this.arrow])
       .setScrollFactor(0)
       .setDepth(DEPTH)
       .setVisible(false);

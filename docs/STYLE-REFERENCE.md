@@ -6,7 +6,10 @@ stored in this repo; this file describes the look to aim for. Draw **original** 
 never copy, trace or recreate assets, characters, buildings or logos from those games (see
 `CLAUDE.md` › Locked decisions: no Nintendo assets, never the word "Pokémon").
 
-Task: once M15 is ticked in `docs/PROGRESS.md`, restyle the tilesets, sprites, UI boxes and Tiled
+**Status: done** (see `docs/PROGRESS.md` › Post-M15 restyle). The art is drawn by code in `tools/art/`
+(`npm run world`, `npm run art`); change the look there and regenerate.
+
+Original task: once M15 is ticked in `docs/PROGRESS.md`, restyle the tilesets, sprites, UI boxes and Tiled
 maps to this look while keeping every file path, tile id, map layer name, collision, warp, spawn
 and encounter zone working (re-run all checks of the Definition of done).
 

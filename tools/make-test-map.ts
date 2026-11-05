@@ -7,7 +7,7 @@
  *   the layers `ground`, `deco`, `above`, `collision` and the object layers `warps`, `encounters`,
  *   `spawns`. Layouts: `public/maps/README.md`. Since M14 they belong to the frozen test world
  *   (`public/test-world/data/`, `src/data/world.ts`), not to the real game.
- * - `public/assets/sprites/player.png`: placeholder player sheet, 2 columns (stand, stride) × 4 rows
+ * - `public/assets/sprites/player.png`: the player sheet (`tools/art/characters.ts`), 2 columns (stand, stride) × 4 rows
  *   (down, left, right, up) of 32 × 32 frames.
  *
  * Like the placeholder tool it NEVER overwrites an existing file (hand-edited maps are safe); pass
@@ -17,6 +17,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
+import { drawCharacterSheet, PLAYER_LOOK } from './art/characters';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -158,31 +159,12 @@ export function drawTileset(): Buffer {
   return c.toBuffer();
 }
 
-/** Draw the player sheet: rows down, left, right, up; columns stand, stride. */
+/**
+ * Draw the player sheet: rows down, left, right, up; columns stand, stride. Since the post-M15 restyle this is the
+ * styled player of `tools/art/characters.ts` (the same file `npm run art` writes).
+ */
 export function drawPlayer(): Buffer {
-  const c = new Canvas(2 * T, 4 * T);
-  const dirs = ['down', 'left', 'right', 'up'] as const;
-  dirs.forEach((dir, row) => {
-    for (let col = 0; col < 2; col += 1) {
-      const x = col * T;
-      const y = row * T;
-      c.rect(x + 9, y + 4, 14, 12, [250, 210, 170, 255]); // head
-      c.rect(x + 9, y + 3, 14, 4, [60, 40, 30, 255]); // hair
-      c.rect(x + 8, y + 16, 16, 9, [40, 90, 200, 255]); // shirt
-      // legs: stride frame moves them apart
-      const spread = col === 1 ? 3 : 0;
-      c.rect(x + 10 - spread, y + 25, 4, 6, [50, 50, 70, 255]);
-      c.rect(x + 18 + spread, y + 25, 4, 6, [50, 50, 70, 255]);
-      const eye: Rgba = [20, 20, 20, 255];
-      if (dir === 'down') {
-        c.rect(x + 12, y + 9, 2, 3, eye);
-        c.rect(x + 18, y + 9, 2, 3, eye);
-      } else if (dir === 'left') c.rect(x + 10, y + 9, 2, 3, eye);
-      else if (dir === 'right') c.rect(x + 20, y + 9, 2, 3, eye);
-      else c.rect(x + 9, y + 3, 14, 10, [60, 40, 30, 255]); // up: back of the head
-    }
-  });
-  return c.toBuffer();
+  return drawCharacterSheet(PLAYER_LOOK);
 }
 
 /** A map layer grid of local tile ids (-1 = empty). */

@@ -5,8 +5,8 @@
  * - `tools/world/world.json`: per map the base ground under buildings and trees, doors, map-edge links, the Audi,
  *   encounter rectangles and the `default` spawn.
  *
- * Output: `public/assets/tilesets/world.png` (8 × 4 tiles of 32 px; the first 14 tiles are the test tileset's, see
- * `make-test-map.ts`) and `public/maps/<zone>.tmj` for every map (Tiled JSON, CSV layers, embedded tileset, layers
+ * Output: `public/assets/tilesets/world.png` (8 columns of 32 px tiles: the 32 base tiles of {@link WT}, then the
+ * look-alike variants that {@link autotile} picks; art in `tools/art/tiles.ts`) and `public/maps/<zone>.tmj` for every map (Tiled JSON, CSV layers, embedded tileset, layers
  * `ground`, `deco`, `collision`, `above`, `warps`, `encounters`, `spawns`).
  *
  * Warps are generated so every door and edge has its matching way back:
@@ -23,8 +23,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
-import { drawTileset as drawTestTileset } from './make-test-map';
+import { BASE_TILES, D, ROOF_ORDER, SIDE, VARIANT_TILES } from './art/tiles';
+import { Pix } from './art/pixels';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -32,7 +32,6 @@ const PUBLIC_DIR = join(ROOT, 'public');
 export const WORLD_DIR = join(ROOT, 'tools', 'world');
 const T = 32;
 const COLS = 8;
-const ROWS = 4;
 
 /** Local tile ids of `assets/tilesets/world.png` (0–13 are the same tiles as the test tileset). */
 export const WT = {
@@ -193,123 +192,21 @@ export function checkLayout(id: string, rows: string[]): string[] {
   return rows;
 }
 
-class Canvas {
-  readonly png: PNG;
-  constructor(w: number, h: number) {
-    this.png = new PNG({ width: w, height: h });
-  }
-  rect(x: number, y: number, w: number, h: number, c: readonly [number, number, number, number]): void {
-    for (let j = y; j < y + h; j += 1)
-      for (let i = x; i < x + w; i += 1) {
-        if (i < 0 || j < 0 || i >= this.png.width || j >= this.png.height) continue;
-        const k = (j * this.png.width + i) * 4;
-        this.png.data[k] = c[0];
-        this.png.data[k + 1] = c[1];
-        this.png.data[k + 2] = c[2];
-        this.png.data[k + 3] = c[3];
-      }
-  }
-}
+/** Every tile of `world.png` in local-id order: the 32 base tiles, then the variants. */
+const ALL_TILES = [...BASE_TILES, ...VARIANT_TILES];
+/** Number of tile rows in `world.png` (8 tiles per row). */
+export const ROWS = Math.ceil(ALL_TILES.length / COLS);
+/** Local id of every tile key (`grass`, `roof:blue:tl`, …). */
+export const TILE_ID: ReadonlyMap<string, number> = new Map(ALL_TILES.map((t, i) => [t.key, i]));
 
-/** Draw the 32-tile world tileset: the 16 test tiles (row 0–1) plus the world tiles from id 14 on. */
+/**
+ * Draw the world tileset (`tools/art/tiles.ts`): 8 columns of 32 px tiles, the 32 base tiles first (ids 0–31, the
+ * ids in {@link WT}), then every variant. Each tile is drawn at 16 × 16 and scaled ×2.
+ */
 export function drawWorldTileset(): Buffer {
-  const c = new Canvas(COLS * T, ROWS * T);
-  const test = PNG.sync.read(drawTestTileset());
-  PNG.bitblt(test, c.png, 0, 0, test.width, test.height, 0, 0);
-  // Ids 14 and 15 live in the test tileset's unused slots; clear them before drawing.
-  c.rect(6 * T, T, 2 * T, T, [0, 0, 0, 0]);
-  const at = (id: number): [number, number] => [(id % COLS) * T, Math.floor(id / COLS) * T];
-  // The trunk and the Audi are drawn on grass in the test tileset; here they sit in `deco` on any ground (sand,
-  // desert…), so their grass pixels become transparent.
-  const grassColours = ['88,168,72', '64,136,56'];
-  for (const id of [WT.trunk, WT.carLeft, WT.carRight]) {
-    const [tx, ty] = at(id);
-    for (let j = ty; j < ty + T; j += 1)
-      for (let i = tx; i < tx + T; i += 1) {
-        const k = (j * c.png.width + i) * 4;
-        const rgb = `${c.png.data[k]},${c.png.data[k + 1]},${c.png.data[k + 2]}`;
-        if (grassColours.includes(rgb)) c.png.data[k + 3] = 0;
-      }
-  }
-  const tile = (
-    id: number,
-    base: [number, number, number, number],
-    dots?: [number, number, number, number],
-  ) => {
-    const [x, y] = at(id);
-    c.rect(x, y, T, T, base);
-    if (dots)
-      for (const [dx, dy] of [
-        [5, 7],
-        [21, 5],
-        [13, 19],
-        [25, 24],
-        [7, 27],
-      ] as const)
-        c.rect(x + dx, y + dy, 2, 2, dots);
-    return [x, y] as const;
-  };
-  let x: number;
-  let y: number;
-  tile(WT.sand, [236, 214, 160, 255], [214, 188, 130, 255]);
-  [x, y] = tile(WT.dune, [236, 214, 160, 255]);
-  for (let i = 3; i < T; i += 7) c.rect(x + i, y + 6, 2, 22, [150, 170, 80, 255]);
-  [x, y] = tile(WT.mountain, [120, 110, 100, 255]);
-  c.rect(x + 2, y + 14, 28, 18, [96, 88, 80, 255]);
-  c.rect(x + 8, y + 6, 16, 10, [96, 88, 80, 255]);
-  c.rect(x + 12, y + 2, 8, 6, [240, 240, 245, 255]);
-  [x, y] = tile(WT.vineyard, [186, 150, 96, 255]);
-  for (let i = 4; i < T; i += 12) {
-    c.rect(x + i, y + 2, 6, 28, [70, 130, 50, 255]);
-    c.rect(x + i + 1, y + 10, 3, 3, [110, 40, 110, 255]);
-    c.rect(x + i + 2, y + 22, 3, 3, [110, 40, 110, 255]);
-  }
-  [x, y] = tile(WT.road, [90, 90, 96, 255]);
-  c.rect(x + 12, y + 14, 8, 3, [230, 230, 230, 255]);
-  [x, y] = tile(WT.plaza, [210, 200, 186, 255]);
-  c.rect(x, y + 15, T, 1, [170, 160, 150, 255]);
-  c.rect(x + 15, y, 1, T, [170, 160, 150, 255]);
-  [x, y] = tile(WT.roof, [180, 60, 50, 255]);
-  for (let r = 4; r < T; r += 8) c.rect(x, y + r, T, 2, [140, 40, 35, 255]);
-  [x, y] = tile(WT.counter, [196, 150, 100, 255]);
-  c.rect(x, y + 6, T, 20, [120, 80, 50, 255]);
-  c.rect(x, y + 6, T, 4, [160, 110, 70, 255]);
-  [x, y] = tile(WT.desk, [196, 150, 100, 255]);
-  c.rect(x + 2, y + 8, 28, 16, [150, 150, 160, 255]);
-  c.rect(x + 8, y + 4, 14, 10, [40, 40, 50, 255]);
-  c.rect(x + 10, y + 6, 10, 6, [90, 150, 220, 255]);
-  [x, y] = tile(WT.cactus, [212, 180, 120, 255]);
-  c.rect(x + 13, y + 4, 6, 26, [50, 140, 60, 255]);
-  c.rect(x + 6, y + 12, 6, 4, [50, 140, 60, 255]);
-  c.rect(x + 20, y + 9, 6, 4, [50, 140, 60, 255]);
-  [x, y] = tile(WT.fence, [88, 168, 72, 255]);
-  c.rect(x, y + 10, T, 4, [150, 110, 60, 255]);
-  c.rect(x, y + 20, T, 4, [150, 110, 60, 255]);
-  c.rect(x + 4, y + 6, 4, 22, [120, 85, 45, 255]);
-  c.rect(x + 24, y + 6, 4, 22, [120, 85, 45, 255]);
-  [x, y] = tile(WT.bridge, [60, 120, 210, 255]);
-  c.rect(x, y + 2, T, 28, [160, 115, 70, 255]);
-  for (let i = 0; i < T; i += 8) c.rect(x + i, y + 2, 1, 28, [110, 75, 45, 255]);
-  tile(WT.desert, [212, 180, 120, 255], [190, 156, 100, 255]);
-  [x, y] = tile(WT.shelf, [196, 150, 100, 255]);
-  c.rect(x + 2, y + 2, 28, 28, [110, 70, 40, 255]);
-  for (let r = 9; r < T; r += 9) c.rect(x + 2, y + r, 28, 2, [70, 45, 25, 255]);
-  c.rect(x + 6, y + 4, 4, 5, [200, 60, 60, 255]);
-  c.rect(x + 14, y + 13, 4, 5, [60, 120, 200, 255]);
-  [x, y] = tile(WT.rock, [88, 168, 72, 0]);
-  c.rect(x + 3, y + 8, 26, 20, [130, 130, 136, 255]);
-  c.rect(x + 7, y + 4, 16, 8, [150, 150, 156, 255]);
-  [x, y] = tile(WT.bush, [0, 0, 0, 0]);
-  c.rect(x + 3, y + 6, 26, 22, [50, 120, 60, 255]);
-  c.rect(x + 8, y + 10, 6, 5, [80, 160, 80, 255]);
-  [x, y] = tile(WT.fountain, [210, 200, 186, 255]);
-  c.rect(x + 2, y + 6, 28, 22, [170, 170, 180, 255]);
-  c.rect(x + 6, y + 10, 20, 14, [90, 160, 230, 255]);
-  c.rect(x + 14, y + 2, 4, 14, [200, 230, 250, 255]);
-  [x, y] = tile(WT.whiteWall, [236, 238, 242, 255]);
-  c.rect(x, y + 28, T, 4, [190, 194, 204, 255]);
-  for (let i = 4; i < T; i += 10) c.rect(x + i, y + 6, 4, 16, [150, 190, 230, 255]);
-  return PNG.sync.write(c.png);
+  const sheet = new Pix(COLS * T, ROWS * T);
+  ALL_TILES.forEach((t, i) => sheet.blit(t.draw().scale(T / D), (i % COLS) * T, Math.floor(i / COLS) * T));
+  return sheet.png();
 }
 
 /** Tiled object (point spawn, warp or encounter rectangle) in tiles; written in pixels. */
@@ -364,6 +261,122 @@ export function findDoormat(id: string, rows: string[]): { x: number; y: number 
   return { x, y };
 }
 
+/** Layout character of each base ground. */
+const GROUND_CHAR: Record<keyof typeof GROUNDS, string> = {
+  grass: '.',
+  sand: 's',
+  desert: 'd',
+  road: 'r',
+  floor: '=',
+};
+
+/**
+ * Swap base tiles for their look-alike variants (`tools/art/tiles.ts › VARIANT_TILES`) from their neighbours, so
+ * buildings get edges and windows, paths, roads, plazas and sand get a grass border, and water a shore. Off-map
+ * neighbours count as "same", so nothing gets an edge along the map border. Only the art changes: every variant
+ * has its base tile's `solid` / `encounter` properties.
+ *
+ * - `^` roof: ridge (top row), eave (bottom row), left and right edges; one colour per building (a connected block
+ *   of `^`), cycling terracotta → blue → teal → ochre in reading order.
+ * - `#` / `W` outdoor walls: under-the-eave shadow on a building's top wall row, a plinth (or tile band) on its
+ *   bottom row, plain middle rows, side edges, and a window on every third column (not next to a door). Indoors, `#` is a papered wall face when the tile below is floor, else a
+ *   dark wall top.
+ * - `D` door: white frame when it stands in a `W` wall.
+ * - `M` mountain: a cliff face when the tile below is not mountain.
+ * - `:` path, `r` road, `p` plaza, `s` sand: grass border on each side whose neighbour stands on grass (`.` or
+ *   `,`, or a deco tile on a grass map; a door never counts).
+ * - `~` water: bank line and foam on each side touching land (a `b` bridge counts as water).
+ */
+export function autotile(rows: string[], spec: WorldMapSpec, layers: BuiltMap['layers']): void {
+  const w = rows[0]!.length;
+  const at = (x: number, y: number): string | undefined => rows[y]?.[x];
+  const groundAt = (x: number, y: number): string | undefined => {
+    const ch = at(x, y);
+    if (ch === undefined) return undefined;
+    return LEGEND[ch]!.layer === 'ground' ? ch : GROUND_CHAR[spec.ground];
+  };
+  // A door stands on the base ground, but the path in front of it should run into it without a border.
+  const grassy = (x: number, y: number) => {
+    if (at(x, y) === 'D') return false;
+    const g = groundAt(x, y);
+    return g === '.' || g === ',';
+  };
+  const mask = (x: number, y: number, edge: (x: number, y: number) => boolean) =>
+    (edge(x, y - 1) ? SIDE.n : 0) |
+    (edge(x + 1, y) ? SIDE.e : 0) |
+    (edge(x, y + 1) ? SIDE.s : 0) |
+    (edge(x - 1, y) ? SIDE.w : 0);
+  const id = (key: string) => {
+    const n = TILE_ID.get(key);
+    if (n === undefined) throw new Error(`make-world: no tile "${key}"`);
+    return n;
+  };
+
+  // Roof colour per connected block of `^`.
+  const roofColour = new Map<number, string>();
+  let blocks = 0;
+  rows.forEach((row, y) =>
+    [...row].forEach((ch, x) => {
+      if (ch !== '^' || roofColour.has(y * w + x)) return;
+      const colour = ROOF_ORDER[blocks % ROOF_ORDER.length]!;
+      blocks += 1;
+      const stack = [[x, y]];
+      while (stack.length) {
+        const [cx, cy] = stack.pop()!;
+        if (at(cx!, cy!) !== '^' || roofColour.has(cy! * w + cx!)) continue;
+        roofColour.set(cy! * w + cx!, colour);
+        stack.push([cx! + 1, cy!], [cx! - 1, cy!], [cx!, cy! + 1], [cx!, cy! - 1]);
+      }
+    }),
+  );
+
+  rows.forEach((row, y) =>
+    [...row].forEach((ch, x) => {
+      const i = y * w + x;
+      if (ch === '^') {
+        const top = at(x, y - 1) !== '^';
+        const bottom = at(x, y + 1) !== '^';
+        const left = at(x - 1, y) !== '^';
+        const right = at(x + 1, y) !== '^';
+        const r = bottom ? 'b' : top ? 't' : 'm';
+        const c = left && !right ? 'l' : right && !left ? 'r' : 'm';
+        const colour = roofColour.get(i)!;
+        layers.deco[i] =
+          colour === 'terracotta' && r === 'm' && c === 'm' ? WT.roof : id(`roof:${colour}:${r}${c}`);
+      } else if (ch === '#' && spec.indoor) {
+        const below = at(x, y + 1);
+        layers.deco[i] = id(below !== undefined && below !== '#' ? 'wall:indoorFace' : 'wall:indoorTop');
+      } else if (ch === '#' || ch === 'W') {
+        const same = (c: string | undefined) => c === ch || c === 'D';
+        const upper = !same(at(x, y - 1));
+        const left = !same(at(x - 1, y));
+        const right = !same(at(x + 1, y));
+        const c = left && !right ? 'l' : right && !left ? 'r' : 'm';
+        const win = c === 'm' && x % 3 === 1 && at(x - 1, y) !== 'D' && at(x + 1, y) !== 'D';
+        const base = ch === '#' ? 'wall' : 'whiteWall';
+        const row = upper ? 'u' : same(at(x, y + 1)) ? 'c' : 'l';
+        const key = `${base}:${row}${c}${win ? 'w' : ''}`;
+        layers.deco[i] = TILE_ID.get(key) ?? (ch === '#' ? WT.wall : WT.whiteWall);
+      } else if (ch === 'D') {
+        if (at(x - 1, y) === 'W' || at(x + 1, y) === 'W') layers.deco[i] = id('door:white');
+      } else if (ch === 'M') {
+        const below = at(x, y + 1);
+        if (below !== undefined && below !== 'M') layers.deco[i] = id('mountain:face');
+      } else if (ch === '~') {
+        const m = mask(x, y, (nx, ny) => {
+          const n = at(nx, ny);
+          return n !== undefined && n !== '~' && n !== 'b';
+        });
+        if (m) layers.ground[i] = id(`water:${m}`);
+      } else if (ch === ':' || ch === 'r' || ch === 'p' || ch === 's') {
+        const m = mask(x, y, grassy);
+        const kind = { ':': 'path', r: 'road', p: 'plaza', s: 'sand' }[ch];
+        if (m) layers.ground[i] = id(`${kind}:${m}`);
+      }
+    }),
+  );
+}
+
 /** Layer grids, warps, encounters and spawns of one built map. */
 export interface BuiltMap {
   width: number;
@@ -406,6 +419,7 @@ export function buildWorld(
         }
       }),
     );
+    autotile(r, spec, layers);
     const doormat = spec.indoor ? findDoormat(id, r) : null;
     built.set(id, {
       width: w,
@@ -500,9 +514,15 @@ export function buildWorld(
 /** Tile properties written into the embedded tileset. */
 function tileProps(): { id: number; properties: { name: string; type: 'bool'; value: boolean }[] }[] {
   const out = new Map<number, { name: string; type: 'bool'; value: boolean }[]>();
-  for (const id of SOLID) out.set(id, [{ name: 'solid', type: 'bool', value: true }]);
-  for (const id of ENCOUNTER)
-    out.set(id, [...(out.get(id) ?? []), { name: 'encounter', type: 'bool', value: true }]);
+  // A variant tile has the properties of its base tile.
+  const baseOf = (id: number) =>
+    id < BASE_TILES.length ? id : TILE_ID.get(VARIANT_TILES[id - BASE_TILES.length]!.base)!;
+  for (let id = 0; id < ALL_TILES.length; id += 1) {
+    const base = baseOf(id);
+    if (SOLID.includes(base)) out.set(id, [{ name: 'solid', type: 'bool', value: true }]);
+    if (ENCOUNTER.includes(base))
+      out.set(id, [...(out.get(id) ?? []), { name: 'encounter', type: 'bool', value: true }]);
+  }
   return [...out].sort(([a], [b]) => a - b).map(([id, properties]) => ({ id, properties }));
 }
 

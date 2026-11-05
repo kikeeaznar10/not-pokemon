@@ -345,7 +345,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   `menu-scene.ts`, `hud-scene.ts` (the "Guardando…" icon moved to the top centre: the touch Start / Mapa buttons hid
   it), `data/assets.ts` (Preload loads the minimaps), `constants.ts`, `tools/make-placeholders.ts`, `es.json`
   (`menu.map_soon` replaced by `menu.map_on/off/indoor`; `touch.*`, `mobile.*`), `playwright.config.ts`, READMEs.
-  Tests changed on purpose: `assets.test.ts` counts the two minimaps. The portrait phone profiles (`android`,
+  Tests changed on purpose: `assets.test.ts` counts the two minimaps; `m10-menu-save.spec.ts` expects *Mapa* to say
+  "Minimapa desactivado." instead of M10's placeholder line. The portrait phone profiles (`android`,
   `iphone`) now start with the E2E-only switch `flexymon.e2e.allowPortrait` (localStorage, ignored outside E2E / dev
   builds) so the older specs still run there; M12's spec removes it to test the guard. No check was weakened.
 - Verified with Playwright on all four profiles + screenshots (`tests/e2e/m12-mobile.spec.ts`): controls only on touch

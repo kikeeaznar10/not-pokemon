@@ -338,7 +338,7 @@ test('Start menu: pauses the game; Equipo shows base + bonus and reorders; closi
   expect(errors).toEqual([]);
 });
 
-test('Mochila: a Café heals a team member, a Regleta adds a slot, others are greyed; Mapa is a placeholder', async ({
+test('Mochila: a Café heals a team member, a Regleta adds a slot, others are greyed; Mapa toggles the minimap', async ({
   page,
 }, testInfo) => {
   test.setTimeout(90_000);
@@ -387,13 +387,13 @@ test('Mochila: a Café heals a team member, a Regleta adds a slot, others are gr
   expect((await party(page)).teamSlots).toBe(3);
   expect(await hook(page, 'items')).toEqual({ cafe: 1, redbull: 1 });
 
-  // B back, then Mapa shows its placeholder.
+  // B back, then Mapa (M12: no longer a placeholder) toggles the minimap off outdoors.
   await expect.poll(async () => (await menu(page))?.ui).toBe('bag');
   await press(page, 'x');
   await expect.poll(async () => (await menu(page))?.ui).toBe('main');
   await cursorTo(page, 2);
   await press(page, 'z');
-  expect(await readMessages(page)).toEqual(['El mapa todavía no está listo.']);
+  expect(await readMessages(page)).toEqual(['Minimapa desactivado.']);
   await expect.poll(async () => (await menu(page))?.ui).toBe('main');
   await press(page, 'x');
   await expect.poll(() => menu(page)).toBeNull();

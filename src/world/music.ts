@@ -7,6 +7,7 @@
  * The player is engine-free: it receives a `makeTrack(key)` factory (Phaser's `sound.add` in the game,
  * fakes in tests). Audio only becomes audible after the first user gesture (browser rule; Phaser
  * unlocks it), and the title needs a key press, so this happens before any zone plays.
+ * M10: the music volume option scales every track ({@link MusicPlayer.setGain}).
  */
 import { MUSIC_FADE_MS } from '../logic/constants';
 
@@ -18,7 +19,7 @@ export interface Track {
   setVolume(volume: number): unknown;
 }
 
-/** Full music volume (0–1). The options menu (M10) will scale it. */
+/** Full music volume (0–1) at the loudest music option; the option scales it ({@link MusicPlayer.setGain}). */
 export const MUSIC_VOLUME = 0.6;
 
 interface Playing {
@@ -32,6 +33,8 @@ interface Playing {
 export class MusicPlayer {
   private current: Playing | null = null;
   private fading: Playing[] = [];
+  /** The music option as a 0–1 gain (M10), multiplied into every track's volume. */
+  private gain = 1;
 
   /** @param makeTrack creates a looping track for a sound key */
   constructor(private readonly makeTrack: (key: string) => Track) {}
@@ -56,6 +59,19 @@ export class MusicPlayer {
     this.current = { key, track, level: 0 };
   }
 
+  /** The music option's gain (0–1, M10). */
+  getGain(): number {
+    return this.gain;
+  }
+
+  /** Set the music option's gain (0–1, M10); applied at once to the playing and fading tracks. */
+  setGain(gain: number): void {
+    this.gain = Math.min(1, Math.max(0, gain));
+    for (const p of [...(this.current ? [this.current] : []), ...this.fading]) {
+      p.track.setVolume(p.level * MUSIC_VOLUME * this.gain);
+    }
+  }
+
   /** Fade out whatever is playing. */
   stop(): void {
     if (this.current) this.fading.push(this.current);
@@ -67,11 +83,11 @@ export class MusicPlayer {
     const step = dtMs / MUSIC_FADE_MS;
     if (this.current && this.current.level < 1) {
       this.current.level = Math.min(1, this.current.level + step);
-      this.current.track.setVolume(this.current.level * MUSIC_VOLUME);
+      this.current.track.setVolume(this.current.level * MUSIC_VOLUME * this.gain);
     }
     this.fading = this.fading.filter((f) => {
       f.level = Math.max(0, f.level - step);
-      f.track.setVolume(f.level * MUSIC_VOLUME);
+      f.track.setVolume(f.level * MUSIC_VOLUME * this.gain);
       if (f.level > 0) return true;
       f.track.stop();
       f.track.destroy();

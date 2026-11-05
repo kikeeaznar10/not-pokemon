@@ -58,6 +58,9 @@ const shop = (page: Page) => hook<ShopView | null>(page, 'shop');
 const storage = (page: Page) => hook<StorageView | null>(page, 'storage');
 const battle = (page: Page) => hook<BattleView | null>(page, 'battle');
 const dialogue = (page: Page) => hook<{ full: string } | null>(page, 'dialogue');
+/** The M9 save requests (`shop`, `healer`); M10 also asks for one on every map entry (`map`), left out here. */
+const shopSaves = async (page: Page) =>
+  (await hook<string[]>(page, 'saveRequests')).filter((r) => r === 'shop' || r === 'healer');
 
 /** Serve start.json with the player standing at `spawn`. */
 async function startAt(page: Page, spawn: object): Promise<void> {
@@ -202,13 +205,13 @@ test('shop: buy 3 Cafés with 200 € (50 € left), sell one for 25 €; B back
   expect(await hook(page, 'items')).toEqual({ cafe: 5 });
 
   // B, B: out of the shop; the overworld moves again and an auto-save was requested.
-  expect(await hook<string[]>(page, 'saveRequests')).toEqual([]);
+  expect(await shopSaves(page)).toEqual([]);
   await press(page, 'x');
   await expect.poll(async () => (await shop(page))?.ui).toBe('main');
   await press(page, 'x');
   await expect.poll(() => shop(page)).toBeNull();
   await standing(page, { map: 'test_house', x: 7, y: 6 });
-  expect(await hook<string[]>(page, 'saveRequests')).toEqual(['shop']);
+  expect(await shopSaves(page)).toEqual(['shop']);
   expect(errors).toEqual([]);
 });
 
@@ -337,6 +340,6 @@ test('healer: full heal of team and storage, message, auto-save', async ({ page 
   const party = await hook<{ team: Inst[]; storage: Inst[] }>(page, 'party');
   expect(party.team.map((m) => m.currentHp)).toEqual([40, 30]);
   expect(party.storage.map((m) => m.currentHp)).toEqual([38]);
-  expect(await hook<string[]>(page, 'saveRequests')).toEqual(['healer']);
+  expect(await shopSaves(page)).toEqual(['healer']);
   expect(errors).toEqual([]);
 });

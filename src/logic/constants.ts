@@ -78,3 +78,16 @@ export const NPC_ALERT_MS = 600;
 
 /** Shop quantity picker (M9): Right / Left change the quantity by this much (Up / Down by 1). */
 export const QTY_BIG_STEP = 10;
+
+/** Options (M10): characters per second for each text speed (lenta / normal / rápida). Normal = `TEXT_CPS`. */
+export const TEXT_SPEED_CPS: Readonly<Record<'slow' | 'normal' | 'fast', number>> = {
+  slow: 15,
+  normal: TEXT_CPS,
+  fast: 60,
+};
+
+/** Options (M10): music and effects volume are whole levels from 0 (silent) to this (full). */
+export const VOLUME_STEPS = 10;
+
+/** Options (M10): the "Guardando…" icon shows this long after every auto-save (ms). */
+export const SAVE_ICON_MS = 600;

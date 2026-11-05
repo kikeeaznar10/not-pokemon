@@ -2,7 +2,7 @@
 
 | File | What it is |
 | --- | --- |
-| `music.ts` | `MusicPlayer` (M4): zone music; same file keeps playing, a different one crossfades over `MUSIC_FADE_MS`. Driven by the game loop in `main.ts` (`zone:entered` → `play`). |
+| `music.ts` | `MusicPlayer` (M4): zone music; same file keeps playing, a different one crossfades over `MUSIC_FADE_MS`. Driven by the game loop in `main.ts` (`zone:entered` → `play`). M10: `setGain` (the music volume option, 0–1) scales every track at once. |
 | `camera.ts` | `cameraBounds` (M4): map bounds, or a screen-sized range centred on maps smaller than the screen. |
 | `player.ts` | `Player`: the player sprite, driven by `src/logic/movement.ts` (grid steps, tap-to-turn); `halt` (M7), `face` (M8: turn to an enemy that walked up). Sheet `assets/sprites/player.png`: 32 × 32 frames, columns stand/stride, rows down/left/right/up. |
 

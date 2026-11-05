@@ -24,7 +24,8 @@
  *   `takeFlexymon` (`src/logic/merge.ts`: added to the team, to storage when the team is full, or merged)
  *   and shows the matching message (`catchMessages`) before the battle ends.
  * - End: the team (HP) and bag are written back to the game state, the screen fades out, the scene
- *   emits `battle:ended` and stops; the overworld wakes up on the same tile.
+ *   asks for an auto-save (`save:request` `battle`, M10), emits `battle:ended` and stops; the overworld
+ *   wakes up on the same tile. Attack sounds play at the effects volume option (M10).
  * - Enemy NPCs (M8): started with `npcId`, a win runs `winAgainstNpc` (euros `+= rng.int(min, max)`,
  *   the NPC goes to `cooldown`) and shows "¡Has ganado {n} €!" (`battle.reward`) before leaving.
  * - Losing (M8, wild or NPC): `loseBattle` applies the Losing rule to the game state (euros halved, team
@@ -37,6 +38,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { events } from '../core/events';
 import { log } from '../core/log';
 import { rng } from '../core/rng';
+import { sfxVolume } from '../core/options';
 import { gameState, setGameState } from '../core/session';
 import { getGameData } from '../data/game-data';
 import { t } from '../i18n';
@@ -259,7 +261,7 @@ export class BattleScene extends Phaser.Scene {
       case 'message':
         return new Promise((resolve) => this.dialog.open([step.text], { onClose: resolve }));
       case 'sound':
-        if (this.cache.audio.exists(step.key)) this.sound.play(step.key);
+        if (this.cache.audio.exists(step.key)) this.sound.play(step.key, { volume: sfxVolume() });
         return Promise.resolve();
       case 'show': {
         const side = this.sides[step.who];
@@ -543,6 +545,7 @@ export class BattleScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.fadeOut(END_FADE_MS, 0, 0, 0);
     cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      events.emit('save:request', { reason: 'battle' });
       events.emit('battle:ended', { result });
       this.scene.stop();
     });

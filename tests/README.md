@@ -41,7 +41,14 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.useFieldItem(itemId, targetUid?)` | M9 | Runs `useFieldItem` on the game state: the `use` (`heal` / `revive` / `team_slot`) or `{ error }`. |
 | `window.__E2E__.shop()` | M9 | The open shop: `{ shopId, ui ('main'/'list'/'quantity'/'confirm'/'message'/'closed'), mode, euros, menu, itemId, quantity, total, prompt, message }`, else `null`. |
 | `window.__E2E__.storage()` | M9 | The open storage box: `{ column, cursor, team[], storage[] (species ids), teamSlots, message }`, else `null`. |
-| `window.__E2E__.saveRequests()` | M9 | Reasons of every `save:request` since load (`healer`, `shop`; M10 adds the rest). |
+| `window.__E2E__.saveRequests()` | M9 | Reasons of every `save:request` since load (`healer`, `shop`; M10: `map`, `battle`, `menu`). |
+| `window.__E2E__.savesWritten()` | M10 | Reasons of every save written since load (`quiet` = page hidden / closed). |
+| `window.__E2E__.savedGame()` | M10 | The raw `flexymon.save.v1` text, or `null`. |
+| `window.__E2E__.saveIcon()` | M10 | True while the "Guardando…" icon shows (600 ms after each save). |
+| `window.__E2E__.menu()` | M10 | The open Start menu: `{ ui ('main'/'team'/'detail'/'move'/'bag'/'bag_target'/'options'/'message'/'closed'), menu { options, cursor }, detail (stats `{ stat, value, base, bonus }`, attacks) on the detail page, options { music, sfx, textSpeed, cursor }, description (Mochila), message }`, else `null`. |
+| `window.__E2E__.options()` / `setOptions(o)` | M10 | Read / replace the options `{ music, sfx (0–10), textSpeed ('slow'/'normal'/'fast') }` (stored in `flexymon.options` and applied). |
+| `window.__E2E__.musicGain()` | M10 | The music option's gain applied to the music player (0–1). |
+| `window.__E2E__.patchState(patch)` | M10 | Merge fields into the game state (e.g. `team` with bonuses, `npcs`); the position follows the player. |
 | `window.__E2E__.npcStates()` | M8 | Enemy NPC states from the game state: `{ id: 'ready' \| 'cooldown' }` (an NPC never beaten is missing = `ready`). |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
@@ -61,6 +68,11 @@ back). Loss and forced-switch tests try seeds 1–10 until the case happens, sin
 Since M9 the overworld hooks (`playerTile`, `overworldLocked`, `npcs`, `dialogue`…) also answer while the overworld
 is paused under the Shop or Storage scene; `battle().ui` can be `item` / `item_target`.
 `tests/e2e/m9-items.spec.ts` serves `start.json` with a spawn inside `test_house` next to the NPC under test.
+
+Since M10 every page load that reaches the overworld writes `flexymon.save.v1`, and the next Start on the title
+continues that game: tests start with an empty `localStorage` (a new browser context per test), so only tests that
+reload see a save. `currentScene()` ignores the always-on `Hud` scene. `tests/e2e/m10-menu-save.spec.ts` reloads with
+`page.reload()` (the quiet save on `pagehide` keeps the exact tile) and writes garbage with `localStorage.setItem`.
 
 Add new helpers to the `E2EHooks` interface in `src/main.ts` and to this table.
 

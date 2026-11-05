@@ -3,10 +3,12 @@
  *
  * - `open(strings, { voice, onClose })` shows the strings one box each; long strings are word-wrapped
  *   to the box and continue on extra boxes if needed (`src/logic/dialogue.ts`).
- * - Text types out at `TEXT_CPS` characters per second. A shows the whole box at once; A on a full box
- *   goes to the next one, and after the last one closes the box and calls `onClose`.
+ * - Text types out at the text speed option's rate (M10: lenta / normal / rápida = `TEXT_SPEED_CPS`;
+ *   normal is `TEXT_CPS`). A shows the whole box at once; A on a full box goes to the next one, and after
+ *   the last one closes the box and calls `onClose`.
  * - A small arrow blinks in the bottom-right corner when another box follows.
- * - The speaker's `voice` (a sound key = its JSON path) plays every `VOICE_EVERY_CHARS` characters.
+ * - The speaker's `voice` (a sound key = its JSON path) plays every `VOICE_EVERY_CHARS` characters, at the
+ *   effects volume option (M10).
  * - Input: the owner calls {@link DialogBox.update} every frame while {@link DialogBox.isOpen}; the box
  *   reads the Input service itself. The frame it opens it ignores input, so the A press that started a
  *   conversation does not also skip the first box.
@@ -16,6 +18,8 @@
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { input } from '../core/input';
+import { getOptions, sfxVolume } from '../core/options';
+import { textCps } from '../logic/options';
 import {
   dialoguePages,
   isTyped,
@@ -146,7 +150,7 @@ export class DialogBox {
         return;
       }
     } else {
-      const r = typeTick(this.typing, dtMs);
+      const r = typeTick(this.typing, dtMs, textCps(getOptions().textSpeed));
       this.typing = r.typing;
       if (r.voice) this.playVoice();
     }
@@ -189,6 +193,6 @@ export class DialogBox {
   private playVoice(): void {
     this.voicePlays += 1;
     const key = this.opts.voice;
-    if (key && this.scene.cache.audio.exists(key)) this.scene.sound.play(key);
+    if (key && this.scene.cache.audio.exists(key)) this.scene.sound.play(key, { volume: sfxVolume() });
   }
 }

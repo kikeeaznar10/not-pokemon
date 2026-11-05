@@ -1,10 +1,11 @@
 /**
  * The live game state of this page session: team, storage, bag, euros, NPC states, player position.
  *
- * Until saving arrives (M10) every page load starts a new game from `start.json` (built lazily by
- * `newGameState` on first use, with the player name `player.default_name`). Scenes read it with
- * {@link gameState} and replace it with {@link setGameState}; the battle writes the team back when a
- * battle ends. Nothing here computes rules.
+ * With no state set, {@link gameState} builds a new game from `start.json` on first use (`newGameState`,
+ * player name `player.default_name`). M10: Preload puts a loaded save here with {@link setGameState} (or
+ * calls {@link resetGameState} for a new game), and `autosave.ts` keeps the player's position in it and
+ * writes it to `localStorage`. Scenes read it with {@link gameState} and replace it with {@link setGameState};
+ * the battle writes the team back when a battle ends. Nothing here computes rules.
  */
 import { getGameData } from '../data/game-data';
 import { t } from '../i18n';

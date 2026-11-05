@@ -12,6 +12,13 @@ import type { Facing } from './data/schemas';
 import { debugFlags } from './core/debug-flags';
 import { rng } from './core/rng';
 import { gameState, setGameState } from './core/session';
+import { Autosave } from './core/autosave';
+import { getOptions, loadOptions, setOptions } from './core/options';
+import { saveStore } from './core/save-store';
+import { volumeGain, type Options } from './logic/options';
+import type { GameState } from './logic/save';
+import { HUD_SCENE, type HudScene } from './scenes/hud-scene';
+import { MENU_SCENE, type MenuScene, type MenuView } from './scenes/menu-scene';
 import type { BattleKind } from './logic/battle';
 import { createInstance, type FlexymonInstance } from './logic/instance';
 import { BATTLE_SCENE, type BattleScene, type BattleView } from './scenes/battle-scene';
@@ -44,6 +51,19 @@ events.on('zone:entered', ({ zone }) => {
   if (z) music.play(z.music);
 });
 
+// Options (M10): read from `flexymon.options`; the music volume follows the option.
+music.setGain(volumeGain(loadOptions().music));
+events.on('options:changed', (o) => music.setGain(volumeGain(o.music)));
+
+// Saving (M10): auto-save at every save point and when the page is hidden or closed.
+const autosave = new Autosave({ store: saveStore, getState: gameState, setState: setGameState });
+autosave.start(window);
+events.on('debug:delete_save', () => {
+  autosave.disable();
+  saveStore.remove();
+  window.location.reload();
+});
+
 /** Number of entries in each content collection. */
 export interface DataSummary {
   flexymon: number;
@@ -59,7 +79,7 @@ export interface DataSummary {
 export interface E2EHooks {
   /** Keys of the currently active scenes, bottom to top. */
   activeScenes(): string[];
-  /** Key of the topmost active scene, ignoring the Debug overlay; `null` before any scene runs. */
+  /** Key of the topmost active scene, ignoring the Debug overlay and the HUD (M10); `null` before any scene runs. */
   currentScene(): string | null;
   /** Counts of the loaded content, or `null` if data is not loaded (yet, or it failed). */
   dataSummary(): DataSummary | null;
@@ -142,12 +162,28 @@ export interface E2EHooks {
   shop(): ShopView | null;
   /** The open storage box (M9): column, cursor, species per column, team slots, message; else `null`. */
   storage(): StorageView | null;
-  /** Reasons of every `save:request` since the page loaded (M9: `healer`, `shop`). */
+  /** Reasons of every `save:request` since the page loaded (M9: `healer`, `shop`; M10: `map`, `battle`, `menu`). */
   saveRequests(): string[];
+  /** Reasons of every save written since the page loaded (M10; `quiet` = page hidden / closed). */
+  savesWritten(): string[];
+  /** The raw `flexymon.save.v1` text, or `null` (M10). */
+  savedGame(): string | null;
+  /** True while the "Guardando…" icon shows (M10). */
+  saveIcon(): boolean;
+  /** The open Start menu (M10): ui, menu, detail page, options, description, message; else `null`. */
+  menu(): MenuView | null;
+  /** The current options (M10). */
+  options(): Options;
+  /** Replace the options (M10; stored and applied like the options screen does). */
+  setOptions(options: Options): void;
+  /** Music option gain applied to the music player (0–1, M10). */
+  musicGain(): number;
+  /** Merge these fields into the game state (M10 tests: bonuses, NPC states…); the position follows the player. */
+  patchState(patch: Partial<GameState>): void;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
-  // Running, or paused under a Shop / Storage overlay (M9).
+  // Running, or paused under a Shop / Storage (M9) or Menu (M10) overlay.
   const overworld = (): OverworldScene | null =>
     game.scene.isActive(OVERWORLD_SCENE) || game.scene.isPaused(OVERWORLD_SCENE)
       ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene)
@@ -165,7 +201,9 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
   const hooks: E2EHooks = {
     activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
     currentScene: () => {
-      const scenes = game.scene.getScenes(true).filter((sc) => sc.scene.key !== DEBUG_SCENE);
+      const scenes = game.scene
+        .getScenes(true)
+        .filter((sc) => sc.scene.key !== DEBUG_SCENE && sc.scene.key !== HUD_SCENE);
       return scenes[scenes.length - 1]?.scene.key ?? null;
     },
     dataSummary: () => {
@@ -242,6 +280,16 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     storage: () =>
       game.scene.isActive(STORAGE_SCENE) ? (game.scene.getScene(STORAGE_SCENE) as StorageScene).view() : null,
     saveRequests: () => [...saveRequests],
+    savesWritten: () => [...autosave.written],
+    savedGame: () => saveStore.raw(),
+    saveIcon: () =>
+      game.scene.isActive(HUD_SCENE) ? (game.scene.getScene(HUD_SCENE) as HudScene).saving : false,
+    menu: () =>
+      game.scene.isActive(MENU_SCENE) ? (game.scene.getScene(MENU_SCENE) as MenuScene).view() : null,
+    options: () => ({ ...getOptions() }),
+    setOptions: (o) => setOptions(o),
+    musicGain: () => music.getGain(),
+    patchState: (patch) => setGameState({ ...gameState(), ...structuredClone(patch) }),
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

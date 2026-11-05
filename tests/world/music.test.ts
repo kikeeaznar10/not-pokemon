@@ -81,4 +81,22 @@ describe('MusicPlayer', () => {
     m.update(500);
     expect(made[0]!.destroyed).toBe(true);
   });
+
+  it('scales every track by the music option gain, at once and during fades (M10)', () => {
+    const { made, make } = fakeTracks();
+    const m = new MusicPlayer(make);
+    expect(m.getGain()).toBe(1);
+    m.play('a.ogg');
+    m.update(500);
+    m.setGain(0.5);
+    expect(made[0]!.volume).toBeCloseTo(MUSIC_VOLUME * 0.5);
+    m.play('b.ogg');
+    m.update(250);
+    expect(made[0]!.volume).toBeCloseTo((MUSIC_VOLUME / 2) * 0.5);
+    expect(made[1]!.volume).toBeCloseTo((MUSIC_VOLUME / 2) * 0.5);
+    m.setGain(0);
+    expect(made[1]!.volume).toBe(0);
+    m.setGain(3);
+    expect(m.getGain()).toBe(1);
+  });
 });

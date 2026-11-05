@@ -13,6 +13,8 @@
  *   the menu stays open so the new value shows.
  * - Euros (M8): the info lines also show the player's euros ("Euros: {n}").
  * - Options (M8): "NPC: todos listos" sets every enemy NPC to `ready` (`resetAllNpcs`); the menu stays open.
+ * - Options (M10): "Borrar partida" (first under "Opciones") emits `debug:delete_save`: `main.ts` stops auto-saving, deletes
+ *   `flexymon.save.v1` and reloads the page, which then starts a new game.
  * Later milestones add more commands here (items…).
  */
 import Phaser from 'phaser';
@@ -96,6 +98,11 @@ export class DebugScene extends Phaser.Scene {
         group: 'battle' as const,
         run: () => events.emit('debug:battle', { speciesId: sp.id }),
       })),
+      {
+        label: t('debug.delete_save'),
+        group: 'option' as const,
+        run: () => events.emit('debug:delete_save'),
+      },
       {
         label: t(debugFlags.encounters ? 'debug.encounters_on' : 'debug.encounters_off'),
         group: 'option' as const,

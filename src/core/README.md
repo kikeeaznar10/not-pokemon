@@ -4,10 +4,11 @@
 | --- | --- |
 | `log.ts` | `log` / `warn` / `error`: the only place allowed to use `console` (silent in production builds). |
 | `rng.ts` | Seedable random generator (`int`, `float`, `chance`, `pick`, `weighted`, `id`). |
-| `events.ts` | Typed event bus (`data:loaded`, `data:error`, `game:ready`, `zone:entered`, `player:moved`, `debug:menu`, `debug:teleport`, `debug:battle`, `battle:ended`). |
+| `events.ts` | Typed event bus (`data:loaded`, `data:error`, `game:ready`, `zone:entered`, `player:moved`, `debug:menu`, `debug:teleport`, `debug:battle`, `battle:ended`; M9 `save:request`, `overlay:closed`; M10 `save:done`, `options:changed`, `debug:delete_save`). |
 | `input.ts` | The Input service (M3): `isDown` / `justPressed` / `direction()` for `up/down/left/right/a/b/start/map` (+ `debug` = F2). Keyboard via `bindKeyboard(window)` in `main.ts`; touch (M12) calls `press/release`. `beginFrame()` runs on Phaser's `prestep`. |
 
 | `debug-flags.ts` | Page-session debug switches (M7): `debugFlags.encounters` (wild encounters on/off), set by the F2 menu and the E2E hooks. |
-| `session.ts` | The live game state (M6): `gameState()` (a new game from `start.json` on first use, via `src/logic/new-game.ts`), `setGameState()`, `resetGameState()`. The battle writes the team and bag back here. M10 loads/saves it. |
-
-Planned: save store (M10).
+| `session.ts` | The live game state (M6): `gameState()` (a new game from `start.json` on first use, via `src/logic/new-game.ts`), `setGameState()`, `resetGameState()`. The battle writes the team and bag back here. M10: Preload puts a loaded save here; `autosave.ts` keeps the player position in it and saves it. |
+| `save-store.ts` | Save store (M10): `SaveStore` over `localStorage` (`saveStore` is the game's). Key `flexymon.save.v1` (`SAVE_KEY`). `load(data)` → `none` / `loaded` (state + migration warnings, logged) / `broken` (bad JSON, schema or empty team: the raw text is copied to `flexymon.save.broken`, `BROKEN_SAVE_KEY`, and the game starts fresh). `write(state)` and `remove()` never throw (full or blocked storage → warning). Format and migration: `src/logic/save.ts`. |
+| `autosave.ts` | Auto-save (M10): `Autosave` saves on every `save:request` (`map`, `battle`, `shop`, `healer`, `menu`) and emits `save:done`; quietly (no `save:done`) on `pagehide` / page hidden, so a reload at any time comes back to the same tile. Inactive until the first `zone:entered` (the title never overwrites a save); keeps `gameState().player` in step with `player:moved`; `disable()` stops it until reload (debug delete). Wired in `main.ts`. |
+| `options.ts` | Options store (M10): `loadOptions()` reads `flexymon.options` (bad fields → defaults, with a warning), `getOptions()`, `setOptions()` (stores at once, emits `options:changed`), `sfxVolume()` (0–1, pass as `volume` when playing a sound effect). Rules: `src/logic/options.ts`. |

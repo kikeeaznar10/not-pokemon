@@ -52,8 +52,10 @@
  * - Losing (M8): the BattleScene applies the Losing rule to the game state; on `battle:ended` with
  *   `lose` this scene restarts at the respawn point (`start.json › respawn`), fades in and shows
  *   `lose.woke_up` ("Te has despertado en la oficina...").
+ * - Start menu (M10): Start while the player stands still and nothing else is open launches the MenuScene
+ *   over this scene, which pauses (game time stops: NPCs freeze) until `overlay:closed`.
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
- *   the player and after every step.
+ *   the player, after every step and (M10) after every turn on the spot; on entry it then asks for an auto-save (`save:request` `map`, M10).
  */
 import Phaser from 'phaser';
 import { TILE_SIZE } from '../config/game';
@@ -92,6 +94,7 @@ import { NpcActor, npcsOnMap } from '../world/npc';
 import { BATTLE_SCENE, type BattleSceneData } from './battle-scene';
 import { SHOP_SCENE, type ShopSceneData } from './shop-scene';
 import { STORAGE_SCENE } from './storage-scene';
+import { MENU_SCENE } from './menu-scene';
 import { Player } from '../world/player';
 
 /** Scene key of {@link OverworldScene}. */
@@ -257,6 +260,7 @@ export class OverworldScene extends Phaser.Scene {
     log(`Overworld: entered ${this.zone.id} at ${x},${y}`);
     events.emit('zone:entered', { zone: this.zone.id });
     this.emitMoved();
+    events.emit('save:request', { reason: 'map' });
   }
 
   override update(_time: number, delta: number): void {
@@ -277,6 +281,8 @@ export class OverworldScene extends Phaser.Scene {
     const dir = frozen ? null : input.direction();
     const fresh = dir !== null && input.justPressed(dir);
     const moves = player.update(dir, dt, (px, py) => this.blockedForPlayer(px, py), fresh);
+    // M10: a turn on the spot is announced too, so the saved facing follows the player.
+    if (moves.some((m) => m.type === 'turn') && !moves.some((m) => m.type === 'step_end')) this.emitMoved();
     if (moves.some((m) => m.type === 'step_end')) {
       this.emitMoved();
       const s = player.state;
@@ -295,6 +301,10 @@ export class OverworldScene extends Phaser.Scene {
       const s = player.state;
       this.updateCooldowns(s.x, s.y);
       if (this.lookForPlayer(s)) return;
+    }
+    if (!frozen && input.justPressed('start') && !player.state.step) {
+      this.openOverlay(null, MENU_SCENE, {});
+      return;
     }
     if (!frozen && input.justPressed('a') && !player.state.step) {
       const s = player.state;
@@ -562,18 +572,18 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /**
-   * Open an overlay scene (M9: Shop, Storage) over this one: launch it and pause this scene (map, player
-   * and NPCs freeze, still drawn underneath). On `overlay:closed` this scene resumes and `npc` goes back
-   * to wandering.
+   * Open an overlay scene (M9: Shop, Storage; M10: the Start menu, with no NPC) over this one: launch it
+   * and pause this scene (map, player and NPCs freeze, still drawn underneath). On `overlay:closed` this
+   * scene resumes and `npc` (if any) goes back to wandering.
    */
-  private openOverlay(npc: NpcActor, key: string, data: object): void {
+  private openOverlay(npc: NpcActor | null, key: string, data: object): void {
     this.overlay = key;
     const off = events.on('overlay:closed', ({ scene }) => {
       if (scene !== key) return;
       off();
       this.overlay = null;
       this.scene.resume();
-      npc.finishTalk(rng);
+      npc?.finishTalk(rng);
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, off);
     this.scene.launch(key, data);
@@ -667,7 +677,7 @@ export class OverworldScene extends Phaser.Scene {
 
   /**
    * True while the player cannot move: warp fade, debug menu, a dialogue/choice box, an enemy sequence, an
-   * open shop or storage box (M9).
+   * open shop or storage box (M9) or the Start menu (M10).
    */
   isLocked(): boolean {
     return (

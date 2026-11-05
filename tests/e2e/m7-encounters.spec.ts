@@ -276,10 +276,10 @@ test('the debug menu switches encounters off', async ({ page }) => {
   await press(page, 'F2');
   await expect.poll(() => hook<string>(page, 'debugMode')).toBe('menu');
   await press(page, 'ArrowUp'); // wraps to the last entry (M8's "NPC: todos listos")…
-  await press(page, 'ArrowUp'); // …the one above it is the encounters option
+  await press(page, 'ArrowUp'); // …the one above it is the encounters option (M10's "Borrar partida" is first)
   await expect
-    .poll(async () => (await hook<string[]>(page, 'debugLines'))!.slice(-3))
-    .toEqual(['Opciones', '> Encuentros: sí', '  NPC: todos listos']);
+    .poll(async () => (await hook<string[]>(page, 'debugLines'))!.slice(-4))
+    .toEqual(['Opciones', '  Borrar partida', '> Encuentros: sí', '  NPC: todos listos']);
   await press(page, 'z');
   await expect.poll(() => hook<boolean>(page, 'encountersEnabled')).toBe(false);
   expect((await hook<string[]>(page, 'debugLines'))!.at(-2)).toBe('> Encuentros: no');

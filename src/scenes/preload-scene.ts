@@ -3,20 +3,27 @@
  * Phaser key (`this.textures.exists('assets/sprites/items/cafe.png')`), plus every map's tileset images
  * and the player sheet. Sounds load the OGG, falling
  * back to the MP3 with the same name. When done it shows the title with "Pulsa START", emits
- * `game:ready`, and launches the DebugScene when debugging is enabled. Start or A (or a tap) then starts
- * the OverworldScene at `start.json › spawn`. (The Title scene replaces this screen in M11.)
+ * `game:ready`, launches the HudScene (M10, save icon) and the DebugScene when debugging is enabled.
+ * Start or A (or a tap) then starts the game (the Title scene replaces this screen in M11):
+ * - M10: if `flexymon.save.v1` holds a valid save it is loaded (`src/core/save-store.ts`) and the
+ *   OverworldScene starts where the player was saved;
+ * - otherwise (no save, or a broken one, which is copied to `flexymon.save.broken`) a new game starts from
+ *   `start.json` at its spawn point.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH, TILE_SIZE } from '../config/game';
 import { PLAYER_SPRITE } from '../world/player';
 import { BOOT_SCENE } from './boot-scene';
 import { DEBUG_SCENE, debugEnabled } from './debug-scene';
+import { HUD_SCENE } from './hud-scene';
 import { OVERWORLD_SCENE, type OverworldData } from './overworld-scene';
 import { input } from '../core/input';
 import { events } from '../core/events';
 import { error, log } from '../core/log';
 import { collectAssets } from '../data/assets';
 import { getGameData } from '../data/game-data';
+import { saveStore } from '../core/save-store';
+import { gameState, resetGameState, setGameState } from '../core/session';
 import { t } from '../i18n';
 
 /** Scene key of {@link PreloadScene}. */
@@ -82,6 +89,7 @@ export class PreloadScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     this.scene.stop(BOOT_SCENE);
+    this.scene.launch(HUD_SCENE);
     if (debugEnabled()) this.scene.launch(DEBUG_SCENE);
     this.input.once('pointerdown', () => this.startGame());
     this.complete = true;
@@ -93,10 +101,16 @@ export class PreloadScene extends Phaser.Scene {
     if (this.complete && (input.justPressed('start') || input.justPressed('a'))) this.startGame();
   }
 
-  /** Leave the title and enter the overworld at the new-game spawn point. */
+  /** Leave the title: load the save if there is a valid one, else start a new game; enter the overworld. */
   private startGame(): void {
     if (!this.scene.isActive()) return;
-    const { map, x, y, facing } = getGameData().start.spawn;
+    const outcome = saveStore.load(getGameData());
+    if (outcome.status === 'loaded') setGameState(outcome.state);
+    else resetGameState();
+    const { map, x, y, facing } = gameState().player;
+    log(
+      `Preload: ${outcome.status === 'loaded' ? 'continuing the saved game' : 'new game'} at ${map} ${x},${y}`,
+    );
     const data: OverworldData = { map, x, y, facing };
     this.scene.start(OVERWORLD_SCENE, data);
   }

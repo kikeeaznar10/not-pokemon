@@ -2,8 +2,8 @@
  * Dialogue box rules (docs/PLAN.md › M5), pure so they can be unit-tested:
  * - Each dialogue string is one box. It is word-wrapped to the box width ({@link wrapText}); a string
  *   too long for one box continues on extra boxes ({@link dialoguePages}), so text is never cut off.
- * - Text types out at `TEXT_CPS` characters per second ({@link typeTick}). Line breaks count as
- *   characters, so typing pauses briefly at the end of a line.
+ * - Text types out at `TEXT_CPS` characters per second ({@link typeTick}); M10's text speed option passes
+ *   another speed (`cps`). Line breaks count as characters, so typing pauses briefly at the end of a line.
  * - The voice plays on the 1st, 4th, 7th… typed character (once every `VOICE_EVERY_CHARS`). Every
  *   character counts, spaces and line breaks included, so the rhythm stays even.
  * - A while typing shows the whole page at once; A on a finished page goes to the next one
@@ -85,14 +85,19 @@ export function voiceAt(n: number): boolean {
 }
 
 /**
- * Advance typing by `dtMs`. Returns the new state and how many times the voice plays this tick
- * (0 or 1 at normal frame rates; a long frame may type several characters but plays it at most once).
+ * Advance typing by `dtMs` at `cps` characters per second (default `TEXT_CPS`). Returns the new state and
+ * whether the voice plays this tick (a long frame may type several characters but plays it at most once).
+ * Changing `cps` mid-page keeps the characters already shown.
  */
-export function typeTick(t: Typing, dtMs: number): { typing: Typing; voice: boolean } {
+export function typeTick(
+  t: Typing,
+  dtMs: number,
+  cps: number = TEXT_CPS,
+): { typing: Typing; voice: boolean } {
   if (isTyped(t)) return { typing: t, voice: false };
   const ms = t.ms + dtMs;
   // Whole characters typed after `ms` (computed from the total time, so rounding never drifts).
-  const shown = Math.min(t.text.length, Math.floor((ms * TEXT_CPS) / 1000 + 1e-9));
+  const shown = Math.min(t.text.length, Math.floor((ms * cps) / 1000 + 1e-9));
   let voice = false;
   for (let n = t.shown + 1; n <= shown; n += 1) if (voiceAt(n)) voice = true;
   return { typing: { text: t.text, shown: Math.max(shown, t.shown), ms }, voice };

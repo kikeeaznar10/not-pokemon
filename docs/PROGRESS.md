@@ -15,7 +15,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M7 — Wild encounters, catching and merging
 - [x] M8 — Enemy NPCs
 - [x] M9 — Items, team, storage, shops and healing
-- [ ] M10 — Start menu and saving
+- [x] M10 — Start menu and saving
 - [ ] M11 — Title screen, intro and secret names
 - [ ] M12 — Mobile controls and minimap
 - [ ] M13 — The Audi to Murcia
@@ -268,6 +268,38 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   and 2 Cafés are left after fleeing; the box refuses to empty the team and to exceed 2 slots; the healer heals
   team and storage and requests a save. Unit tests: `field-items`, `shop`, `storage-box`, battle-view items.
 
+### M10
+
+- Built: `MenuScene` (Start in the overworld; the overworld pauses, so NPCs freeze): Equipo (list → detail page with
+  the four stats as "value (base + bonus)", attacks, *Mover* to reorder), Mochila (descriptions, field items through
+  `useFieldItem`: Café / revive pick a team member, Regleta at once, others greyed), Mapa (placeholder until M12),
+  Opciones (Música / Efectos 0–10, Texto lenta / normal / rápida, stored in `flexymon.options`, applied live), Cerrar.
+  Saving: `src/core/save-store.ts` (`flexymon.save.v1`; unreadable saves copied to `flexymon.save.broken`, fresh start),
+  `src/core/autosave.ts` (saves on every `save:request`: `map`, `battle`, `shop`, `healer`, `menu`), `HudScene`
+  ("Guardando…" for 600 ms on `save:done`). Preload loads a valid save on Start (no Title until M11). Debug option
+  "Borrar partida". Pure rules: `logic/menu.ts`, `logic/options.ts`; `typeTick` takes the text speed.
+- "Reload at any time": the listed save points alone would lose the steps since the last one, so the game also saves
+  quietly on `pagehide` / page hidden, and `player:moved` (now also sent on a turn on the spot) keeps the position in
+  the state. That quiet save is skipped when the slot no longer holds what the page wrote (devtools garbage, another
+  tab), so the garbage check still starts fresh. Nothing is saved before the first map is entered.
+- Files outside a list (M10 has none in the plan): `core/{save-store,autosave,options}.ts`, `logic/{menu,options}.ts`,
+  `scenes/{menu,hud}-scene.ts`, `constants.ts` (`TEXT_SPEED_CPS`, `VOLUME_STEPS`, `SAVE_ICON_MS`), `dialogue.ts`,
+  `ui/dialog-box.ts` and `battle-scene.ts` (text speed, effects volume, `save:request` `battle`), `world/music.ts`
+  (`setGain`), `overworld-scene.ts`, `preload-scene.ts`, `debug-scene.ts`, `config/game.ts`, `events.ts`, `main.ts`
+  (hooks `savesWritten`, `savedGame`, `saveIcon`, `menu`, `options`, `setOptions`, `musicGain`, `patchState`),
+  `es.json`, READMEs. Tests changed on purpose: `m9-items.spec.ts` only counts `shop` / `healer` requests (M10 adds a
+  `map` request on every map entry); `m7-encounters.spec.ts` expects "Borrar partida" between the "Opciones" header
+  and "Encuentros" (the cursor moves are unchanged). No check was weakened.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m10-menu-save.spec.ts`): after walking,
+  turning and changing team (with bonuses), storage, bag, euros and NPC states, a reload continues on the same tile
+  and facing with everything equal; garbage and schema-invalid saves start a new game with no page error and the
+  broken copy kept; the menu pauses the overworld (the becario does not move for 3.5 s); detail stats; reorder;
+  closing saves and shows "Guardando…"; Café +20 PS, Regleta 3 slots; options persist after reload; rápida types
+  faster than lenta; map and battle saves; "Borrar partida" reloads into a new game.
+- For M11: `saveStore.load(getGameData())` tells the Title whether *Continuar* exists (`loaded`); a new game is
+  `resetGameState()` + `gameState()`. Move the load from Preload to the Title. Sound effects pass
+  `{ volume: sfxVolume() }`.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -280,9 +312,22 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
 
+### Raised in M10 (safe assumptions in brackets)
+
+- [ ] "Reload at any time" vs. the list of save points. [Also a quiet save on page hide / close, not shown with
+  "Guardando…"; skipped if the slot was changed outside the game.]
+- [ ] Does B close the Start menu, and does Start close it again? [Both, and *Cerrar*. B goes back one step in the
+  sub-screens.]
+- [ ] Opciones ranges and defaults are not in the plan. [Volumes 0–10, both start at 10 (the music's mix level stays
+  `MUSIC_VOLUME` 0.6 at 10); text 15 / 30 / 60 characters per second, normal = the old `TEXT_CPS`.]
+- [ ] Mochila: are items not usable outside battle listed? [Yes, greyed with their description; key items too.]
+- [ ] Until M11 the game still starts from the "Pulsa START" screen (needed for the audio unlock); Start continues a
+  valid save. [The plan's "load straight into the game" is read as "no Continuar / Nueva partida choice yet".]
+- [ ] The "Guardando…" icon look. [Small dark box top right, `HudScene`, until real UI art.]
+
 ### Raised in M9 (safe assumptions in brackets)
 
-- [ ] "Auto-save" after healing comes before saving exists (M10). [`save:request` event; M10 saves on it.]
+- [x] "Auto-save" after healing comes before saving exists (M10). **Resolved in M10:** `autosave.ts` saves on it.
 - [ ] Healer message wording and order. ["Tus flexymon están como nuevos." (`healer.done`), shown after the heal
   and before the NPC's dialogue, as the plan's "heals the team, then says its dialogue".]
 - [ ] Can field items target the storage box? [No: team only (`not_in_team`), the field menu only shows the team.]
@@ -322,7 +367,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 ### Raised in M6 (safe assumptions in brackets)
 
 - [x] What happens after a loss before M8's Losing rule exists? **Resolved in M8:** the Losing rule runs.
-- [ ] Is there game state before M10 saves? [`src/core/session.ts` holds it in memory; a reload starts a new game.]
+- [x] Is there game state before M10 saves? **Resolved in M10:** the session state is saved and reloaded.
 - [ ] What does B do in the battle's main menu? [Nothing.] Can the forced replacement after a faint be cancelled? [No.]
 - [ ] Battle message wording (appear, uses, stat up/down, win/lose…) is not in the plan. [Written in `es.json`
   under `battle.*`; easy to change.]

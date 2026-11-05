@@ -4,6 +4,7 @@
  * Add new events to {@link GameEvents}: the key is the event name, the value its payload type
  * (`void` for no payload).
  */
+import type { Options } from '../logic/options';
 
 /** Every game-wide event and its payload. Milestones add entries here. */
 export interface GameEvents {
@@ -15,7 +16,7 @@ export interface GameEvents {
   'game:ready': void;
   /** The overworld finished building a zone's map (M3). */
   'zone:entered': { zone: string };
-  /** The player finished a step or was placed on a map (M3). Tile coordinates match Tiled. */
+  /** The player finished a step, was placed on a map (M3) or turned on the spot (M10). Tile coordinates match Tiled. */
   'player:moved': { map: string; x: number; y: number; facing: 'up' | 'down' | 'left' | 'right' };
   /** Debug menu (M4): opened/closed. While open the overworld ignores movement. */
   'debug:menu': { open: boolean };
@@ -26,12 +27,18 @@ export interface GameEvents {
   /** The BattleScene finished (M6); the game state already holds the team after the battle. */
   'battle:ended': { result: 'win' | 'lose' | 'fled' };
   /**
-   * A point where the game auto-saves (M9 emits `healer` and `shop`; M10 adds the rest and does the
-   * actual saving to `localStorage`).
+   * A point where the game auto-saves (M9 emits `healer` and `shop`; M10 adds `map` (overworld entered a
+   * map), `battle` (battle ended) and `menu` (Start menu closed); `src/core/autosave.ts` writes the save).
    */
   'save:request': { reason: 'healer' | 'shop' | 'map' | 'battle' | 'menu' };
-  /** An overlay scene opened from the overworld (M9: Shop, Storage) closed; the overworld resumes. */
+  /** An overlay scene opened from the overworld (M9: Shop, Storage; M10: Menu) closed; the overworld resumes. */
   'overlay:closed': { scene: string };
+  /** A save was written for this reason (M10; the HUD shows "Guardando…"). Quiet saves on page hide are not announced. */
+  'save:done': { reason: 'healer' | 'shop' | 'map' | 'battle' | 'menu' };
+  /** The player changed an option (M10); payload = the new options. */
+  'options:changed': Options;
+  /** Debug command (M10): delete the save and reload the page. */
+  'debug:delete_save': void;
 }
 
 type Handler<P> = P extends void ? () => void : (payload: P) => void;

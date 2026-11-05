@@ -42,6 +42,7 @@ import {
 import { ChoiceBox } from '../ui/choice-box';
 import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
 import { GridMenu, type GridMenuState } from '../ui/grid-menu';
+import { framedBox } from '../ui/frame';
 
 /** Scene key of {@link ShopScene}. */
 export const SHOP_SCENE = 'Shop';
@@ -78,8 +79,6 @@ const MONEY_H = 28;
 const LIST_Y = MONEY_H + 8;
 const QTY_W = 150;
 const QTY_H = 52;
-const COLOR_PANEL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -142,8 +141,7 @@ export class ShopScene extends Phaser.Scene {
 
   /** A framed panel at (`x`, `y`) holding `children`. */
   private panel(x: number, y: number, w: number, h: number, children: Phaser.GameObjects.GameObject[]) {
-    const bg = this.add.rectangle(0, 0, w, h, COLOR_PANEL).setOrigin(0).setStrokeStyle(2, COLOR_BORDER);
-    return this.add.container(x, y, [bg, ...children]).setDepth(90);
+    return this.add.container(x, y, [...framedBox(this, 0, 0, w, h), ...children]).setDepth(90);
   }
 
   private setPrompt(text: string): void {

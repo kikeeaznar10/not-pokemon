@@ -29,8 +29,8 @@ Writes the test maps and the art they need (no one can draw in Tiled in a cloud 
 `public/maps/test/test.tmj`, `test_house.tmj` and `test_east.tmj` (since M14 in `public/maps/test/`, for the frozen test world) (layouts, warps and, from M7, tall grass and encounter rectangles in `public/maps/README.md`), the
 placeholder tileset `public/assets/tilesets/test.png`
 (8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties; M13 added the two solid Audi tiles and the cars on
-`test` and `test_east`) and the placeholder player sheet
-`public/assets/sprites/player.png` (2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).
+`test` and `test_east`) and the player sheet
+`public/assets/sprites/player.png` (since the post-M15 restyle the styled player of `npm run art`; 2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).
 Never overwrites existing files (so maps edited in Tiled are safe); `npm run test-map -- --force` regenerates all
 all five files. A unit test checks that the shipped maps still equal the generator's output — after editing a map
 in Tiled, update the generator too or drop that comparison.
@@ -39,8 +39,9 @@ in Tiled, update the generator too or drop that comparison.
 
 Builds the real world's maps from plain text, since no one can draw in Tiled in a cloud session:
 `tools/world/<zone>.txt` (one character per tile) and `tools/world/world.json`. Writes
-`public/assets/tilesets/world.png` (8 × 11 tiles: ids 0–31 drawn in `make-world.ts`, ids 32–87 — the world
-redesign's tiles — in `tools/world-tiles.ts` as 16 × 16 pixel grids scaled 2×; tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
+`public/assets/tilesets/world.png` (8 columns; the 32 base tiles, then their variants, art in `tools/art/tiles.ts`;
+then the world redesign's extra tiles, 16 × 16 grids in `tools/world-tiles.ts`; tile ids in `public/maps/README.md`)
+and `public/maps/<zone>.tmj` for
 every map in `world.json`. Never overwrites existing files; `npm run world -- --force` regenerates everything (after
 editing a layout). Then run `npm run placeholders` (after deleting the zone's minimap, if the map changed).
 
@@ -80,6 +81,29 @@ office wall, `g` glass, `(` sofa, `%` plant, `t` meeting table, `&` modern desk,
 
 The tool checks the layout (equal row widths, known characters) and that doors and the car stand on `D` / `Aa`.
 
+Post-M15 restyle: after placing the base tiles, `autotile()` swaps them for look-alike **variants** chosen from the
+neighbours (roof ridge / eave / edges and one of four roof colours per building, facade edges and windows, indoor
+wall face / top, cliff face, grass borders on `:` `r` `p` `s`, shore foam on `~`). A variant keeps its base tile's
+`solid` / `encounter` property, so only the picture changes; the rules are in `autotile`'s doc comment.
+
+## `npm run art` (`make-art.ts`, post-M15 restyle)
+
+Draws the game's sprites in the style of `docs/STYLE-REFERENCE.md` at the paths the content JSON names (both content
+folders), plus `assets/sprites/player.png`:
+
+| Path | Drawn by | Size |
+| --- | --- | --- |
+| `player.png`, `sprites/npcs/<name>.png` | `art/characters.ts` (look per name in `NPC_LOOKS`; unknown names get one from the name) | 64 × 128 walk sheet |
+| `sprites/flexymon/<id>_front/_back.png`, `_icon.png` | `art/flexymon.ts` (hand-made per id; unknown ids get a round creature) | 64 × 64, 16 × 16 |
+| `sprites/items/<id>.png` | `art/sprites.ts` (unknown ids get a parcel) | 16 × 16 |
+| `sprites/car/*.png` | `art/sprites.ts` | 96 × 40 |
+| the title (`intro.json › titleImage`) | `art/sprites.ts` (built from the world tiles) | 512 × 288 |
+
+Never overwrites: `npm run art -- --force` redraws everything after changing the art code, `-- --dry-run` lists what
+would be written. Other PNG paths (minimaps) are left to `npm run placeholders`. `tools/art/pixels.ts` is the shared
+painter: art is drawn at design size (16 px tiles and characters, 32 px flexymon), auto-outlined with `outline()` and
+scaled ×2 with `scale()`. `npm run test-map`'s player sheet is the same drawing.
+
 ## `npm run atlas` (`make-atlas.ts`, M15)
 
 Packs every content sprite (PNG paths under `assets/sprites/` in either content folder, at most 128 × 128) into one
@@ -88,3 +112,14 @@ path, 1 px padding, shelf packing 1024 px wide). Always rewritten; a build artif
 runs it first, so production and E2E builds load one sprite image instead of ~70 (about 0.5 s less to the title on
 4G). Without it (`npm run dev` before any build) sprites load as separate files. `--dry-run` only prints the count.
 Run `npm run placeholders` first: missing files are skipped with a warning.
+
+## `npm run offline` (`make-offline.ts`)
+
+Runs `npm run build`, then packages `dist/` as **one HTML file anyone can open from disk** (double-click, no server):
+`dist-offline/flexymon.html`, zipped as `dist-offline/flexymon.zip` to share. The zip holds only that file. Browsers block
+`fetch` / XHR on `file://` pages, so a plain zip of `dist/` would not run. Instead the JS bundle is inlined and every
+shipped file of `dist/` (data, maps, art, sounds, atlas) is embedded as a `data:` URL. A small script that runs before
+the game sends its `fetch` / `XMLHttpRequest` calls for those relative paths to the embedded copies. The frozen test
+world (`test-world/`, `maps/test/`) and the `README.md` files are left out. A file with an extension not in the
+tool's `MIME` table stops the tool with an error. `dist-offline/` is git-ignored (`dist-*/`). The save lives in that
+browser's `localStorage` for local files, so it is separate from the hosted site's save.

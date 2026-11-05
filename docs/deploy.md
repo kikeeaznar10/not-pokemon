@@ -25,6 +25,11 @@ the test hooks (`window.__E2E__`) and lets the URL load the frozen test world.
 
 To try the build on a phone on the same Wi-Fi: `npm run preview -- --host`, then open the printed network address.
 
+## Sharing without a host
+
+`npm run offline` writes `dist-offline/flexymon.zip`: one `flexymon.html` with everything inside. Unzip it and
+double-click the HTML to play in any desktop browser, with no server (details in `tools/README.md`).
+
 ## 2. Sub-paths
 
 `vite.config.ts` sets `base: './'`, so every URL in the build is relative. The same `dist/` works at the root of a

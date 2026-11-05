@@ -50,6 +50,7 @@ import { reorderTeam } from '../logic/team';
 import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
 import { GridMenu, type GridMenuState } from '../ui/grid-menu';
 import { toggleMinimap } from '../ui/minimap';
+import { FRAME, framedBox } from '../ui/frame';
 
 /** Scene key of {@link MenuScene}. */
 export const MENU_SCENE = 'Menu';
@@ -80,8 +81,8 @@ const ROW_H = 22;
 const LIST_H = GAME_HEIGHT - DIALOG_HEIGHT;
 const DETAIL_MENU_W = 130;
 const DETAIL_MENU_H = 60;
-const COLOR_PANEL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
+const COLOR_PANEL = FRAME.fill;
+const COLOR_BORDER = FRAME.border;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -124,12 +125,9 @@ export class MenuScene extends Phaser.Scene {
       .setStrokeStyle(2, COLOR_BORDER)
       .setVisible(false);
     this.descText = this.add.text(12, 10, '', { ...TEXT_STYLE, wordWrap: { width: GAME_WIDTH - 24 } });
-    const descBg = this.add
-      .rectangle(0, 0, GAME_WIDTH, DIALOG_HEIGHT, COLOR_PANEL)
-      .setOrigin(0)
-      .setStrokeStyle(2, COLOR_BORDER);
+    const descBg = framedBox(this, 0, 0, GAME_WIDTH, DIALOG_HEIGHT);
     this.descPanel = this.add
-      .container(0, GAME_HEIGHT - DIALOG_HEIGHT, [descBg, this.descText])
+      .container(0, GAME_HEIGHT - DIALOG_HEIGHT, [...descBg, this.descText])
       .setDepth(90)
       .setVisible(false);
     this.menu = new GridMenu(this);

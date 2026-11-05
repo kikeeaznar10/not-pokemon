@@ -147,11 +147,13 @@ playwright.config.ts       Playwright projects: desktop, android, android-landsc
 - `npm run build` — sprite atlas (`npm run atlas`, M15) + typecheck + production build to `dist/` (deploying: `docs/deploy.md`)
 - `npm run preview` — serve `dist/`
 - `npm start` — install dependencies, build (typecheck + production build), then serve `dist/` with `vite preview`
+- `npm run offline` — build, then write `dist-offline/flexymon.html` (everything embedded, opens from disk) and `dist-offline/flexymon.zip` to share (see `tools/README.md`)
 - `npm run lint` (ESLint + `prettier --check`) / `npm run format` (Prettier write)
 - `npm run typecheck` / `npm test` (Vitest, `vitest run`) / `npm run coverage` (Vitest + v8 coverage)
 - `npm run placeholders` — generate missing placeholder assets (never overwrites; `-- --dry-run` lists them; see `tools/README.md`)
 - `npm run atlas` — pack the content sprites into `public/assets/atlas/` (M15; a build artifact, not committed)
-- `npm run world` — build the real world's maps from `tools/world/` (M14; never overwrites, `-- --force` regenerates)
+- `npm run world` — build the real world's maps and tileset from `tools/world/` (M14; never overwrites, `-- --force` regenerates)
+- `npm run art` — draw the styled player, NPC, flexymon, item, car and title art (post-M15 restyle, `tools/art/`; never overwrites, `-- --force` redraws, `-- --dry-run` lists)
 - `npm run dev` then `?world=test` in the URL — the frozen M0–M13 test world (dev / E2E builds only, `src/data/world.ts`)
 - `npx playwright test` — browser tests (builds with `VITE_E2E=1` and serves `dist/` automatically)
 - `npx playwright test --project=iphone` — a single device profile

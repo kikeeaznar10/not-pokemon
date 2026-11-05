@@ -21,6 +21,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M13 — The Audi to Murcia
 - [x] M14 — Build the world
 - [x] M15 — Audio, polish and deployment
+- [x] Post-M15 restyle — art and maps in the style of `docs/STYLE-REFERENCE.md` (asked by the user after M15)
 - [x] M16 — World redesign (requested after M15)
 
 ## Milestone notes
@@ -483,6 +484,34 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   the full suite and screenshots (struck-through *Huir*, the scrolled debug menu, a plain production build with no
   hooks booting to the title and name screens on desktop and a phone profile).
 
+### Post-M15 restyle
+
+- Asked by the user after M15: restyle the assets and maps to look like the handheld (Game Boy Color / Advance era)
+  top-down monster RPG screenshots they shared. The screenshots are not in the repo; `docs/STYLE-REFERENCE.md`
+  describes the target. All art is **original and drawn by code** (no game's assets copied or traced), so it can be
+  regenerated: `tools/art/` (`pixels.ts` painter with auto-outline and ×2 scale; `tiles.ts`, `characters.ts`,
+  `flexymon.ts`, `sprites.ts`), drawn by `npm run world` (tileset + maps) and the new `npm run art`
+  (`tools/make-art.ts`: player, 23 NPC walk sheets, 12 flexymon front / back / icon, 8 items, the car, the title).
+- Built: 16 px tiles scaled ×2 (the reference's pixel size), dark outlines, textured grass / paths / cobbles / plaza
+  paving, pine trees, scalloped roofs in four colours (one per building), plaster and white-azulejo facades with
+  windows, shores with foam, rock cliffs, wooden floors. The world tileset grew from 32 to 168 tiles: ids 0–31 keep
+  their meaning; ids 32+ are look-alike **variants** chosen from the neighbours by `autotile()` in
+  `tools/make-world.ts`, each with its base tile's `solid` / `encounter` property. Layouts, warps, spawns, encounter
+  zones and NPCs are unchanged, so the minimaps came out byte-identical. NPCs are now 64 × 128 walk sheets (they
+  face and step; `npc.ts` already supported that). UI: one box style (`src/ui/frame.ts`, cream fill, dark outer and
+  blue inner line) for every dialogue, choice, menu and panel; a sky-to-grass battle backdrop with rimmed platforms.
+- Files outside a milestone list: `tools/art/*`, `tools/make-art.ts`, `tools/make-world.ts` (tileset + `autotile`),
+  `tools/make-test-map.ts` (`drawPlayer` uses the new player), `package.json` (`art`), every PNG under
+  `public/assets/sprites/`, `public/assets/tilesets/world.png`, `public/assets/ui/title.png`, every real-world
+  `public/maps/*.tmj` (regenerated: tile ids only), `src/ui/{frame,dialog-box,choice-box,grid-menu}.ts`, the Battle,
+  Shop, Menu, Name, Storage and Title scenes (box style / backdrop only), `CLAUDE.md` (commands), READMEs,
+  `docs/CONTENT.md`. Tests: `make-world.test.ts`'s tileset-size check now expects the larger sheet (the size change
+  is the point of the restyle), plus new tests for variant properties, `autotile` and `make-art`. The frozen test
+  world (`test.png`, `public/maps/test/`) is unchanged.
+- Next session: to change the look, edit `tools/art/` and run `npm run world -- --force` and `npm run art -- --force`
+  (then `npm run test` / Playwright). New content gets generic art until it is added to `NPC_LOOKS` or the flexymon /
+  item tables. There is still no pixel font (monospace text).
+
 ### M16 — World redesign
 
 - Built (owner's request after M15; plan updated: `docs/PLAN.md` › M16 and › Map layout): four big outdoor maps
@@ -493,7 +522,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   Malvarrosa and the port; `pueblo` 48 × 32 (train only); `murcia` 136 × 40 (El Ciruelo | vineyards | desert |
   coastal town, Audi only). New interiors `casa_mp`, `metro_alboraya`, `metro_xativa`, `estacion_norte`,
   `estacion_pueblo`; `tienda_sur` → `tienda_pueblo`; the office is a 22 × 14 open plan in ahora navy / light blue /
-  white with an orange flexygo accent. 56 new tiles (ids 32–87, `tools/world-tiles.ts`), new `world.json › links`
+  white with an orange flexygo accent. 56 new tiles (`tools/world-tiles.ts`, appended after the restyle's variants,
+  ids computed: `XT`), new `world.json › links`
   (one-way step warps for the metro and the train). 48 new NPCs (39 wandering townsfolk, M.P., 4 station staff,
   2 office coworkers); the 15 enemies moved to the new maps. Layout and coordinates: `public/maps/README.md`.
 - Research used for the layout: Alboraya (horchata and chufa huerta, Patacona / Port Saplaya beach, Metrovalencia
@@ -543,6 +573,15 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   plus an orange accent for flexygo: `tools/world-tiles.ts › C.f`; change it there and run `npm run world -- --force`.]
 - [ ] Clients: Isaval stays in El Pueblo (M14's south town); Ciruelo now sits in the El Ciruelo part of Murcia. [As
   the plan's table.]
+
+### Raised in the post-M15 restyle (safe assumptions in brackets)
+
+- [x] `tools/world/valencia.txt` row 5 has a walkable flowers tile (`f`) inside the middle building's white wall
+  (`WWWWfWWWW`, tile (23, 5)): a one-tile notch with no door, NPC or warp. Typo for `W`, or a planter on purpose?
+  [Left as is: changing it would change walkability; it now shows as flowers in a gap of the wall.] **Obsolete in
+  M16:** the Valencia layout was redrawn.
+- [ ] Is the player's look right? [An original look: orange cap, teal jacket, dark trousers, picked to read clearly
+  on grass and not to copy any existing game's hero.]
 
 ### Raised in M15 (safe assumptions in brackets)
 

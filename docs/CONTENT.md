@@ -4,7 +4,8 @@ How to add or change game content: flexymon, attacks, items, NPCs, shops, maps, 
 This is the plan's *Content guide* (docs/PLAN.md), kept up to date with what the game really does (M15). Adding
 content means editing JSON and maps only; no TypeScript change is needed.
 
-**After any change:** run `npm run placeholders` (art and sound for any new path), then `npm run dev` and fix whatever
+**After any change:** run `npm run art` (styled art for new sprite paths) and `npm run placeholders` (sound, and any
+other new path), then `npm run dev` and fix whatever
 the red error screen reports (`file › JSON path › message`). With the dev server running, F2 twice opens the debug
 menu; *Recargar datos* reloads every JSON and map without reloading the page (an error is shown and the old data
 kept). Before sharing, run the checks in `CLAUDE.md` › Definition of done.
@@ -35,8 +36,9 @@ intro) and `sounds.json` (M15: interface sounds). All visible content text is wr
    `percent` 1–100, `turns` 1–9; buff on `self`, debuff on `enemy`). `accuracy` 1–100, and a `sound`.
 2. Add an entry to `flexymon.json` with a new `snake_case` id, the Spanish name, `sprite` (`front`, `back`, `icon`),
    `cry`, the four `stats` (whole numbers 1–999) and 1–3 attack ids.
-3. Run `npm run placeholders` for placeholder images and sounds, or drop real files at those paths: front / back
-   64 × 64 PNG, icon 16 × 16 PNG, sounds as OGG + MP3 with the same name.
+3. Run `npm run art` for its images (a new id gets a generic round creature in its own colour until its look is
+   added to `tools/art/flexymon.ts`), then `npm run placeholders` for its sounds; or drop real files at those paths:
+   front / back 64 × 64 PNG, icon 16 × 16 PNG, sounds as OGG + MP3 with the same name.
 4. Make it appear: add `{ "id": "...", "weight": n }` to an encounter group in `zones.json`, or put it in an enemy
    NPC's `team`.
 5. Balance: total stats 60–100 for the Valencia side, 100–140 for the Murcia side. `tests/data/world.test.ts` checks
@@ -118,10 +120,18 @@ tile ids: `public/maps/README.md`. After changing an outdoor map, delete its `as
 
 ## Real art
 
-Replace any placeholder by dropping a file with the same path and size; nothing else changes. Sizes: flexymon
-front / back 64 × 64, icons and items 16 × 16, NPCs 32 × 32 (or a 64 × 128 walk sheet: 2 columns stand / stride × 4
-rows down / left / right / up), the player sheet `assets/sprites/player.png` (same layout), the trip car (any size,
-side view), the title 512 × 288, tilesets 32 px tiles, minimaps any size (they are scaled to fit). There is no pixel
+Since the post-M15 restyle the game's art is drawn by code in the style of `docs/STYLE-REFERENCE.md` (bright
+handheld-RPG pixel art, dark outlines, 16 px design scaled ×2): `npm run world` draws the world tileset and
+`npm run art` draws the player, NPC walk sheets, flexymon, items, the car and the title. Each new sprite path in the
+content gets styled art the next time you run `npm run art` (it never overwrites; `-- --force` redraws everything).
+To give a new NPC its own clothes, add its sprite name to `NPC_LOOKS` in `tools/art/characters.ts`; a new flexymon or
+item gets hand-made art in `tools/art/flexymon.ts` / `tools/art/sprites.ts`. Without that, they get generic art
+picked from the name. See `tools/README.md` › `npm run art`.
+
+Replace any drawn image by dropping a file with the same path and size; nothing else changes. Sizes: flexymon
+front / back 64 × 64, icons and items 16 × 16, NPCs a 64 × 128 walk sheet (or a 32 × 32 still image: 2 columns stand / stride × 4
+rows down / left / right / up; still images show no facing), the player sheet `assets/sprites/player.png` (same layout), the trip car (any size,
+side view), the title 512 × 288, tilesets 32 px tiles (keep `world.png`'s tile order: see `public/maps/README.md`), minimaps any size (they are scaled to fit). There is no pixel
 font yet: texts use the browser's monospace font.
 
 `npm run build` packs every sprite of the content up to 128 × 128 into one texture atlas

@@ -17,14 +17,14 @@ import { input } from '../core/input';
 import { uiSound } from '../core/ui-sound';
 import { DIALOG_HEIGHT } from './dialog-box';
 import { moveCursor } from './cursor';
+import { FRAME, framedBox } from './frame';
 
 const DEPTH = 101;
 const PAD_X = 10;
 const PAD_Y = 8;
 const CURSOR_W = 12;
 const ROW_SPACING = 4;
-const COLOR_FILL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
+const COLOR_BORDER = FRAME.border;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -86,10 +86,10 @@ export class ChoiceBox {
     const h = Math.ceil(PAD_Y * 2 + this.rowH * texts.length - ROW_SPACING);
     const x = opts.x ?? GAME_WIDTH - w - 4;
     const y = opts.y ?? GAME_HEIGHT - DIALOG_HEIGHT - h - 2;
-    const bg = this.scene.add.rectangle(0, 0, w, h, COLOR_FILL).setOrigin(0).setStrokeStyle(2, COLOR_BORDER);
+    const bg = framedBox(this.scene, 0, 0, w, h);
     this.cursorMark = this.scene.add.triangle(0, 0, 0, 0, 0, 8, 6, 4, COLOR_BORDER).setOrigin(0);
     this.root = this.scene.add
-      .container(x, y, [bg, ...texts, this.cursorMark])
+      .container(x, y, [...bg, ...texts, this.cursorMark])
       .setScrollFactor(0)
       .setDepth(DEPTH);
     this.root.setName('choice-box');

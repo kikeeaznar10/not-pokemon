@@ -21,6 +21,7 @@ import { getGameData } from '../data/game-data';
 import { t } from '../i18n';
 import { boxMove, boxRows, clampCursor, otherColumn, scrollTop, type BoxColumn } from '../logic/storage-box';
 import { DialogBox } from '../ui/dialog-box';
+import { FRAME } from '../ui/frame';
 
 /** Scene key of {@link StorageScene}. */
 export const STORAGE_SCENE = 'Storage';
@@ -43,8 +44,8 @@ const ROW_H = 22;
 const HINT_H = 30;
 const VISIBLE = Math.floor((GAME_HEIGHT - ROWS_Y - HINT_H - 4) / ROW_H);
 const ICON_W = 20;
-const COLOR_FILL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
+const COLOR_FILL = FRAME.fill;
+const COLOR_BORDER = FRAME.border;
 const COLOR_TEXT = '#202028';
 const COLOR_DISABLED = '#9898a0';
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {

@@ -21,14 +21,14 @@ import Phaser from 'phaser';
 import { input } from '../core/input';
 import { uiSound } from '../core/ui-sound';
 import { moveGridCursor } from './cursor';
+import { FRAME, framedBox } from './frame';
 
 const DEPTH = 102;
 const PAD_X = 10;
 const PAD_Y = 8;
 const CURSOR_W = 12;
 const ICON_W = 20;
-const COLOR_FILL = 0xf8f8f0;
-const COLOR_BORDER = 0x202028;
+const COLOR_BORDER = FRAME.border;
 const COLOR_TEXT = '#202028';
 const COLOR_DISABLED = '#9898a0';
 /** Line through a disabled label (M15). */
@@ -140,10 +140,7 @@ export class GridMenu {
     const layout = this.layout;
     if (!layout) return;
     const parts: Phaser.GameObjects.GameObject[] = [
-      this.scene.add
-        .rectangle(0, 0, layout.width, layout.height, COLOR_FILL)
-        .setOrigin(0)
-        .setStrokeStyle(2, COLOR_BORDER),
+      ...framedBox(this.scene, 0, 0, layout.width, layout.height),
     ];
     if (layout.title) parts.push(this.scene.add.text(PAD_X, PAD_Y, layout.title, TEXT_STYLE));
     const rows = Math.ceil(this.options.length / this.cols);

@@ -1,132 +1,139 @@
 /**
- * World tileset, part 2 (world redesign): the tiles from id 32 on, drawn as 16 × 16 pixel grids scaled 2× to 32 px
- * (one character per pixel, a palette per tile; `.` is transparent). `make-world.ts` draws ids 0–31 and then
- * calls {@link drawExtraTiles}. Placeholder art in the same flat style as the rest: real art can replace
- * `assets/tilesets/world.png` tile by tile at the same ids.
+ * World tileset, part 2 (world redesign, M16): the extra tiles the redesigned maps need (huerta crops, the sea,
+ * the industrial estate and the ahora façade, stations and trains, the open-plan office, the Turia park, the CAC…).
+ * Each is a 16 × 16 design grid (one character per pixel, a palette per tile; `.` is transparent), scaled ×2 like
+ * every tile of `tools/art/tiles.ts`. They come after the base tiles and their variants in `world.png`, so their
+ * local ids ({@link XT}) are computed, never hard-coded. An extra tile is its own base: no autotile variants.
  *
- * Colours of the office (the ahora façade and the open-plan interior) follow the ahora logo: deep navy, light
- * blue (the check mark) and white; the flexygo accent is orange (see the open question in `docs/PROGRESS.md`).
+ * Colours follow the handheld-RPG palette of `tools/art/tiles.ts` (dark outlines, bright fills). The office uses the
+ * ahora logo's deep navy, light blue and white; the flexygo accent is orange (open question in `docs/PROGRESS.md`).
  */
-import type { PNG } from 'pngjs';
-
-/** RGBA colour. */
-type RGBA = readonly [number, number, number, number];
+import { BASE_TILES, VARIANT_TILES, type TileArt } from './art/tiles';
+import { hex, Pix, type Rgba } from './art/pixels';
 
 /** Shared palette; tiles may add their own letters. */
-const C: Record<string, RGBA> = {
-  g: [88, 168, 72, 255], // grass
-  G: [64, 136, 56, 255], // dark grass
-  d: [40, 96, 40, 255], // deep leaf
-  l: [120, 200, 96, 255], // light leaf
-  o: [244, 140, 32, 255], // orange
-  y: [250, 210, 80, 255], // yellow
-  b: [120, 80, 50, 255], // brown
-  B: [86, 56, 34, 255], // dark brown
-  s: [160, 110, 70, 255], // soil
-  S: [130, 88, 54, 255], // soil furrow
-  w: [250, 250, 248, 255], // white
-  W: [214, 218, 226, 255], // off-white shadow
-  k: [40, 40, 50, 255], // near black
-  K: [90, 90, 100, 255], // dark grey
-  m: [150, 150, 160, 255], // mid grey
-  M: [190, 192, 198, 255], // light grey
-  n: [43, 42, 110, 255], // ahora navy
-  N: [30, 30, 80, 255], // navy shadow
-  a: [70, 165, 225, 255], // ahora light blue
-  A: [150, 205, 240, 255], // pale blue
-  f: [240, 136, 40, 255], // flexygo orange accent
-  r: [200, 60, 50, 255], // red
-  R: [150, 40, 35, 255], // dark red
-  t: [214, 120, 70, 255], // terracotta
-  c: [244, 226, 170, 255], // cream
-  C: [220, 196, 140, 255], // cream shadow
-  p: [128, 70, 170, 255], // purple
-  P: [90, 46, 130, 255], // dark purple
-  e: [60, 120, 210, 255], // sea blue
-  E: [40, 90, 180, 255], // deep sea
-  u: [236, 214, 160, 255], // sand
-  U: [214, 188, 130, 255], // sand shadow
-  v: [110, 40, 110, 255], // eggplant / plum
-  i: [196, 150, 100, 255], // light wood
+const C: Record<string, Rgba> = {
+  g: hex('#78d080'), // grass
+  G: hex('#58b068'), // dark grass
+  d: hex('#2e7840'), // deep leaf
+  l: hex('#a8e8a0'), // light leaf
+  o: hex('#f89838'), // orange
+  y: hex('#f8d848'), // yellow
+  b: hex('#8a6038'), // brown
+  B: hex('#5a3c20'), // dark brown
+  s: hex('#c88850'), // soil
+  S: hex('#a06838'), // soil furrow
+  w: hex('#fbfbf8'), // white
+  W: hex('#d4d8e4'), // off-white shadow
+  k: hex('#283828'), // outline
+  K: hex('#5c5a64'), // dark grey
+  m: hex('#9c9888'), // mid grey
+  M: hex('#cdc8b8'), // light grey
+  n: hex('#2b2a6e'), // ahora navy
+  N: hex('#1e1e50'), // navy shadow
+  a: hex('#46a5e1'), // ahora light blue
+  A: hex('#a8d8f0'), // pale blue / glass
+  f: hex('#f08828'), // flexygo orange accent
+  r: hex('#e84848'), // red
+  R: hex('#a82838'), // dark red
+  t: hex('#e07850'), // terracotta
+  c: hex('#f4ecd4'), // cream
+  C: hex('#d8ccac'), // cream shadow
+  p: hex('#8048b0'), // purple
+  P: hex('#5a2e82'), // dark purple
+  e: hex('#58b8e8'), // sea
+  E: hex('#3890c8'), // deep sea
+  u: hex('#f8e4b0'), // sand
+  U: hex('#e2c486'), // sand shadow
+  v: hex('#6e2870'), // eggplant / plum
+  i: hex('#d8a060'), // light wood
 };
 
 /** One tile: a 16-row pixel grid (16 chars a row) and optional extra palette entries. */
 interface PixelTile {
   rows: string[];
-  pal?: Record<string, RGBA>;
+  pal?: Record<string, Rgba>;
 }
 
-/** Local tile ids from 32 on (ids 0–31: `WT` in make-world.ts). */
-export const XT = {
-  soil: 32,
-  onion: 33,
-  lettuce: 34,
-  eggplant: 35,
-  sea: 36,
-  shore: 37,
-  sidewalk: 38,
-  crosswalk: 39,
-  paseo: 40,
-  officeFloor: 41,
-  carpet: 42,
-  platform: 43,
-  rails: 44,
-  stationFloor: 45,
-  orangeTree: 46,
-  palm: 47,
-  whiteHouse: 48,
-  creamHouse: 49,
-  industrial: 50,
-  industrialWindows: 51,
-  ahoraFacade: 52,
-  logoA: 53,
-  logoB: 54,
-  logoC: 55,
-  shutter: 56,
-  brick: 57,
-  metroSign: 58,
-  train: 59,
-  trainDoor: 60,
-  glass: 61,
-  sofa: 62,
-  plant: 63,
-  meetingTable: 64,
-  modernDesk: 65,
-  coffeeBar: 66,
-  screen: 67,
-  umbrella: 68,
-  towel: 69,
-  bench: 70,
-  bankWall: 71,
-  stairs: 72,
-  agora: 73,
-  cac: 74,
-  oldStone: 75,
-  plumTree: 76,
-  stationFacade: 77,
-  boat: 78,
-  stoneBridge: 79,
-  officeWall: 80,
-  flatRoof: 81,
-  greyRoof: 82,
-  assut: 83,
-  bullring: 84,
-  lamp: 85,
-  dryGrass: 86,
-  wave: 87,
-} as const;
+/** Names of the extra tiles, in tileset order. */
+const EXTRA_NAMES = [
+  'soil',
+  'onion',
+  'lettuce',
+  'eggplant',
+  'sea',
+  'shore',
+  'sidewalk',
+  'crosswalk',
+  'paseo',
+  'officeFloor',
+  'carpet',
+  'platform',
+  'rails',
+  'stationFloor',
+  'orangeTree',
+  'palm',
+  'whiteHouse',
+  'creamHouse',
+  'industrial',
+  'industrialWindows',
+  'ahoraFacade',
+  'logoA',
+  'logoB',
+  'logoC',
+  'shutter',
+  'brick',
+  'metroSign',
+  'train',
+  'trainDoor',
+  'glass',
+  'sofa',
+  'plant',
+  'meetingTable',
+  'modernDesk',
+  'coffeeBar',
+  'screen',
+  'umbrella',
+  'towel',
+  'bench',
+  'bankWall',
+  'stairs',
+  'agora',
+  'cac',
+  'oldStone',
+  'plumTree',
+  'stationFacade',
+  'boat',
+  'stoneBridge',
+  'officeWall',
+  'flatRoof',
+  'greyRoof',
+  'assut',
+  'bullring',
+  'lamp',
+  'dryGrass',
+  'wave',
+] as const;
+/** An extra tile's name. */
+export type ExtraName = (typeof EXTRA_NAMES)[number];
 
-/** Rows of a tileset with the extra tiles (8 columns). */
-export const EXTRA_ROWS = 7;
+/** Local id of the first extra tile: after the base tiles and their variants. */
+export const EXTRA_FIRST = BASE_TILES.length + VARIANT_TILES.length;
+
+/** Local tile ids of the extra tiles (`XT.soil`, `XT.logoA`, …), right after the variants. */
+export const XT = Object.fromEntries(EXTRA_NAMES.map((n, i) => [n, EXTRA_FIRST + i])) as Record<
+  ExtraName,
+  number
+>;
 
 const solidRow = (ch: string) => ch.repeat(16);
 
 /** The pixel art, by id. */
-const TILES: Record<number, PixelTile> = {
-  [XT.soil]: {
+const TILES: Record<ExtraName, PixelTile> = {
+  soil: {
     rows: Array.from({ length: 16 }, (_, y) => solidRow(y % 4 === 1 ? 'S' : 's')),
   },
-  [XT.onion]: {
+  onion: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y % 8 === 0
         ? '.l...l...l...l..'
@@ -139,7 +146,7 @@ const TILES: Record<number, PixelTile> = {
               : solidRow('s'),
     ).map((r) => r.replace(/\./g, 's')),
   },
-  [XT.lettuce]: {
+  lettuce: {
     rows: [
       'ssssssssssssssss',
       'slllsssslllsssss',
@@ -160,7 +167,7 @@ const TILES: Record<number, PixelTile> = {
     ],
     pal: { L: [70, 160, 60, 255] },
   },
-  [XT.eggplant]: {
+  eggplant: {
     rows: [
       'sssGssssssGsssss',
       'ssGGGsssssGGGsss',
@@ -180,12 +187,12 @@ const TILES: Record<number, PixelTile> = {
       'ssssssssssssssss',
     ],
   },
-  [XT.sea]: {
+  sea: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y === 3 ? 'eeAAeeeeeeeeeeee' : y === 10 ? 'eeeeeeeeeAAeeeee' : solidRow(y > 12 ? 'E' : 'e'),
     ),
   },
-  [XT.shore]: {
+  shore: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y < 3
         ? solidRow('u')
@@ -198,13 +205,13 @@ const TILES: Record<number, PixelTile> = {
               : solidRow('e'),
     ),
   },
-  [XT.sidewalk]: {
+  sidewalk: {
     rows: Array.from({ length: 16 }, (_, y) => (y % 8 === 7 ? solidRow('M') : 'WWWWWWWMWWWWWWWM')),
   },
-  [XT.crosswalk]: {
+  crosswalk: {
     rows: Array.from({ length: 16 }, (_, y) => (y % 4 < 2 ? 'KwwwwwwwwwwwwwwK' : solidRow('K'))),
   },
-  [XT.paseo]: {
+  paseo: {
     rows: Array.from({ length: 16 }, (_, y) =>
       Array.from({ length: 16 }, (_, x) => ((Math.floor(x / 4) + Math.floor(y / 4)) % 2 ? 'c' : 'r')).join(
         '',
@@ -212,30 +219,30 @@ const TILES: Record<number, PixelTile> = {
     ),
     pal: { r: [226, 150, 120, 255] },
   },
-  [XT.officeFloor]: {
+  officeFloor: {
     rows: Array.from({ length: 16 }, (_, y) => (y === 15 ? solidRow('M') : 'WWWWWWWWWWWWWWWM')),
   },
-  [XT.carpet]: {
+  carpet: {
     rows: Array.from({ length: 16 }, (_, y) => (y % 4 === 0 ? 'AaAAAaAAAaAAAaAA' : solidRow('A'))),
   },
-  [XT.platform]: {
+  platform: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y >= 13 ? solidRow(y === 13 ? 'y' : 'k') : y % 8 === 7 ? solidRow('m') : 'MMMMMMMmMMMMMMMm',
     ),
   },
-  [XT.rails]: {
+  rails: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y === 3 || y === 12 ? solidRow('m') : y % 4 === 1 ? solidRow('b') : solidRow('K'),
     ),
   },
-  [XT.stationFloor]: {
+  stationFloor: {
     rows: Array.from({ length: 16 }, (_, y) =>
       Array.from({ length: 16 }, (_, x) => ((x + y) % 8 === 0 || (x - y + 16) % 8 === 0 ? 't' : 'c')).join(
         '',
       ),
     ),
   },
-  [XT.orangeTree]: {
+  orangeTree: {
     rows: [
       '................',
       '.....dddddd.....',
@@ -255,7 +262,7 @@ const TILES: Record<number, PixelTile> = {
       '......BBBB......',
     ],
   },
-  [XT.palm]: {
+  palm: {
     rows: [
       '...l........l...',
       '..lGl..ll..lGl..',
@@ -275,7 +282,7 @@ const TILES: Record<number, PixelTile> = {
       '......BBBBB.....',
     ],
   },
-  [XT.whiteHouse]: {
+  whiteHouse: {
     rows: [
       'wwwwwwwwwwwwwwww',
       'wwwwwwwwwwwwwwww',
@@ -295,7 +302,7 @@ const TILES: Record<number, PixelTile> = {
       'MMMMMMMMMMMMMMMM',
     ],
   },
-  [XT.creamHouse]: {
+  creamHouse: {
     rows: [
       'cccccccccccccccc',
       'cccccccccccccccc',
@@ -315,10 +322,10 @@ const TILES: Record<number, PixelTile> = {
       'tttttttttttttttt',
     ],
   },
-  [XT.industrial]: {
+  industrial: {
     rows: Array.from({ length: 16 }, (_, y) => (y === 15 ? solidRow('K') : 'MmMMmMMmMMmMMmMM')),
   },
-  [XT.industrialWindows]: {
+  industrialWindows: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y >= 4 && y <= 9
         ? y === 4 || y === 9
@@ -329,11 +336,11 @@ const TILES: Record<number, PixelTile> = {
           : 'MmMMmMMmMMmMMmMM',
     ),
   },
-  [XT.ahoraFacade]: {
+  ahoraFacade: {
     rows: Array.from({ length: 16 }, (_, y) => (y === 15 ? solidRow('N') : 'nNnnNnnNnnNnnNnn')),
   },
   // The logo "ahora" in white with the light-blue check, over three façade tiles: "ah" | "o✓" | "ra".
-  [XT.logoA]: {
+  logoA: {
     rows: [
       'nNnnNnnNnnNnnNnn',
       'nNnnNnnNnnNnnNnn',
@@ -353,7 +360,7 @@ const TILES: Record<number, PixelTile> = {
       'NNNNNNNNNNNNNNNN',
     ],
   },
-  [XT.logoB]: {
+  logoB: {
     rows: [
       'nNnnNnnNnnNnnNnn',
       'nNnnNnnNnnNnnNnn',
@@ -373,7 +380,7 @@ const TILES: Record<number, PixelTile> = {
       'NNNNNNNNNNNNNNNN',
     ],
   },
-  [XT.logoC]: {
+  logoC: {
     rows: [
       'nNnnNnnNnnNnnNnn',
       'nNnnNnnNnnNnnNnn',
@@ -393,18 +400,18 @@ const TILES: Record<number, PixelTile> = {
       'NNNNNNNNNNNNNNNN',
     ],
   },
-  [XT.shutter]: {
+  shutter: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y < 2 ? solidRow('M') : y === 15 ? solidRow('K') : y % 2 ? 'MNNNNNNNNNNNNNNM' : 'MnnnnnnnnnnnnnnM',
     ),
   },
-  [XT.brick]: {
+  brick: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y % 4 === 3 ? solidRow('C') : y % 8 < 4 ? 'tttCtttttttCtttt' : 'tttttttCttttttttt'.slice(0, 16),
     ),
     pal: { t: [214, 160, 110, 255], C: [176, 128, 86, 255] },
   },
-  [XT.metroSign]: {
+  metroSign: {
     rows: [
       '................',
       '....rrrrrrrr....',
@@ -424,7 +431,7 @@ const TILES: Record<number, PixelTile> = {
       '......KKKK......',
     ],
   },
-  [XT.train]: {
+  train: {
     rows: [
       'KKKKKKKKKKKKKKKK',
       'wwwwwwwwwwwwwwww',
@@ -444,7 +451,7 @@ const TILES: Record<number, PixelTile> = {
       'kkkkkkkkkkkkkkkk',
     ],
   },
-  [XT.trainDoor]: {
+  trainDoor: {
     rows: [
       'KKKKKKKKKKKKKKKK',
       'wwwwwwwwwwwwwwww',
@@ -464,12 +471,12 @@ const TILES: Record<number, PixelTile> = {
       'MMMMMMMMMMMMMMMM',
     ],
   },
-  [XT.glass]: {
+  glass: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y === 0 || y === 15 ? solidRow('m') : y % 5 === 2 ? 'mAAwAAAAAAAAAAAm' : 'mAAAAAAAAAAAAAAm',
     ),
   },
-  [XT.sofa]: {
+  sofa: {
     rows: [
       '................',
       '................',
@@ -489,7 +496,7 @@ const TILES: Record<number, PixelTile> = {
       '................',
     ],
   },
-  [XT.plant]: {
+  plant: {
     rows: [
       '.....l...l......',
       '...l.ll.ll.l....',
@@ -509,7 +516,7 @@ const TILES: Record<number, PixelTile> = {
       '................',
     ],
   },
-  [XT.meetingTable]: {
+  meetingTable: {
     rows: [
       '................',
       '..KKK..KKK..KK..',
@@ -529,7 +536,7 @@ const TILES: Record<number, PixelTile> = {
       '................',
     ],
   },
-  [XT.modernDesk]: {
+  modernDesk: {
     rows: [
       '................',
       '...kkkkkkkkkk...',
@@ -549,7 +556,7 @@ const TILES: Record<number, PixelTile> = {
       '.......nn.......',
     ],
   },
-  [XT.coffeeBar]: {
+  coffeeBar: {
     rows: [
       'MMMMMMMMMMMMMMMM',
       'MkkkkMMMMMMwwwMM',
@@ -569,7 +576,7 @@ const TILES: Record<number, PixelTile> = {
       'kkkkkkkkkkkkkkkk',
     ],
   },
-  [XT.screen]: {
+  screen: {
     rows: [
       'wwwwwwwwwwwwwwww',
       'wkkkkkkkkkkkkkkw',
@@ -589,7 +596,7 @@ const TILES: Record<number, PixelTile> = {
       'MMMMMMMMMMMMMMMM',
     ],
   },
-  [XT.umbrella]: {
+  umbrella: {
     rows: [
       '................',
       '.....rrwwrr.....',
@@ -609,7 +616,7 @@ const TILES: Record<number, PixelTile> = {
       '................',
     ],
   },
-  [XT.towel]: {
+  towel: {
     rows: [
       '................',
       '................',
@@ -629,7 +636,7 @@ const TILES: Record<number, PixelTile> = {
       '................',
     ],
   },
-  [XT.bench]: {
+  bench: {
     rows: [
       '................',
       '................',
@@ -650,7 +657,7 @@ const TILES: Record<number, PixelTile> = {
     ],
   },
   // The Turia's retaining wall: pale stone with a dark shadow at the foot, so the park reads as sunken.
-  [XT.bankWall]: {
+  bankWall: {
     rows: [
       'MMMMMMMMMMMMMMMM',
       'WWWWWWWWWWWWWWWW',
@@ -670,28 +677,28 @@ const TILES: Record<number, PixelTile> = {
       'gggggggggggggggg',
     ],
   },
-  [XT.stairs]: {
+  stairs: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y % 4 === 3 ? solidRow('C') : y % 4 === 0 ? solidRow('w') : solidRow('c'),
     ),
   },
-  [XT.agora]: {
+  agora: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y < 3 ? (y === 0 ? solidRow('w') : 'AeAAeAAeAAeAAeAA') : y === 15 ? solidRow('K') : 'pPwpppPwpppPwppp',
     ),
   },
-  [XT.cac]: {
+  cac: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y < 4 ? 'wwWwwwWwwwWwwwWw' : y < 8 ? 'wWAAwWAAwWAAwWAA' : y === 15 ? solidRow('M') : 'wWkkwWkkwWkkwWkk',
     ),
   },
-  [XT.oldStone]: {
+  oldStone: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y % 4 === 3 ? solidRow('U') : y % 8 < 4 ? 'CCCUCCCCCCCUCCCC' : 'CCCCCCCUCCCCCCCU',
     ),
     pal: { C: [196, 172, 130, 255], U: [150, 130, 96, 255] },
   },
-  [XT.plumTree]: {
+  plumTree: {
     rows: [
       '................',
       '.....dddddd.....',
@@ -712,7 +719,7 @@ const TILES: Record<number, PixelTile> = {
     ],
   },
   // Estació del Nord: orange modernist façade with a band of glazed tiles and an orange.
-  [XT.stationFacade]: {
+  stationFacade: {
     rows: [
       'oooooooooooooooo',
       'oRoooooooooooRoo',
@@ -733,7 +740,7 @@ const TILES: Record<number, PixelTile> = {
     ],
     pal: { o: [232, 120, 52, 255], g: [60, 140, 60, 255] },
   },
-  [XT.boat]: {
+  boat: {
     rows: [
       'eeeeeeeweeeeeeee',
       'eeeeeeewweeeeeee',
@@ -753,7 +760,7 @@ const TILES: Record<number, PixelTile> = {
       'EEEEEEEEEEEEEEEE',
     ],
   },
-  [XT.stoneBridge]: {
+  stoneBridge: {
     rows: Array.from({ length: 16 }, (_, x) => x).map((y) =>
       y < 2 || y > 13
         ? solidRow('U')
@@ -765,12 +772,12 @@ const TILES: Record<number, PixelTile> = {
     ),
     pal: { c: [206, 190, 160, 255], C: [176, 160, 130, 255], U: [150, 130, 96, 255] },
   },
-  [XT.officeWall]: {
+  officeWall: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y >= 12 ? solidRow(y === 12 ? 'f' : y < 15 ? 'n' : 'N') : solidRow('w'),
     ),
   },
-  [XT.flatRoof]: {
+  flatRoof: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y === 0
         ? solidRow('C')
@@ -782,11 +789,11 @@ const TILES: Record<number, PixelTile> = {
     ),
     pal: { c: [216, 200, 176, 255], C: [180, 164, 140, 255] },
   },
-  [XT.greyRoof]: {
+  greyRoof: {
     rows: Array.from({ length: 16 }, (_, y) => (y % 4 === 0 ? solidRow('K') : 'mmmMmmmmmmmMmmmm')),
   },
   // L'Assut de l'Or: the white harp bridge's mast and cables (from the reference photo).
-  [XT.assut]: {
+  assut: {
     rows: [
       'wwW.............',
       '.wwW..........k.',
@@ -807,13 +814,13 @@ const TILES: Record<number, PixelTile> = {
     ].map((r) => r.replace(/\./g, 'e')),
     pal: { e: [200, 225, 245, 255], c: [206, 190, 160, 255] },
   },
-  [XT.bullring]: {
+  bullring: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y < 2 ? solidRow('t') : y === 15 ? solidRow('R') : y % 7 < 4 ? 'tRRtttRRtttRRttt' : solidRow('t'),
     ),
     pal: { t: [214, 150, 100, 255] },
   },
-  [XT.lamp]: {
+  lamp: {
     rows: [
       '................',
       '......kkkk......',
@@ -833,7 +840,7 @@ const TILES: Record<number, PixelTile> = {
       '................',
     ],
   },
-  [XT.dryGrass]: {
+  dryGrass: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y % 5 === 0
         ? 'dddhdddddhdddhdd'
@@ -845,7 +852,7 @@ const TILES: Record<number, PixelTile> = {
     ),
     pal: { d: [212, 180, 120, 255], h: [170, 150, 70, 255] },
   },
-  [XT.wave]: {
+  wave: {
     rows: Array.from({ length: 16 }, (_, y) =>
       y === 4
         ? 'eewwweeeeeewwwee'
@@ -904,29 +911,25 @@ export const EXTRA_SOLID: number[] = [
 /** Ids of the extra tiles that start encounters (`encounter = true`): the huerta's crops and the dry scrub. */
 export const EXTRA_ENCOUNTER: number[] = [XT.onion, XT.lettuce, XT.eggplant, XT.dryGrass];
 
-/** Draw every extra tile into `png` (an 8-column tileset of 32 px tiles). */
-export function drawExtraTiles(png: PNG): void {
-  for (const [idText, tile] of Object.entries(TILES)) {
-    const id = Number(idText);
-    const ox = (id % 8) * 32;
-    const oy = Math.floor(id / 8) * 32;
-    if (tile.rows.length !== 16) throw new Error(`world tile ${id}: ${tile.rows.length} rows, expected 16`);
-    tile.rows.forEach((row, y) => {
-      if (row.length !== 16)
-        throw new Error(`world tile ${id}: row ${y} has ${row.length} pixels, expected 16`);
-      [...row].forEach((ch, x) => {
-        if (ch === '.') return;
-        const c = tile.pal?.[ch] ?? C[ch];
-        if (!c) throw new Error(`world tile ${id}: unknown colour "${ch}"`);
-        for (let j = 0; j < 2; j += 1)
-          for (let i = 0; i < 2; i += 1) {
-            const k = ((oy + y * 2 + j) * png.width + ox + x * 2 + i) * 4;
-            png.data[k] = c[0];
-            png.data[k + 1] = c[1];
-            png.data[k + 2] = c[2];
-            png.data[k + 3] = c[3];
-          }
-      });
+/** Draw one extra tile's 16 × 16 grid. */
+function drawPixelTile(name: string, tile: PixelTile): Pix {
+  const p = new Pix(16, 16);
+  if (tile.rows.length !== 16) throw new Error(`world tile ${name}: ${tile.rows.length} rows, expected 16`);
+  tile.rows.forEach((row, y) => {
+    if (row.length !== 16)
+      throw new Error(`world tile ${name}: row ${y} has ${row.length} pixels, expected 16`);
+    [...row].forEach((ch, x) => {
+      if (ch === '.') return;
+      const c = tile.pal?.[ch] ?? C[ch];
+      if (!c) throw new Error(`world tile ${name}: unknown colour "${ch}"`);
+      p.set(x, y, c);
     });
-  }
+  });
+  return p;
 }
+
+/** The extra tiles in tileset order (keys `x:<name>`), appended to `world.png` after the variants. */
+export const EXTRA_TILES: TileArt[] = EXTRA_NAMES.map((name) => ({
+  key: `x:${name}`,
+  draw: () => drawPixelTile(name, TILES[name]),
+}));

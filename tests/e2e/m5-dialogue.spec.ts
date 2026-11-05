@@ -195,11 +195,21 @@ test('healer and storage NPCs show their placeholder actions', async ({ page }) 
   await standing(page, { x: 15, y: 10 });
 });
 
+/**
+ * Wait two animation frames, so at least one game update ran: a ChoiceBox ignores input on the frame it
+ * opens, and a key pressed in that frame would be lost (flaky under load).
+ */
+const nextFrames = (page: Page) =>
+  page.evaluate(
+    () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))),
+  );
+
 test('choice box: cursor wraps, A chooses, B cancels', async ({ page }, testInfo) => {
   await enterOverworld(page, { map: 'test', x: 15, y: 10 });
   await hook(page, 'openChoice', ['Sí', 'No']);
   await expect.poll(() => hook(page, 'choice')).toEqual({ options: ['Sí', 'No'], cursor: 0 });
   expect(await hook<boolean>(page, 'overworldLocked')).toBe(true);
+  await nextFrames(page);
   await page.keyboard.press('ArrowDown');
   await expect.poll(() => hook(page, 'choice')).toMatchObject({ cursor: 1 });
   await page.screenshot({ path: testInfo.outputPath(`choice-${testInfo.project.name}.png`) });
@@ -214,6 +224,7 @@ test('choice box: cursor wraps, A chooses, B cancels', async ({ page }, testInfo
 
   await hook(page, 'openChoice', ['Llevármelo', 'Dejarlo']);
   await expect.poll(() => hook(page, 'choice')).toMatchObject({ cursor: 0 });
+  await nextFrames(page);
   await page.keyboard.press('x');
   await expect.poll(() => hook(page, 'choiceResult')).toBeNull();
   await standing(page, { x: 15, y: 10 });

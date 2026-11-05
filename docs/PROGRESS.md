@@ -201,6 +201,9 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   (warnings), `main.ts` (hooks), `es.json`, READMEs. `tests/data/tiled.test.ts` asserted "no tall grass yet"; it now
   checks the grass and rectangles. `tests/e2e/m6-battle.spec.ts`'s `advance()` presses B (Dejarlo) on the new catch
   choice, so the M6 checks run unchanged.
+- Flaky tests fixed (they also failed now and then on `main`): a menu or ChoiceBox ignores input on the frame it opens,
+  and the M5/M6 tests could press a key in that very frame under load. The `press()` helpers (M6, M7) and the M5
+  choice-box test now wait two animation frames before pressing. No game code changed for this.
 - Decisions (Open questions › Raised in M7): the catch choice happens on the battle screen, before the fade-out;
   Dejarlo shows no message; while encounters are switched off, safe steps still count down.
 - Verified with Playwright on all four profiles + screenshots (`tests/e2e/m7-encounters.spec.ts`): with every rate at

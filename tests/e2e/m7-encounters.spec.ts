@@ -103,8 +103,15 @@ async function enterOverworld(page: Page, expected: Partial<Tile>, url = '/'): P
   return errors;
 }
 
-/** Press a key and give the game a few frames to see it. */
+/**
+ * Press a key and give the game a few frames to see it. First wait two animation frames, so at least one
+ * game update ran since the last state read: a menu ignores input on the frame it opens, and a press
+ * landing in that frame would be lost (this made the M6 tests flaky under load).
+ */
 async function press(page: Page, key: string): Promise<void> {
+  await page.evaluate(
+    () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))),
+  );
   await page.keyboard.press(key);
   await page.waitForTimeout(80);
 }

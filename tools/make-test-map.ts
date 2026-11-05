@@ -37,6 +37,8 @@ export const TILES = {
   door: 9,
   floor: 10,
   doormat: 11,
+  carLeft: 12,
+  carRight: 13,
 } as const;
 
 /** Tile properties written into the embedded tileset. */
@@ -45,6 +47,8 @@ const TILE_PROPS: Record<number, { name: string; type: 'bool'; value: boolean }[
   [TILES.water]: [{ name: 'solid', type: 'bool', value: true }],
   [TILES.blocker]: [{ name: 'solid', type: 'bool', value: true }],
   [TILES.tallgrass]: [{ name: 'encounter', type: 'bool', value: true }],
+  [TILES.carLeft]: [{ name: 'solid', type: 'bool', value: true }],
+  [TILES.carRight]: [{ name: 'solid', type: 'bool', value: true }],
 };
 
 class Canvas {
@@ -126,6 +130,30 @@ export function drawTileset(): Buffer {
   [x, y] = at(TILES.doormat);
   c.rect(x, y, T, T, [196, 150, 100, 255]);
   c.rect(x + 3, y + 6, 26, 20, [170, 40, 50, 255]);
+  // M13: the white Audi seen from above, nose to the right, over two tiles (both solid).
+  const white: Rgba = [244, 244, 240, 255];
+  const glass: Rgba = [70, 90, 120, 255];
+  const tyre: Rgba = [30, 30, 34, 255];
+  const edge: Rgba = [170, 170, 176, 255];
+  [x, y] = at(TILES.carLeft);
+  grass(x, y);
+  c.rect(x + 6, y + 3, 8, 4, tyre);
+  c.rect(x + 6, y + 25, 8, 4, tyre);
+  c.rect(x + 2, y + 6, T - 2, 20, edge);
+  c.rect(x + 3, y + 7, T - 3, 18, white);
+  c.rect(x + 16, y + 9, 10, 14, glass); // rear window
+  c.rect(x + 2, y + 9, 2, 4, [200, 40, 40, 255]); // tail lights
+  c.rect(x + 2, y + 19, 2, 4, [200, 40, 40, 255]);
+  [x, y] = at(TILES.carRight);
+  grass(x, y);
+  c.rect(x + 16, y + 3, 8, 4, tyre);
+  c.rect(x + 16, y + 25, 8, 4, tyre);
+  c.rect(x, y + 6, T - 2, 20, edge);
+  c.rect(x, y + 7, T - 3, 18, white);
+  c.rect(x + 4, y + 9, 12, 14, glass); // windscreen
+  c.rect(x, y + 11, 4, 10, white); // roof between the windows
+  c.rect(x + 26, y + 9, 2, 4, [250, 240, 160, 255]); // headlights
+  c.rect(x + 26, y + 19, 2, 4, [250, 240, 160, 255]);
   return c.toBuffer();
 }
 
@@ -183,6 +211,26 @@ function encounterRect(
     properties: [
       { name: 'group', type: 'string', value: group },
       { name: 'mode', type: 'string', value: mode },
+    ],
+  };
+}
+
+/**
+ * The Audi (M13): its two solid tiles at (x, y) and (x + 1, y) in `deco`, and an `action` warp over them with
+ * `car` = the destination (car.json holds the arrival point).
+ */
+function audi(g: ReturnType<typeof grids>, x: number, y: number, to: 'murcia' | 'valencia'): ObjSpec {
+  g.set(g.layers.deco, x, y, TILES.carLeft);
+  g.set(g.layers.deco, x + 1, y, TILES.carRight);
+  return {
+    name: 'audi',
+    x,
+    y,
+    width: 2,
+    height: 1,
+    properties: [
+      { name: 'car', type: 'string', value: to },
+      { name: 'trigger', type: 'string', value: 'action' },
     ],
   };
 }
@@ -339,6 +387,8 @@ export function buildTestMap(): object {
   // Tall grass (M7): encounter tiles inside the `jardin_turia` rectangle (x 19–23, y 1–5), which
   // also covers plain grass (column 19, row 1) so the `tiles` mode can be seen to need the grass.
   for (let y = 2; y <= 5; y += 1) for (let x = 20; x <= 23; x += 1) g.set(ground, x, y, TILES.tallgrass);
+  // M13: the office Audi on (8–9, 11), just below the path; car.json › toValencia lands on (8, 12) below it.
+  const car = audi(g, 8, 11, 'murcia');
   return tiledMap(30, 20, g.layers, {
     encounters: [
       encounterRect('jardin', { x: 19, y: 1, width: 5, height: 5 }, 'jardin_turia', 'tiles'),
@@ -353,6 +403,7 @@ export function buildTestMap(): object {
       ),
       // Off-map column just past the east edge: walking off the edge keeps the row.
       warp('east_edge', { x: 30, y: 0, width: 1, height: 20 }, { map: 'test_east', x: 0 }),
+      car,
     ],
     spawns: [{ name: 'default', x: 15, y: 10, point: true }],
   });
@@ -395,8 +446,10 @@ export function buildTestEast(): object {
     [26, 13],
   ] as const)
     tree(g, x, y);
+  // M13: the "Murcia" Audi on (2–3, 9), just above the path; car.json › toMurcia lands on (2, 10) below it.
+  const car = audi(g, 2, 9, 'valencia');
   return tiledMap(30, 20, g.layers, {
-    warps: [warp('west_edge', { x: -1, y: 0, width: 1, height: 20 }, { map: 'test', x: 29 })],
+    warps: [warp('west_edge', { x: -1, y: 0, width: 1, height: 20 }, { map: 'test', x: 29 }), car],
     spawns: [{ name: 'default', x: 2, y: 10, point: true }],
   });
 }

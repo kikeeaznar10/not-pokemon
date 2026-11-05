@@ -4,7 +4,8 @@
  * - every NPC spawn, the start spawn/respawn and both car endpoints are walkable tiles of their map;
  * - every named spawn point in a map's `spawns` layer is walkable;
  * - every warp points at an existing zone, and every tile it can land on there is walkable (for edge
- *   warps that keep the row/column, every tile of the rectangle is checked).
+ *   warps that keep the row/column, every tile of the rectangle is checked). Car warps (M13) have no target
+ *   of their own: they use the car.json endpoints checked above.
  * - every encounter rectangle's `group` exists in its zone's `encounters` in zones.json (M7).
  * - the intro (M11, `intro.json`) plays on the `start.json › spawn` map: the coworker's start tile and every
  *   tile either actor walks onto are walkable, and no walk enters the tile where the other actor stands.
@@ -81,6 +82,7 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
     });
     for (const warp of info.warps) {
       const path = ['warps', warp.name];
+      if (warp.car) continue; // M13: the Audi drives to car.json › toMurcia / toValencia (checked above).
       if (!data.zones.has(warp.toMap)) {
         errors.push({ file: zone.file, path, message: `unknown map "${warp.toMap}"` });
         continue;

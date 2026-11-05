@@ -18,7 +18,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M10 — Start menu and saving
 - [x] M11 — Title screen, intro and secret names
 - [x] M12 — Mobile controls and minimap
-- [ ] M13 — The Audi to Murcia
+- [x] M13 — The Audi to Murcia
 - [ ] M14 — Build the world
 - [ ] M15 — Audio, polish and deployment
 
@@ -359,6 +359,38 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   devices; only the emulated profiles above (WebKit stands in for Safari) were run. A human must try both phones and
   write the results here (things emulation cannot show: real fullscreen, double-tap zoom on iOS, notch insets, feel).
 
+### M13
+
+- Built: the Audi as data. A map warp with the property `car` (`murcia` / `valencia`, `trigger = action`, no `toMap`:
+  the arrival points are `car.json › toMurcia` / `toValencia`) over two solid car tiles. A facing the office car:
+  `lockedDialogue` unless the bag holds both items of any `unlockPairs` pair (pure `src/logic/car.ts`; items are only
+  checked, never consumed); otherwise "¿Subir al Audi?" stays on screen (new DialogBox `hold` mode + `dismiss()`)
+  with Sí / No (B = No). Sí → fade out → `CarScene` (5 s `CAR_TRIP_MS`; parallax sky / mountains / bushes / road,
+  speed lines, bobbing car, camera shake, looped engine; any button skips after 1 s `CAR_SKIP_AFTER_MS`) →
+  `car:ended` → the overworld restarts at the arrival point. The Murcia car has no requirement and plays the same
+  scene in reverse (car flipped, scenery scrolling the other way). Hook `carTrip()`.
+- Content: `car.json` gained `sprite` (`assets/sprites/car/audi.png`, side view; the placeholder tool draws a
+  96 × 40 white car for `sprites/car/`) and `sound` (`assets/audio/sfx/car_engine.ogg`; names with `engine` get a
+  1 s 90 Hz hum). Test maps (`npm run test-map -- --force`): tileset tiles 12–13 (the Audi from above, solid), the
+  office car on `test` (8–9, 11) above `toValencia` (8, 12), the "Murcia" car on `test_east` (2–3, 9) above
+  `toMurcia` (2, 10); their minimaps were redrawn. `test_east` stands in for Murcia until M14.
+- **Not done: task 5's item source.** `llaves_audi`, `carnet` and `cafe_doble` exist (since M1) but nothing gives
+  them to the player yet; the plan says to decide the source in M14, so M14 must add it (shop with a price, NPC
+  gift…) or a tester cannot drive without the hooks. No debug "give item" command was added: the debug menu's
+  layout is pinned by the M7 / M10 tests, and the plan puts "give item" in M15.
+- Files outside a list (M13 has none): `src/logic/{car,warp,constants}.ts`, `src/data/{tiled,map-checks,assets}.ts`,
+  `src/data/schemas/car.ts`, `src/ui/dialog-box.ts` (`hold`), `overworld-scene.ts` (the dialogue and choice boxes
+  now update in the same frame, so a question can stay under its choice), `config/game.ts`, `core/events.ts`,
+  `main.ts`, `es.json` (`car.ask`, `car.yes`, `car.no`), `tools/make-{placeholders,test-map}.ts`, READMEs. Tests
+  changed on purpose: `tiled.test.ts` expects the new `audi` warps (and `car: null` on the others),
+  `assets.test.ts` counts the car sprite and engine sound, `warp.test.ts` fixtures gained `car: null`.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m13-car.spec.ts`): an empty bag, keys
+  only, or licence + double coffee only → the locked line, no question, the player stays; keys + licence and keys
+  + double coffee → the question, No / B stays; Sí → the trip to Murcia (nose right) plays at least 5 s and lands
+  on `test_east` (2, 10) with the bag unchanged; the Murcia car with an empty bag asks, drives back (flipped), a
+  button in the first second does nothing, after it skips, and the player lands on `test` (8, 12) right under the
+  office car (facing it gives the locked line) with a `map` save.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -370,6 +402,20 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M13 (safe assumptions in brackets)
+
+- [ ] Where does the player get `llaves_audi`, `carnet` and `cafe_doble`? [Not given anywhere yet; the plan defers
+  the source to M14.] The pairs themselves are still the plan's placeholders (see "From the plan").
+- [ ] Does the Murcia car also ask "¿Subir al Audi?"? [Yes, both cars ask Sí / No, so a stray A never starts a
+  trip.] Default answer? [Cursor on Sí; B = No.]
+- [ ] How long is the trip? [5 s (`CAR_TRIP_MS`), the middle of the plan's 4–6 s.] Which buttons skip it? [Any game
+  button: A, B, Start, Mapa or a direction.]
+- [ ] How is a car drawn on a map? [Two solid tiles plus an action warp with the property `car`; the arrival
+  points live only in car.json, so a car warp has no `toMap`.] The trip art and engine sound are content
+  (`car.json › sprite`, `sound`); the scenery is drawn in code until real art exists.
+- [ ] Is the trip saved mid-way? [No: the save happens on arrival (the usual `map` save); a reload during the trip
+  continues from the car you got into.]
 
 ### Raised in M12 (safe assumptions in brackets)
 

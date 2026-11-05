@@ -6,6 +6,8 @@ import {
   makeMinimapPng,
   makePng,
   readMinimapTargets,
+  isCarSprite,
+  makeCarPng,
   makeTitlePng,
   pngSize,
   TITLE_IMAGE,
@@ -56,6 +58,16 @@ describe('make-placeholders', () => {
     const png = PNG.sync.read(makeTitlePng());
     expect([png.width, png.height]).toEqual([512, 288]);
     for (let i = 3; i < png.data.length; i += 4 * 997) expect(png.data[i]).toBe(255);
+  });
+
+  it('draws the car (M13) as a 96 × 40 side view with a transparent background', () => {
+    expect(isCarSprite('assets/sprites/car/audi.png')).toBe(true);
+    expect(isCarSprite('assets/sprites/npcs/becario.png')).toBe(false);
+    const png = PNG.sync.read(makeCarPng());
+    expect([png.width, png.height]).toEqual([96, 40]);
+    expect(png.data[3]).toBe(0); // top-left corner is transparent
+    const at = (x: number, y: number) => [...png.data.subarray((y * 96 + x) * 4, (y * 96 + x) * 4 + 4)];
+    expect(at(40, 24)).toEqual([244, 244, 240, 255]); // white body
   });
 
   it('draws a minimap from the collision data, one square per tile (M12)', () => {

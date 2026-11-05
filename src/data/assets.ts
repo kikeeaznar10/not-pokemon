@@ -18,8 +18,8 @@ export interface AssetList {
 }
 
 /**
- * Collect sprites (flexymon, items, NPCs, M11 title + coworker, M12 the minimap of every outdoor zone) and sounds
- * (cries, attacks, voices, zone music, M11 jingle).
+ * Collect sprites (flexymon, items, NPCs, M11 title + coworker, M12 the minimap of every outdoor zone, M13 the Audi)
+ * and sounds (cries, attacks, voices, zone music, M11 jingle, M13 engine).
  */
 export function collectAssets(data: GameData): AssetList {
   const images = new Set<string>();
@@ -42,6 +42,9 @@ export function collectAssets(data: GameData): AssetList {
   // M11: the title image, the intro coworker and the handover jingle.
   images.add(data.intro.titleImage).add(data.intro.coworker.sprite);
   sounds.add(data.intro.coworker.voice).add(data.intro.jingle);
+  // M13: the car trip scene.
+  images.add(data.car.sprite);
+  sounds.add(data.car.sound);
 
   return {
     images: [...images].sort(),

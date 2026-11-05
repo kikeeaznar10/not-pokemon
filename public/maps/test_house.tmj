@@ -524,6 +524,26 @@
        "value": true
       }
      ]
+    },
+    {
+     "id": 12,
+     "properties": [
+      {
+       "name": "solid",
+       "type": "bool",
+       "value": true
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "properties": [
+      {
+       "name": "solid",
+       "type": "bool",
+       "value": true
+      }
+     ]
     }
    ]
   }

@@ -8,8 +8,13 @@
  *   out = keep the facing.
  * - A step warp may lie outside the map (one tile past an edge): those off-map tiles become walkable,
  *   so walking off the edge enters the warp. Every other off-map tile blocks.
+ * - Car warps (M13): an `action` warp with the property `car` (`murcia` or `valencia`) is the Audi. Its
+ *   destination comes from `car.json` (`toMurcia` / `toValencia`), so `toMap` / `toX` / `toY` / `toFacing`
+ *   are not used; the OverworldScene checks the unlock pairs and runs the CarScene instead of warping
+ *   (`src/logic/car.ts`).
  */
 import type { Facing } from '../data/schemas';
+import type { CarDestination } from './car';
 import type { Point } from './npc-state';
 
 /** One warp rectangle, in tiles. */
@@ -25,6 +30,8 @@ export interface Warp {
   toY: number | null;
   toFacing: Facing | null;
   trigger: 'step' | 'action';
+  /** M13: set on the Audi's `action` warp; the trip's destination (`toMap` is then empty and unused). */
+  car: CarDestination | null;
 }
 
 /** Where a warp sends the player. */
@@ -55,8 +62,9 @@ export function warpDestination(warp: Warp, from: Point & { facing: Facing }): W
   };
 }
 
-/** Every distinct target tile of a warp (one per tile of its rectangle when an axis is kept). */
+/** Every distinct target tile of a warp (one per tile of its rectangle when an axis is kept); none for a car warp. */
 export function warpTargetTiles(warp: Warp): Point[] {
+  if (warp.car) return [];
   const seen = new Set<string>();
   const out: Point[] = [];
   for (let y = warp.y; y < warp.y + warp.height; y += 1) {

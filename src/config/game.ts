@@ -5,6 +5,7 @@
 import Phaser from 'phaser';
 import { BattleScene } from '../scenes/battle-scene';
 import { BootScene } from '../scenes/boot-scene';
+import { CarScene } from '../scenes/car-scene';
 import { DebugScene } from '../scenes/debug-scene';
 import { ErrorScene } from '../scenes/error-scene';
 import { HudScene } from '../scenes/hud-scene';
@@ -42,7 +43,8 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
     input: { keyboard: false },
     // No physics: movement is grid-based and handled by the game rules.
     // Title, Name and Intro (M11) come before the overworld. Shop, Storage (M9) and Menu (M10) draw over the paused overworld. Hud (M10, the save icon) draws over
-    // every game scene; DebugScene is last so it draws on top of everything.
+    // every game scene; DebugScene is last so it draws on top of everything. Car (M13) replaces the sleeping
+    // overworld during the Audi trip, like Battle.
     scene: [
       BootScene,
       PreloadScene,
@@ -52,6 +54,7 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
       IntroScene,
       OverworldScene,
       BattleScene,
+      CarScene,
       ShopScene,
       StorageScene,
       MenuScene,

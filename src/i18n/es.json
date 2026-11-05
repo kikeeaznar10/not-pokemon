@@ -154,5 +154,8 @@
   "touch.start": "START",
   "touch.map": "MAPA",
   "mobile.rotate": "Gira el móvil",
-  "mobile.rotate_hint": "Flexymon se juega en horizontal."
+  "mobile.rotate_hint": "Flexymon se juega en horizontal.",
+  "car.ask": "¿Subir al Audi?",
+  "car.yes": "Sí",
+  "car.no": "No"
 }

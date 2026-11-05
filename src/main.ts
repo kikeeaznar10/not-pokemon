@@ -22,6 +22,7 @@ import { MENU_SCENE, type MenuScene, type MenuView } from './scenes/menu-scene';
 import type { BattleKind } from './logic/battle';
 import { createInstance, type FlexymonInstance } from './logic/instance';
 import { BATTLE_SCENE, type BattleScene, type BattleView } from './scenes/battle-scene';
+import { CAR_SCENE, type CarScene, type CarTripView } from './scenes/car-scene';
 import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
 import { ERROR_SCENE, type ErrorScene } from './scenes/error-scene';
 import { OVERWORLD_SCENE, type NpcView, type OverworldScene } from './scenes/overworld-scene';
@@ -254,6 +255,8 @@ export interface E2EHooks {
   fullscreenRequested(): boolean;
   /** The minimap in the overworld (M12): shown / visible, frame, dot, tile…; `null` outside the overworld. */
   minimap(): MinimapView | null;
+  /** The Audi trip while the CarScene runs (M13): destination, elapsed ms, skippable, finished, skipped; else `null`. */
+  carTrip(): CarTripView | null;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -383,6 +386,8 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     rotateScreen: () => ({ shown: rotateScreen?.shown ?? false, paused: game.isPaused, touch: touchDevice }),
     fullscreenRequested: () => fullscreenRequested,
     minimap: () => overworld()?.minimapView() ?? null,
+    carTrip: () =>
+      game.scene.isActive(CAR_SCENE) ? (game.scene.getScene(CAR_SCENE) as CarScene).view() : null,
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

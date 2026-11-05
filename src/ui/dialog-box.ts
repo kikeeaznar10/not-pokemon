@@ -56,6 +56,11 @@ export interface DialogOptions {
   voice?: string;
   /** Called once after the last box closes. */
   onClose?: () => void;
+  /**
+   * M13: a question box. A no longer closes the last box (it can still reveal its text); the box stays on
+   * screen under a ChoiceBox until the owner calls {@link DialogBox.dismiss}.
+   */
+  hold?: boolean;
 }
 
 /** What the box shows (for the E2E hooks). */
@@ -145,7 +150,9 @@ export class DialogBox {
     if (pressed) {
       if (pressA(this.typing) === 'reveal') this.typing = revealAll(this.typing);
       else if (this.page + 1 < this.pages.length) this.showPage(this.page + 1);
-      else {
+      else if (this.opts.hold) {
+        // A question box (M13): the ChoiceBox shown with it handles A; the owner dismisses this box.
+      } else {
         this.close();
         return;
       }
@@ -172,6 +179,11 @@ export class DialogBox {
       more: this.page + 1 < this.pages.length,
       voicePlays: this.voicePlays,
     };
+  }
+
+  /** Close the box now (a `hold` question box once its choice is made); `onClose` runs as usual. */
+  dismiss(): void {
+    if (this.open_) this.close();
   }
 
   private showPage(i: number): void {

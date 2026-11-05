@@ -64,6 +64,15 @@ describe('maps at load time (M4)', () => {
     ]);
   });
 
+  it('a car warp (M13) is not checked as a warp target; car.json endpoints are', async () => {
+    expect(await load()).toBe('ok');
+    expect(
+      await load((file, json) => {
+        if (file === 'car.json') json.toValencia = { map: 'test', x: 8, y: 11, facing: 'down' }; // the Audi itself
+      }),
+    ).toEqual(['car.json › toValencia › tile (8, 11) on map "test" is not walkable']);
+  });
+
   it('an edge warp checks every row it can land on', async () => {
     const errors = await load((file, json) => {
       if (file !== 'maps/test_east.tmj') return;

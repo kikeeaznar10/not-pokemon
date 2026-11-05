@@ -9,7 +9,9 @@
  *   `solid = true`. Tiles with `encounter = true` mark grass/sand/vineyard (used from M7).
  * - Object layer `warps` (M4): rectangles with `toMap` (string), `toX` / `toY` (int, optional = keep
  *   the player's column / row), `toFacing` (optional) and `trigger` (`step` or `action`); see
- *   `src/logic/warp.ts`. Rectangles may lie one tile outside the map (edge warps).
+ *   `src/logic/warp.ts`. Rectangles may lie one tile outside the map (edge warps). M13: a warp with the
+ *   string property `car` (`murcia` or `valencia`) is the Audi: it must use `trigger = action`, and its
+ *   destination comes from car.json, so it needs no `toMap`.
  * - Object layer `encounters` (M7): rectangles with the string properties `group` (a key of the zone's
  *   `encounters` in zones.json) and `mode` (`tiles`: only tiles with `encounter = true`; `all`: every
  *   tile, urban crowds); see `src/logic/encounter.ts`. The object name is only used in messages.
@@ -139,13 +141,21 @@ function gidsWith(map: TiledMap, name: string): Set<number> {
 }
 
 /** Warp object properties (after reading them from the Tiled property list). */
-const warpPropsSchema = z.object({
-  toMap: z.string().min(1, 'needs a toMap property'),
-  toX: z.int().nullable(),
-  toY: z.int().nullable(),
-  toFacing: facingSchema.nullable(),
-  trigger: z.enum(['step', 'action']),
-});
+const warpPropsSchema = z
+  .object({
+    toMap: z.string(),
+    toX: z.int().nullable(),
+    toY: z.int().nullable(),
+    toFacing: facingSchema.nullable(),
+    trigger: z.enum(['step', 'action']),
+    car: z.enum(['murcia', 'valencia']).nullable(),
+  })
+  .superRefine((w, ctx) => {
+    if (w.car === null && w.toMap === '')
+      ctx.addIssue({ code: 'custom', path: ['toMap'], message: 'needs a toMap property' });
+    if (w.car !== null && w.trigger !== 'action')
+      ctx.addIssue({ code: 'custom', path: ['trigger'], message: 'a car warp needs trigger = action' });
+  });
 
 /** Read one warp object; throws a message naming the warp if a property is missing or wrong. */
 function parseWarp(o: TiledObject, index: number, map: TiledMap, mapFile: string): Warp {
@@ -156,6 +166,7 @@ function parseWarp(o: TiledObject, index: number, map: TiledMap, mapFile: string
     toY: prop('toY'),
     toFacing: prop('toFacing'),
     trigger: prop('trigger'),
+    car: prop('car'),
   });
   const label = o.name ? `"${o.name}"` : `#${index}`;
   if (!parsed.success) {

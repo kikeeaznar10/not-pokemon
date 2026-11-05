@@ -11,7 +11,7 @@
  "tilewidth": 32,
  "tileheight": 32,
  "nextlayerid": 8,
- "nextobjectid": 3,
+ "nextobjectid": 4,
  "layers": [
   {
    "id": 1,
@@ -909,8 +909,8 @@
     0,
     0,
     0,
-    0,
-    0,
+    13,
+    14,
     0,
     0,
     0,
@@ -2502,6 +2502,29 @@
        "value": "step"
       }
      ]
+    },
+    {
+     "id": 2,
+     "name": "audi",
+     "type": "",
+     "x": 64,
+     "y": 288,
+     "width": 64,
+     "height": 32,
+     "rotation": 0,
+     "visible": true,
+     "properties": [
+      {
+       "name": "car",
+       "type": "string",
+       "value": "valencia"
+      },
+      {
+       "name": "trigger",
+       "type": "string",
+       "value": "action"
+      }
+     ]
     }
    ]
   },
@@ -2527,7 +2550,7 @@
    "visible": true,
    "objects": [
     {
-     "id": 2,
+     "id": 3,
      "name": "default",
      "type": "",
      "x": 64,
@@ -2587,6 +2610,26 @@
     },
     {
      "id": 8,
+     "properties": [
+      {
+       "name": "solid",
+       "type": "bool",
+       "value": true
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "properties": [
+      {
+       "name": "solid",
+       "type": "bool",
+       "value": true
+      }
+     ]
+    },
+    {
+     "id": 13,
      "properties": [
       {
        "name": "solid",

@@ -9,8 +9,10 @@
  *   in a tiny pixel font. Size: `*_front` / `*_back` 64×64, `*_icon` and `sprites/items/` 16×16,
  *   anything else 32×32. `assets/ui/title.png` (M11) is a 512×288 pixel office scene instead (sky, a building
  *   with windows and a door, a path), so the title screen has something to show until real art exists.
+ *   Anything in `sprites/car/` (M13, `car.json › sprite`) is a 96×40 white car seen from the side, nose right.
  * - Audio: an `.ogg` or `.mp3` path produces BOTH `<name>.ogg` and `<name>.mp3` (0.2 s beep made with
- *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`).
+ *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`). A name containing
+ *   `engine` (M13, the car) gets a 1 s low 90 Hz hum instead, so it can loop during the trip.
  * - Minimaps (M12): every outdoor zone in `zones.json` (`indoor: false`) gets `assets/ui/minimap_<zone>.png`, a
  *   scaled-down render of its map's collision data (`MINIMAP_TILE_PX` pixels per tile: solid dark, encounter
  *   tiles green, the rest sand). Like everything else it is never overwritten: after editing a map, delete its
@@ -96,6 +98,51 @@ export function pngSize(assetPath: string): number {
   if (/_(front|back)$/.test(name)) return 64;
   if (/_icon$/.test(name) || assetPath.includes('sprites/items/')) return 16;
   return 32;
+}
+
+/** Placeholder size of a car sprite (M13, any PNG under `sprites/car/`): the side view drawn by {@link makeCarPng}. */
+export const CAR_SIZE = { width: 96, height: 40 } as const;
+
+/** True for an asset path that gets the side-view car placeholder (M13). */
+export function isCarSprite(assetPath: string): boolean {
+  return assetPath.includes('sprites/car/');
+}
+
+/**
+ * Build the car placeholder (M13): a white hatchback seen from the side, nose to the right, with dark windows,
+ * two wheels, a headlight and a tail light, on a transparent background. Real art replaces the file.
+ */
+export function makeCarPng(width: number = CAR_SIZE.width, height: number = CAR_SIZE.height): Buffer {
+  const png = new PNG({ width, height });
+  const rect = (x0: number, y0: number, w: number, h: number, rgb: [number, number, number]): void => {
+    for (let y = Math.max(0, y0); y < Math.min(height, y0 + h); y++)
+      for (let x = Math.max(0, x0); x < Math.min(width, x0 + w); x++) {
+        const i = (y * width + x) * 4;
+        png.data[i] = rgb[0];
+        png.data[i + 1] = rgb[1];
+        png.data[i + 2] = rgb[2];
+        png.data[i + 3] = 255;
+      }
+  };
+  const white: [number, number, number] = [244, 244, 240];
+  const shade: [number, number, number] = [176, 178, 186];
+  const glass: [number, number, number] = [60, 80, 110];
+  // Body (lower), cabin (upper, set back from the nose), outline shade under the body.
+  rect(4, 18, width - 8, 12, white);
+  rect(4, 28, width - 8, 3, shade);
+  rect(22, 6, 48, 13, white);
+  rect(26, 9, 18, 9, glass); // rear window
+  rect(48, 9, 18, 9, glass); // front window
+  rect(44, 9, 4, 10, white); // pillar
+  rect(width - 8, 20, 4, 4, [250, 236, 150]); // headlight
+  rect(4, 20, 3, 4, [210, 40, 40]); // tail light
+  rect(40, 22, 8, 1, shade); // door line
+  // Wheels: dark tyres with grey hubs.
+  for (const cx of [22, width - 24]) {
+    rect(cx - 7, 26, 14, 14, [28, 28, 32]);
+    rect(cx - 3, 30, 6, 6, [150, 150, 158]);
+  }
+  return PNG.sync.write(png);
 }
 
 /** Path of the title image (M11, `intro.json › titleImage`); it gets {@link makeTitlePng} instead of a square. */
@@ -311,7 +358,7 @@ function writeAudio(file: string, ext: (typeof AUDIO_EXTS)[number]): 'beep' | 's
         '-f',
         'lavfi',
         '-i',
-        'sine=frequency=880:duration=0.2',
+        /engine/.test(basename(file)) ? 'sine=frequency=90:duration=1' : 'sine=frequency=880:duration=0.2',
         '-ac',
         '1',
         ...codec,
@@ -352,7 +399,11 @@ function main(): void {
       mkdirSync(dirname(file), { recursive: true });
       writeFileSync(
         file,
-        assetPath === TITLE_IMAGE ? makeTitlePng() : makePng(basename(assetPath, ext), pngSize(assetPath)),
+        assetPath === TITLE_IMAGE
+          ? makeTitlePng()
+          : isCarSprite(assetPath)
+            ? makeCarPng()
+            : makePng(basename(assetPath, ext), pngSize(assetPath)),
       );
     } else {
       const stem = assetPath.slice(0, -ext.length);

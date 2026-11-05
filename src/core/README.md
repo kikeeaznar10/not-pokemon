@@ -4,7 +4,7 @@
 | --- | --- |
 | `log.ts` | `log` / `warn` / `error`: the only place allowed to use `console` (silent in production builds). |
 | `rng.ts` | Seedable random generator (`int`, `float`, `chance`, `pick`, `weighted`, `id`). |
-| `events.ts` | Typed event bus (`data:loaded`, `data:error`, `game:ready`, `zone:entered`, `player:moved`, `debug:menu`, `debug:teleport`, `debug:battle`, `battle:ended`; M9 `save:request`, `overlay:closed`; M10 `save:done`, `options:changed`, `debug:delete_save`). |
+| `events.ts` | Typed event bus (`data:loaded`, `data:error`, `game:ready`, `zone:entered`, `player:moved`, `debug:menu`, `debug:teleport`, `debug:battle`, `battle:ended`; M9 `save:request`, `overlay:closed`; M10 `save:done`, `options:changed`, `debug:delete_save`; M13 `car:ended`). |
 | `input.ts` | The Input service (M3): `isDown` / `justPressed` / `direction()` for `up/down/left/right/a/b/start/map` (+ `debug` = F2). Keyboard via `bindKeyboard(window)` in `main.ts`; touch (M12, `src/ui/touch-controls.ts`) calls `press/release` with its own source ids, so keys and fingers never release each other. `beginFrame()` runs on Phaser's `prestep`. M11 text mode (`setTextMode`, `takeTyped`): while on, a key that types one character is queued as text instead of pressing its action (Z / X / WASD / M type letters), Backspace is queued as `'\b'`; arrows, Enter and F2 keep their actions. Used by the Name scene. |
 
 | `debug-flags.ts` | Page-session debug switches (M7): `debugFlags.encounters` (wild encounters on/off), set by the F2 menu and the E2E hooks. |

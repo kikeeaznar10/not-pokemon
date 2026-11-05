@@ -11,7 +11,7 @@
  "tilewidth": 32,
  "tileheight": 32,
  "nextlayerid": 8,
- "nextobjectid": 6,
+ "nextobjectid": 7,
  "layers": [
   {
    "id": 1,
@@ -975,8 +975,8 @@
     0,
     0,
     0,
-    0,
-    0,
+    13,
+    14,
     0,
     3,
     0,
@@ -2540,6 +2540,29 @@
        "value": "step"
       }
      ]
+    },
+    {
+     "id": 3,
+     "name": "audi",
+     "type": "",
+     "x": 256,
+     "y": 352,
+     "width": 64,
+     "height": 32,
+     "rotation": 0,
+     "visible": true,
+     "properties": [
+      {
+       "name": "car",
+       "type": "string",
+       "value": "murcia"
+      },
+      {
+       "name": "trigger",
+       "type": "string",
+       "value": "action"
+      }
+     ]
     }
    ]
   },
@@ -2554,7 +2577,7 @@
    "visible": true,
    "objects": [
     {
-     "id": 3,
+     "id": 4,
      "name": "jardin",
      "type": "",
      "x": 608,
@@ -2577,7 +2600,7 @@
      ]
     },
     {
-     "id": 4,
+     "id": 5,
      "name": "plaza",
      "type": "",
      "x": 32,
@@ -2612,7 +2635,7 @@
    "visible": true,
    "objects": [
     {
-     "id": 5,
+     "id": 6,
      "name": "default",
      "type": "",
      "x": 480,
@@ -2672,6 +2695,26 @@
     },
     {
      "id": 8,
+     "properties": [
+      {
+       "name": "solid",
+       "type": "bool",
+       "value": true
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "properties": [
+      {
+       "name": "solid",
+       "type": "bool",
+       "value": true
+      }
+     ]
+    },
+    {
+     "id": 13,
      "properties": [
       {
        "name": "solid",

@@ -57,6 +57,12 @@
  * - Minimap (M12): outdoors, the zone's minimap (`src/ui/minimap.ts`) shows in the top-left corner with a
  *   blinking dot on the player's tile. M (or the touch *Mapa* button) toggles it whenever this scene runs, except
  *   while the debug menu is open; the choice is kept across maps.
+ * - The Audi (M13): an `action` warp with a `car` property is the car. A while facing it: the office car
+ *   (`car = murcia`) shows `car.json › lockedDialogue` unless the bag holds both items of an unlock pair
+ *   (`src/logic/car.ts`; the items are never consumed); otherwise, and always for the Murcia car
+ *   (`car = valencia`), "¿Subir al Audi?" stays on screen with Sí / No (B = No). Sí locks input, fades out,
+ *   launches the CarScene and sleeps; on `car:ended` this scene restarts at `car.json › toMurcia` /
+ *   `toValencia`, fading in.
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
  *   the player, after every step and (M10) after every turn on the spot; on entry it then asks for an auto-save (`save:request` `map`, M10).
  */
@@ -72,6 +78,7 @@ import type { Facing, Zone } from '../data/schemas';
 import { findSpawn, isBlocked, type MapInfo } from '../data/tiled';
 import { t } from '../i18n';
 import type { BattleKind } from '../logic/battle';
+import { carArrival, carUnlocked, type CarDestination } from '../logic/car';
 import { BATTLE_FLASH_MS, NPC_ALERT_MS, WARP_FADE_MS } from '../logic/constants';
 import {
   findSpotter,
@@ -96,6 +103,7 @@ import { Minimap, toggleMinimap, type MinimapView } from '../ui/minimap';
 import { drawZoneMap } from '../world/zone-map';
 import { NpcActor, npcsOnMap } from '../world/npc';
 import { BATTLE_SCENE, type BattleSceneData } from './battle-scene';
+import { CAR_SCENE, type CarSceneData } from './car-scene';
 import { SHOP_SCENE, type ShopSceneData } from './shop-scene';
 import { STORAGE_SCENE } from './storage-scene';
 import { MENU_SCENE } from './menu-scene';
@@ -232,6 +240,7 @@ export class OverworldScene extends Phaser.Scene {
         this.startBattle({ speciesId });
       }),
       events.on('battle:ended', ({ result }) => this.returnFromBattle(result)),
+      events.on('car:ended', ({ to }) => this.arriveByCar(to)),
       events.on('debug:menu', ({ open }) => {
         this.debugMenuOpen = open;
       }),
@@ -251,8 +260,9 @@ export class OverworldScene extends Phaser.Scene {
     if (input.justPressed('map') && !this.debugMenuOpen) toggleMinimap();
     this.minimap?.update(dt, player.state.x, player.state.y);
     const talking = this.isTalking();
+    // Both can be open at once: a question box (M13 "¿Subir al Audi?") stays under its ChoiceBox.
     if (this.dialog?.isOpen) this.dialog.update(dt);
-    else if (this.choice?.isOpen) this.choice.update();
+    if (this.choice?.isOpen) this.choice.update();
     let npcStepped = false;
     for (const npc of this.npcs) {
       const evs = npc.update(dt, (nx, ny) => this.blockedForNpc(npc, nx, ny), rng);
@@ -301,7 +311,8 @@ export class OverworldScene extends Phaser.Scene {
         return;
       }
       const warp = warpAt(this.info.warps, s.x + d.x, s.y + d.y, 'action');
-      if (warp) this.warpTo(warpDestination(warp, s));
+      if (warp?.car) this.useCar(warp.car);
+      else if (warp) this.warpTo(warpDestination(warp, s));
     }
   }
 
@@ -503,6 +514,49 @@ export class OverworldScene extends Phaser.Scene {
       });
     });
     this.emitMoved();
+  }
+
+  /**
+   * The Audi (M13), A pressed facing a car warp going `to`: locked → `car.json › lockedDialogue`; otherwise ask
+   * "¿Subir al Audi?" (the question box stays under Sí / No; B = No) and drive on Sí.
+   */
+  private useCar(to: CarDestination): void {
+    const dialog = this.dialog;
+    const choice = this.choice;
+    if (!dialog || !choice) return;
+    const car = getGameData().car;
+    if (!carUnlocked(car, to, gameState().items)) {
+      log('Overworld: the Audi is locked');
+      dialog.open(car.lockedDialogue);
+      return;
+    }
+    dialog.open([t('car.ask')], { hold: true });
+    choice.open([t('car.yes'), t('car.no')], {
+      onChoose: (i) => {
+        dialog.dismiss();
+        if (i === 0) this.drive(to);
+      },
+    });
+  }
+
+  /** Lock input, fade out, then launch the CarScene and sleep until `car:ended`. */
+  private drive(to: CarDestination): void {
+    if (this.locked) return;
+    this.locked = true;
+    log(`Overworld: getting into the Audi to ${to}`);
+    const cam = this.cameras.main;
+    cam.fadeOut(WARP_FADE_MS, 0, 0, 0);
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      this.scene.launch(CAR_SCENE, { to } satisfies CarSceneData);
+      this.scene.sleep();
+    });
+  }
+
+  /** The trip is over (M13): restart at the arrival point from car.json, fading in. */
+  private arriveByCar(to: CarDestination): void {
+    if (!this.sys.isSleeping()) return;
+    this.scene.wake();
+    this.scene.restart({ ...carArrival(getGameData().car, to), fadeIn: true } satisfies OverworldData);
   }
 
   /** Lock input, fade out, then restart on the target (which fades in and unlocks). */

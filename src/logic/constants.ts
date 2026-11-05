@@ -115,3 +115,9 @@ export const MINIMAP_BLINK_MS = 300;
 
 /** Touch D-pad (M12): a touch closer to the pad's centre than this fraction of its half-width presses nothing. */
 export const DPAD_DEAD_ZONE = 0.2;
+
+/** Car (M13): the Audi trip scene lasts this long (ms) unless skipped; the plan asks for 4–6 seconds. */
+export const CAR_TRIP_MS = 5000;
+
+/** Car (M13): any button skips the trip once it has run this long (ms). */
+export const CAR_SKIP_AFTER_MS = 1000;

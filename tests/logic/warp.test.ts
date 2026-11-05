@@ -19,6 +19,7 @@ const door: Warp = {
   toY: 7,
   toFacing: 'up',
   trigger: 'step',
+  car: null,
 };
 const edge: Warp = {
   ...door,
@@ -63,6 +64,8 @@ describe('warps', () => {
 
   it('lists every target tile (one per row for an edge warp)', () => {
     expect(warpTargetTiles(door)).toEqual([{ x: 4, y: 7 }]);
+    // M13: a car warp lands on the car.json endpoints, not on tiles of its own.
+    expect(warpTargetTiles({ ...car, car: 'murcia' })).toEqual([]);
     const tiles = warpTargetTiles(edge);
     expect(tiles).toHaveLength(20);
     expect(tiles[12]).toEqual({ x: 0, y: 12 });

@@ -77,7 +77,7 @@ describe('Tiled maps', () => {
     expect(shipped('test_east')).toEqual(JSON.parse(JSON.stringify(buildTestEast())));
   });
 
-  it('reads warps: door, off-map edge (row kept), interior exit', () => {
+  it('reads warps: door, off-map edge (row kept), interior exit, the Audi (M13)', () => {
     const test = parseTiledMap(shipped(), 'maps/test.tmj');
     expect(test.warps).toEqual([
       {
@@ -91,6 +91,7 @@ describe('Tiled maps', () => {
         toY: 7,
         toFacing: 'up',
         trigger: 'step',
+        car: null,
       },
       {
         name: 'east_edge',
@@ -103,13 +104,50 @@ describe('Tiled maps', () => {
         toY: null,
         toFacing: null,
         trigger: 'step',
+        car: null,
+      },
+      {
+        name: 'audi',
+        x: 8,
+        y: 11,
+        width: 2,
+        height: 1,
+        toMap: '',
+        toX: null,
+        toY: null,
+        toFacing: null,
+        trigger: 'action',
+        car: 'murcia',
       },
     ]);
     expect(isBlocked(test, 6, 6)).toBe(false); // the door tile is walkable
+    expect(isBlocked(test, 8, 11)).toBe(true); // the Audi is solid (both tiles)
+    expect(isBlocked(test, 9, 11)).toBe(true);
     const house = parseTiledMap(shipped('test_house'), 'maps/test_house.tmj');
     expect(house.warps[0]).toMatchObject({ x: 4, y: 8, toMap: 'test', toX: 6, toY: 7, toFacing: 'down' });
     const east = parseTiledMap(shipped('test_east'), 'maps/test_east.tmj');
     expect(east.warps[0]).toMatchObject({ x: -1, y: 0, height: 20, toMap: 'test', toX: 29, toY: null });
+    expect(east.warps[1]).toMatchObject({ x: 2, y: 9, width: 2, trigger: 'action', car: 'valencia' });
+    expect(isBlocked(east, 2, 9) && isBlocked(east, 3, 9)).toBe(true);
+  });
+
+  it('a car warp (M13) needs no toMap but must use trigger = action and a known destination', () => {
+    const map = buildTestMap() as {
+      layers: { name: string; objects?: { name: string; properties?: object[] }[] }[];
+    };
+    const audi = map.layers.find((l) => l.name === 'warps')!.objects!.find((o) => o.name === 'audi')!;
+    audi.properties = [
+      { name: 'car', value: 'murcia' },
+      { name: 'trigger', value: 'step' },
+    ];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(
+      /warp "audi": trigger a car warp needs trigger = action/,
+    );
+    audi.properties = [
+      { name: 'car', value: 'luna' },
+      { name: 'trigger', value: 'action' },
+    ];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(/warp "audi": car/);
   });
 
   it('rejects a warp with missing or wrong properties, naming it', () => {

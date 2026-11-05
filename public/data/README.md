@@ -23,7 +23,9 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
 - `zones.json`: `encounters` is required (use `{}` for none); rate 1–100; weights whole ≥ 1.
 - `start.json`: euros 0–999 999, `teamSlots` 1–6, item counts 1–99, spawn/respawn `{ map, x, y, facing }`.
 - `secret-names.json`: names may not collide after normalising (case, accents, spaces; ñ is kept).
-- `car.json`: at least one pair of two item ids.
+- `car.json`: at least one pair of two item ids. M13 added `sprite` (PNG: the Audi seen from the side, nose to the
+  right, drawn by the trip scene; placeholder 96 × 40) and `sound` (the engine, looped during the trip). The cars
+  themselves are drawn on the maps (see `public/maps/README.md`, warp property `car`).
 - `intro.json` (M11): `titleImage` (PNG, 512 × 288), `jingle` (sound played at the handover), `coworker`
   `{ name, sprite, voice, x, y, facing }` (stands on the `start.json › spawn` map; exists only in the intro) and
   `steps`, run in order, the player starting on `start.json › spawn`:

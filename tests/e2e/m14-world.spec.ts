@@ -9,7 +9,8 @@
 // The walks use a small path finder over the real .tmj maps (solid tiles, step warps, the NPCs where they stand
 // now), pressing one arrow per tile. Wild encounters are switched off with the `setEncounters` hook (the same
 // flag as the F2 menu option, but no debug menu is opened) so the walks are deterministic; enemy NPCs that spot
-// the player are fought for real (A through the battle) with a strong team set through `setParty`, so the walk
+// the player are fought for real (A through the battle) with a strong team set through `patchState` (stats at the
+// merge cap, healed after each fight), so the walk
 // never depends on luck. Euros for the licence are topped up with `setEuros` (earning them would need luck too);
 // the purchase itself goes through the shop screens.
 import { test, expect, type Page } from '@playwright/test';
@@ -88,10 +89,25 @@ async function quickStart(page: Page): Promise<void> {
   );
   await standing(page, { map: 'oficina_ahora', x: 7, y: 12 });
   await hook(page, 'setEncounters', false);
-  // A strong, healthy team so the enemy NPCs met on the way never stop the walk.
-  await hook(page, 'setParty', {
-    team: [{ speciesId: 'servidor' }, { speciesId: 'proyector' }, { speciesId: 'router' }],
-    teamSlots: 3,
+  await strongTeam(page);
+}
+
+/**
+ * A strong, healthy team so the enemy NPCs met on the way never stop the walk: the three Murcia species with every
+ * stat at its merge cap (2 × base) and full HP. Set again after every battle.
+ */
+async function strongTeam(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const species = (await (await fetch('data/flexymon.json')).json()) as {
+      id: string;
+      stats: { hp: number; attack: number; defense: number; speed: number };
+    }[];
+    const team = ['servidor', 'proyector', 'router'].map((id, i) => {
+      const s = species.find((f) => f.id === id)!.stats;
+      return { uid: `walker${i}`, speciesId: id, bonus: { ...s }, currentHp: s.hp * 2 };
+    });
+    const e2e = (window as unknown as { __E2E__: Record<string, (...a: unknown[]) => unknown> }).__E2E__;
+    e2e.patchState!({ team, teamSlots: 3 });
   });
 }
 
@@ -184,6 +200,7 @@ async function fightThrough(page: Page, map: string): Promise<void> {
   }
   await expect.poll(() => scene(page), { timeout: 10_000 }).toBe('Overworld');
   expect((await tile(page))?.map, 'lost a battle on the way').toBe(map);
+  await strongTeam(page);
 }
 
 /**

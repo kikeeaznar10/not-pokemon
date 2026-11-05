@@ -431,8 +431,12 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   On desktop, two long walks with screenshots: office → Alboraya (both bars, the shop, the office again) → Huerta
   Norte → Valencia (shop, Àgora, the beach and back) → the south town (Isaval; buys the licence in its shop) → back
   north to the office Audi → Murcia; and in Murcia its shop, the vineyards, the industrial estate and Ciruelo, then
-  the car back to the office car. Enemies met on the way are fought for real; wild encounters are switched off with
+  the car back to the office car. Enemies met on the way are fought for real (with a Murcia team at the merge cap,
+  set through `patchState` and healed after each fight); wild encounters are switched off with
   the `setEncounters` hook and euros for the licence are topped up with `setEuros` (no debug menu is opened).
+- Known flaky (not changed): in the first full run `m7-encounters.spec.ts` failed 3 times on desktop (the M7 / M10
+  "extra A in the battle intro" pattern) while a second Playwright run loaded the machine, and `m12-mobile.spec.ts`
+  "every action … by touch alone" once on `iphone` (the M13 note); both passed when re-run on their own.
 - For M15: the region music files are still placeholders (`valencia.ogg`, `murcia.ogg`); `docs/CONTENT.md` should
   take `tools/README.md` › `npm run world` (legend and `world.json` fields) and `public/maps/README.md`. The
   real-device check of M12 is still open.

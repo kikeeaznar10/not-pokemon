@@ -45,7 +45,7 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.savesWritten()` | M10 | Reasons of every save written since load (`quiet` = page hidden / closed). |
 | `window.__E2E__.savedGame()` | M10 | The raw `flexymon.save.v1` text, or `null`. |
 | `window.__E2E__.saveIcon()` | M10 | True while the "Guardando…" icon shows (600 ms after each save). |
-| `window.__E2E__.menu()` | M10 | The open Start menu: `{ ui ('main'/'team'/'detail'/'move'/'bag'/'bag_target'/'options'/'message'/'closed'), menu { options, cursor }, detail (stats `{ stat, value, base, bonus }`, attacks) on the detail page, options { music, sfx, textSpeed, cursor }, description (Mochila), message }`, else `null`. |
+| `window.__E2E__.menu()` | M10 | The open Start menu: `{ ui ('main'/'team'/'detail'/'move'/'bag'/'bag_target'/'options'/'message'/'closed'), menu { options, cursor }, detail (stats `{ stat, value, base, bonus }`, attacks) on the detail page, options { music, sfx, textSpeed, cursor }, description (Mochila), message, messageTyped }`, else `null`. |
 | `window.__E2E__.options()` / `setOptions(o)` | M10 | Read / replace the options `{ music, sfx (0–10), textSpeed ('slow'/'normal'/'fast') }` (stored in `flexymon.options` and applied). |
 | `window.__E2E__.musicGain()` | M10 | The music option's gain applied to the music player (0–1). |
 | `window.__E2E__.patchState(patch)` | M10 | Merge fields into the game state (e.g. `team` with bonuses, `npcs`); the position follows the player. |

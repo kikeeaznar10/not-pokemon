@@ -65,6 +65,8 @@ export interface MenuView {
   description: string;
   /** Text of the open dialogue box, or `null`. */
   message: string | null;
+  /** True once the open dialogue box shows its whole text (A then goes on); `false` with no box. */
+  messageTyped: boolean;
 }
 
 const MAIN_W = 150;
@@ -445,6 +447,7 @@ export class MenuScene extends Phaser.Scene {
       options: { ...getOptions(), cursor: this.optionCursor },
       description: this.descPanel.visible ? this.descText.text : '',
       message: this.dialog.state()?.full ?? null,
+      messageTyped: this.dialog.state()?.typed ?? false,
     };
   }
 }

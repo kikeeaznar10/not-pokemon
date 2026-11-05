@@ -27,6 +27,7 @@ interface MenuView {
   options: { music: number; sfx: number; textSpeed: string; cursor: number };
   description: string;
   message: string | null;
+  messageTyped: boolean;
 }
 interface Inst {
   uid: string;
@@ -145,15 +146,20 @@ async function cursorTo(page: Page, index: number): Promise<void> {
   }
 }
 
-/** Press A through the menu's message box; returns every text seen. */
+/**
+ * Press A through the menu's message box; returns every text seen. Each box is first allowed to type out, and
+ * after each A the next box (or none) must show before pressing again, so no stray A reaches the menu behind it.
+ */
 async function readMessages(page: Page): Promise<string[]> {
   const seen: string[] = [];
   await expect.poll(async () => (await menu(page))?.message ?? null).not.toBeNull();
   for (;;) {
-    const m = (await menu(page))?.message ?? null;
-    if (!m) return seen;
-    if (seen.at(-1) !== m) seen.push(m);
+    const m = await menu(page);
+    if (!m?.message) return seen;
+    seen.push(m.message);
+    await expect.poll(async () => (await menu(page))?.messageTyped).toBe(true);
     await press(page, 'z');
+    await expect.poll(async () => (await menu(page))?.message ?? null).not.toBe(m.message);
   }
 }
 
@@ -222,6 +228,11 @@ test('garbage in the save does not crash: a fresh game starts and the broken cop
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
+  // Let the first load finish (WebKit reports assets cut off by a reload as page errors).
+  await page.waitForFunction(
+    () =>
+      (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
+  );
   await page.evaluate((k) => localStorage.setItem(k, '{"version":1,"player":garbage'), SAVE_KEY);
   await page.reload();
   await enterGame(page, { map: 'test', x: 15, y: 10 });

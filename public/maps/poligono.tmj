@@ -3177,7 +3177,7 @@
     },
     {
      "id": 2,
-     "name": "door_ciruelo",
+     "name": "door_empresa_poligono",
      "type": "",
      "x": 224,
      "y": 576,
@@ -3189,7 +3189,7 @@
       {
        "name": "toMap",
        "type": "string",
-       "value": "ciruelo"
+       "value": "empresa_poligono"
       },
       {
        "name": "toX",

@@ -28,24 +28,24 @@ checks that). Zones and landmarks (coordinates are tiles):
 
 | Zone | Size | Links | Contains |
 | --- | --- | --- | --- |
-| `alboraya` (village) | 32 × 24 | south x 14–16 → `huerta_norte` | Office of ahora (door (7, 8) → `oficina_ahora`), Bar Pacos (16, 7), Bar Las Rusas (24, 7), shop (21, 17) → `tienda_alboraya`, the office Audi on (9–10, 10), tall grass `campo_alboraya`, enemy `becario_alboraya`. Spawn (7, 9). |
+| `alboraya` (village) | 32 × 24 | south x 14–16 → `huerta_norte` | The office where the game starts (door (7, 8) → `oficina`), two bars (16, 7) → `bar_centro` and (24, 7) → `bar_este`, shop (21, 17) → `tienda_alboraya`, the office Audi on (9–10, 10), tall grass `campo_alboraya`, enemy `becario_alboraya`. Spawn (7, 9). |
 | `huerta_norte` (fields) | 32 × 24 | north → `alboraya`, south x 14–16 → `valencia` | Three tall-grass fields (`huerta`), irrigation channels with bridges, a barraca; two enemies. |
 | `valencia` (city) | 48 × 36 | north → `huerta_norte`, south x 14–16 → `pueblo_sur`, east y 16–18 → `playa` | Turia river park (tall grass `jardin_turia`, rows 8–13), Torres de Serranos and Mercado, shop (37, 5) → `tienda_valencia`, Plaza del Ayuntamiento (crowd `plaza_ayuntamiento`), Plaza de la Virgen (crowd `plaza_virgen`), the CAC / Àgora (door (39, 27) → `agora`) and its esplanade (crowd `explanada_cac`); 4 enemies. |
 | `playa` (beach) | 20 × 36 | west y 16–18 → `valencia` | Sand, dunes (`dunas`), the sea; two enemies. |
-| `pueblo_sur` (south town) | 32 × 24 | north → `valencia` | Isaval (door (7, 8) → `isaval`), shop (21, 8) → `tienda_sur`, tall grass `campos_sur`, the range from row 18 down; one enemy. |
+| `pueblo_sur` (south town) | 32 × 24 | north → `valencia` | a client company (door (7, 8) → `empresa_sur`), shop (21, 8) → `tienda_sur`, tall grass `campos_sur`, the range from row 18 down; one enemy. |
 | `murcia` (desert town) | 32 × 24 | east y 10–12 → `vinedos`, south x 14–16 → `poligono` | The arrival Audi on (14–15, 5), shop (6, 6) → `tienda_murcia`, houses, cacti, dunes (`desierto`); one enemy. |
 | `vinedos` (vineyards) | 32 × 24 | west → `murcia` | Vineyard rows (`vinas`), a bodega; one enemy. |
-| `poligono` (industrial estate) | 32 × 24 | north → `murcia` | Warehouses, Ciruelo (door (7, 18) → `ciruelo`), loading yard (crowd `muelle_carga`); one enemy. |
+| `poligono` (industrial estate) | 32 × 24 | north → `murcia` | Warehouses, a client company (door (7, 18) → `empresa_poligono`), loading yard (crowd `muelle_carga`); one enemy. |
 
-Interiors (smaller than the screen, centred on black): `oficina_ahora` 14 × 13 (desks; the new game starts on its
-doormat (7, 12); healer at (5, 9), storage at (11, 8)), `bar_pacos` and `bar_las_rusas` 10 × 8, the four shops 8 × 7
-(shopkeeper at (5, 3)), `agora` 16 × 10 (two enemies), `isaval` and `ciruelo` 10 × 8 (a client who talks).
+Interiors (smaller than the screen, centred on black): `oficina` 14 × 13 (desks; the new game starts on its
+doormat (7, 12); healer at (5, 9), storage at (11, 8)), `bar_centro` and `bar_este` 10 × 8 (counter and shopkeeper), the four shops 8 × 7
+(shopkeeper at (5, 3)), `agora` 16 × 10 (two enemies), `empresa_sur` and `empresa_poligono` 10 × 8 (a client who talks).
 
 ## Editing with text layouts
 
 ### Layout files (`tools/world/<zone>.txt`)
 
-One character per tile, one line per row, all rows the same width. For example `tools/world/oficina_ahora.txt`:
+One character per tile, one line per row, all rows the same width. For example `tools/world/oficina.txt`:
 
 ```
 ##############
@@ -108,7 +108,7 @@ Example (Alboraya):
 "alboraya": {
   "ground": "grass",
   "spawn": [7, 9],
-  "doors": [{ "x": 7, "y": 8, "to": "oficina_ahora" }, { "x": 21, "y": 17, "to": "tienda_alboraya" }],
+  "doors": [{ "x": 7, "y": 8, "to": "oficina" }, { "x": 21, "y": 17, "to": "tienda_alboraya" }],
   "edges": [{ "side": "south", "from": 14, "to": 16, "map": "huerta_norte" }],
   "car": { "x": 9, "y": 10, "to": "murcia" },
   "encounters": [{ "name": "campo", "x": 3, "y": 15, "width": 8, "height": 6, "group": "campo_alboraya", "mode": "tiles" }]

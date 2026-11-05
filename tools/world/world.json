@@ -4,9 +4,9 @@
       "ground": "grass",
       "spawn": [7, 9],
       "doors": [
-        { "x": 7, "y": 8, "to": "oficina_ahora" },
-        { "x": 16, "y": 7, "to": "bar_pacos" },
-        { "x": 24, "y": 7, "to": "bar_las_rusas" },
+        { "x": 7, "y": 8, "to": "oficina" },
+        { "x": 16, "y": 7, "to": "bar_centro" },
+        { "x": 24, "y": 7, "to": "bar_este" },
         { "x": 21, "y": 17, "to": "tienda_alboraya" }
       ],
       "edges": [{ "side": "south", "from": 14, "to": 16, "map": "huerta_norte" }],
@@ -120,7 +120,7 @@
       "ground": "grass",
       "spawn": [15, 2],
       "doors": [
-        { "x": 7, "y": 8, "to": "isaval" },
+        { "x": 7, "y": 8, "to": "empresa_sur" },
         { "x": 21, "y": 8, "to": "tienda_sur" }
       ],
       "encounters": [
@@ -184,20 +184,20 @@
     "poligono": {
       "ground": "road",
       "spawn": [15, 2],
-      "doors": [{ "x": 7, "y": 18, "to": "ciruelo" }],
+      "doors": [{ "x": 7, "y": 18, "to": "empresa_poligono" }],
       "encounters": [
         { "name": "muelle", "x": 20, "y": 9, "width": 8, "height": 3, "group": "muelle_carga", "mode": "all" }
       ]
     },
-    "oficina_ahora": { "ground": "floor", "indoor": true },
-    "bar_pacos": { "ground": "floor", "indoor": true },
-    "bar_las_rusas": { "ground": "floor", "indoor": true },
+    "oficina": { "ground": "floor", "indoor": true },
+    "bar_centro": { "ground": "floor", "indoor": true },
+    "bar_este": { "ground": "floor", "indoor": true },
     "tienda_alboraya": { "ground": "floor", "indoor": true },
     "tienda_valencia": { "ground": "floor", "indoor": true },
     "tienda_sur": { "ground": "floor", "indoor": true },
     "tienda_murcia": { "ground": "floor", "indoor": true },
     "agora": { "ground": "floor", "indoor": true },
-    "isaval": { "ground": "floor", "indoor": true },
-    "ciruelo": { "ground": "floor", "indoor": true }
+    "empresa_sur": { "ground": "floor", "indoor": true },
+    "empresa_poligono": { "ground": "floor", "indoor": true }
   }
 }

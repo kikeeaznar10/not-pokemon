@@ -151,17 +151,17 @@ Every NPC is one entry in `npcs.json`. Common fields:
 
 ```json
 {
-  "id": "camarero_pacos",
+  "id": "camarero_bar_centro",
   "type": "shopkeeper",
   "name": "Camarero",
   "sprite": "assets/sprites/npcs/camarero.png",
   "voice": "assets/audio/sfx/voice_low.ogg",
-  "map": "bar_pacos",
+  "map": "bar_centro",
   "spawn": { "x": 7, "y": 3 },
   "facing": "down",
   "wander": null,
   "dialogue": ["¿Lo de siempre?"],
-  "shop": "bar_pacos"
+  "shop": "bar_centro"
 }
 ```
 
@@ -280,7 +280,7 @@ warning (and fails the world test).
 `shops.json` maps a shop id to the item ids it sells, in the order shown:
 
 ```json
-{ "tienda_alboraya": ["cafe", "bocadillo", "redbull", "regleta"], "bar_pacos": ["cafe", "bocadillo"] }
+{ "tienda_alboraya": ["cafe", "bocadillo", "redbull", "regleta"], "bar_centro": ["cafe", "bocadillo"] }
 ```
 
 Only items with a price can be listed. A shop opens through a `shopkeeper` NPC whose `shop` names it; usually the
@@ -294,8 +294,8 @@ shop can buy any sellable item from the player.
   "starter": "portatil",
   "euros": 200,
   "teamSlots": 2,
-  "spawn": { "map": "oficina_ahora", "x": 7, "y": 12, "facing": "up" },
-  "respawn": { "map": "oficina_ahora", "x": 7, "y": 10, "facing": "down" },
+  "spawn": { "map": "oficina", "x": 7, "y": 12, "facing": "up" },
+  "respawn": { "map": "oficina", "x": 7, "y": 10, "facing": "down" },
   "items": { "cafe": 3, "llaves_audi": 1 }
 }
 ```
@@ -328,7 +328,7 @@ a public repository.
 ```
 
 - `unlockPairs`: owning both items of any pair opens the office car (items are not consumed). The shipped sources:
-  the keys at the start, *Café doble* at Bar Las Rusas, *Carnet* at the south town's shop.
+  the keys at the start, *Café doble* at the bar `bar_este`, *Carnet* at the south town's shop.
 - `lockedDialogue`: what the locked car says.
 - `sprite`: the car seen from the side, nose to the right (flipped for the way back), used by the trip scene.
 - `sound`: the engine, looped during the trip.

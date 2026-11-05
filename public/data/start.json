@@ -3,13 +3,13 @@
   "euros": 200,
   "teamSlots": 2,
   "spawn": {
-    "map": "oficina_ahora",
+    "map": "oficina",
     "x": 7,
     "y": 12,
     "facing": "up"
   },
   "respawn": {
-    "map": "oficina_ahora",
+    "map": "oficina",
     "x": 7,
     "y": 10,
     "facing": "down"

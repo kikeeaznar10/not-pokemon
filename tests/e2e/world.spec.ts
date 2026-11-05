@@ -87,7 +87,7 @@ async function quickStart(page: Page): Promise<void> {
   await page.waitForFunction(() =>
     (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
   );
-  await standing(page, { map: 'oficina_ahora', x: 7, y: 12 });
+  await standing(page, { map: 'oficina', x: 7, y: 12 });
   await hook(page, 'setEncounters', false);
   await strongTeam(page);
 }
@@ -320,7 +320,7 @@ test.describe('the real world', () => {
       } else await page.waitForTimeout(50);
     }
     expect(seen).toContain('¡Recibes a Portátil!');
-    await standing(page, { map: 'oficina_ahora', x: 7, y: 9 });
+    await standing(page, { map: 'oficina', x: 7, y: 9 });
     expect(await hook(page, 'items')).toEqual({ cafe: 3, llaves_audi: 1 });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/interior.ogg');
     await page.screenshot({ path: testInfo.outputPath(`office-${testInfo.project.name}.png`) });
@@ -340,15 +340,15 @@ test.describe('the real world', () => {
     const shot = (name: string) => page.screenshot({ path: testInfo.outputPath(`${name}.png`) });
 
     // Out of the office into Alboraya, then its bars and shop.
-    await walkTo(page, 'oficina_ahora', 7, 13, { map: 'alboraya' });
+    await walkTo(page, 'oficina', 7, 13, { map: 'alboraya' });
     await standing(page, { map: 'alboraya', x: 7, y: 9, facing: 'down' });
     expect(await hook(page, 'currentMusic')).toBe('assets/audio/music/valencia.ogg');
     await shot('alboraya');
-    await visit(page, 'alboraya', [16, 7], 'bar_pacos');
-    await visit(page, 'alboraya', [24, 7], 'bar_las_rusas');
+    await visit(page, 'alboraya', [16, 7], 'bar_centro');
+    await visit(page, 'alboraya', [24, 7], 'bar_este');
     await visit(page, 'alboraya', [21, 17], 'tienda_alboraya');
     // Back in after leaving: the office door.
-    await visit(page, 'alboraya', [7, 8], 'oficina_ahora');
+    await visit(page, 'alboraya', [7, 8], 'oficina');
 
     // South: Huerta Norte, Valencia (shop, Àgora, the beach), the south town.
     await walkTo(page, 'alboraya', 15, 24, { map: 'huerta_norte', y: 0 });
@@ -362,7 +362,7 @@ test.describe('the real world', () => {
     await walkTo(page, 'playa', -1, 17, { map: 'valencia', x: 47 });
     await walkTo(page, 'valencia', 15, 36, { map: 'pueblo_sur', y: 0 });
     await shot('pueblo-sur');
-    await visit(page, 'pueblo_sur', [7, 8], 'isaval');
+    await visit(page, 'pueblo_sur', [7, 8], 'empresa_sur');
 
     // The licence from the south town's shop (Comprar → Carnet de conducir → 1 → Sí).
     await walkTo(page, 'pueblo_sur', 21, 8, { map: 'tienda_sur' });
@@ -402,7 +402,7 @@ test.describe('the real world', () => {
     expect(errors).toEqual([]);
   });
 
-  test('Murcia: its shop, the vineyards, the industrial estate and Ciruelo, and the car back', async ({
+  test('Murcia: its shop, the vineyards, the industrial estate and its client office, and the car back', async ({
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'one long walk on desktop is enough');
@@ -411,7 +411,7 @@ test.describe('the real world', () => {
     // Arrive in Murcia the normal way: drive from the office car with the keys and a double coffee.
     await quickStart(page);
     await hook(page, 'setItems', { llaves_audi: 1, cafe_doble: 1 });
-    await walkTo(page, 'oficina_ahora', 7, 13, { map: 'alboraya' });
+    await walkTo(page, 'oficina', 7, 13, { map: 'alboraya' });
     await walkTo(page, 'alboraya', 9, 11);
     await drive(page, { map: 'murcia', x: 14, y: 6 });
 
@@ -421,7 +421,7 @@ test.describe('the real world', () => {
     await walkTo(page, 'vinedos', -1, 11, { map: 'murcia', x: 31 });
     await walkTo(page, 'murcia', 15, 24, { map: 'poligono', y: 0 });
     await page.screenshot({ path: testInfo.outputPath('poligono.png') });
-    await visit(page, 'poligono', [7, 18], 'ciruelo');
+    await visit(page, 'poligono', [7, 18], 'empresa_poligono');
     await walkTo(page, 'poligono', 15, -1, { map: 'murcia', y: 23 });
 
     // The Murcia car needs nothing and lands right under the office car.

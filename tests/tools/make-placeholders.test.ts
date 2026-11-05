@@ -42,7 +42,7 @@ describe('make-placeholders', () => {
   });
 
   it('wraps labels on underscores', () => {
-    expect(wrapLabel('BAR_PACOS', 5)).toEqual(['BAR', 'PACOS']);
+    expect(wrapLabel('TIENDA_SUR', 6)).toEqual(['TIENDA', 'SUR']);
     expect(wrapLabel('PORTATIL', 5)).toEqual(['PORTA', 'TIL']);
   });
 

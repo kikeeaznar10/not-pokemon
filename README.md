@@ -90,4 +90,8 @@ docs/             guides                         src/i18n/     es.json (every UI
 
 Flexymon is an original fan-style game. It is not affiliated with Nintendo, Game Freak or The Pokémon Company, uses
 none of their assets, and never uses the word "Pokémon" in the game. The world is a cartoon of real places in the
-Valencia region and mentions some real businesses as landmarks.
+Valencia region.
+
+## License
+
+[MIT](LICENSE). Contributions are accepted under the same license.

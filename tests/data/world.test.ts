@@ -67,16 +67,16 @@ const nextTo = (tiles: Set<string>, map: string, x: number, y: number) =>
 const VALENCIA_SIDE = ['alboraya', 'huerta_norte', 'valencia', 'playa', 'pueblo_sur'];
 const MURCIA_SIDE = ['murcia', 'vinedos', 'poligono'];
 const INTERIORS = [
-  'oficina_ahora',
-  'bar_pacos',
-  'bar_las_rusas',
+  'oficina',
+  'bar_centro',
+  'bar_este',
   'tienda_alboraya',
   'tienda_valencia',
   'agora',
   'tienda_sur',
-  'isaval',
+  'empresa_sur',
   'tienda_murcia',
-  'ciruelo',
+  'empresa_poligono',
 ];
 
 describe('the real world', () => {
@@ -134,10 +134,11 @@ describe('the real world', () => {
     const maps = new Set([...tiles].map((t) => t.split(':')[0]));
     for (const id of [
       ...VALENCIA_SIDE,
-      ...INTERIORS.filter((i) => !['tienda_murcia', 'ciruelo'].includes(i)),
+      ...INTERIORS.filter((i) => !['tienda_murcia', 'empresa_poligono'].includes(i)),
     ])
       expect(maps.has(id), id).toBe(true);
-    for (const id of [...MURCIA_SIDE, 'tienda_murcia', 'ciruelo']) expect(maps.has(id), id).toBe(false);
+    for (const id of [...MURCIA_SIDE, 'tienda_murcia', 'empresa_poligono'])
+      expect(maps.has(id), id).toBe(false);
     // The respawn point is on the same walkable network.
     expect(tiles.has(`${data.start.respawn.map}:${data.start.respawn.x},${data.start.respawn.y}`)).toBe(true);
   });
@@ -151,7 +152,8 @@ describe('the real world', () => {
     ).toBe(true);
     const murcia = reachable(data.car.toMurcia);
     const maps = new Set([...murcia].map((t) => t.split(':')[0]));
-    for (const id of [...MURCIA_SIDE, 'tienda_murcia', 'ciruelo']) expect(maps.has(id), id).toBe(true);
+    for (const id of [...MURCIA_SIDE, 'tienda_murcia', 'empresa_poligono'])
+      expect(maps.has(id), id).toBe(true);
     for (const id of VALENCIA_SIDE) expect(maps.has(id), id).toBe(false);
     const murciaCar = data.maps.get('murcia')!.info.warps.find((w) => w.car === 'valencia')!;
     expect(murcia.has(`murcia:${murciaCar.x},${murciaCar.y + 1}`)).toBe(true);
@@ -169,7 +171,7 @@ describe('the real world', () => {
   it('the car items have a source: the keys at the start, a double coffee or a licence in a shop', () => {
     expect(data.start.items).toMatchObject({ llaves_audi: 1 });
     const sold = (id: string) => [...data.shops].filter(([, items]) => items.includes(id)).map(([s]) => s);
-    expect(sold('cafe_doble')).toEqual(['bar_las_rusas']);
+    expect(sold('cafe_doble')).toEqual(['bar_este']);
     expect(sold('carnet')).toEqual(['tienda_sur']);
     expect(data.items.get('cafe_doble')!.price).toBeGreaterThan(0);
     expect(data.items.get('carnet')!.price).toBeGreaterThan(0);
@@ -178,22 +180,15 @@ describe('the real world', () => {
     const shopkeepers = [...data.npcs.values()].filter((n) => n.type === 'shopkeeper');
     expect(new Set(shopkeepers.map((n) => n.shop))).toEqual(new Set(data.shops.keys()));
     expect(shopkeepers.map((n) => n.map).sort()).toEqual(
-      [
-        'bar_las_rusas',
-        'bar_pacos',
-        'tienda_alboraya',
-        'tienda_murcia',
-        'tienda_sur',
-        'tienda_valencia',
-      ].sort(),
+      ['bar_este', 'bar_centro', 'tienda_alboraya', 'tienda_murcia', 'tienda_sur', 'tienda_valencia'].sort(),
     );
   });
 
   it('the office has the healer and the storage box; the intro plays there', () => {
-    const office = [...data.npcs.values()].filter((n) => n.map === 'oficina_ahora').map((n) => n.type);
+    const office = [...data.npcs.values()].filter((n) => n.map === 'oficina').map((n) => n.type);
     expect(office.sort()).toEqual(['healer', 'storage']);
-    expect(data.start.spawn.map).toBe('oficina_ahora');
-    expect(data.start.respawn.map).toBe('oficina_ahora');
+    expect(data.start.spawn.map).toBe('oficina');
+    expect(data.start.respawn.map).toBe('oficina');
   });
 });
 

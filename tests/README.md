@@ -36,6 +36,12 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.safeSteps()` | M7 | Steps left without encounter rolls (3 after every map entry and battle); `null` outside the overworld. |
 | `window.__E2E__.encountersEnabled()` / `setEncounters(on)` | M7 | Read / set the debug flag that switches wild encounters off (same as the F2 menu's "Encuentros" option). |
 | `window.__E2E__.euros()` / `setEuros(n)` | M8 | Read / set the player's euros in the game state. |
+| `window.__E2E__.items()` / `setItems(items)` | M9 | Read / replace the bag `{ itemId: count }` in the game state. |
+| `window.__E2E__.setParty({ team?, storage?, teamSlots? })` | M9 | Replace team and/or storage with fresh flexymon `[{ speciesId, currentHp? }]` and/or set the slots. |
+| `window.__E2E__.useFieldItem(itemId, targetUid?)` | M9 | Runs `useFieldItem` on the game state: the `use` (`heal` / `revive` / `team_slot`) or `{ error }`. |
+| `window.__E2E__.shop()` | M9 | The open shop: `{ shopId, ui ('main'/'list'/'quantity'/'confirm'/'message'/'closed'), mode, euros, menu, itemId, quantity, total, prompt, message }`, else `null`. |
+| `window.__E2E__.storage()` | M9 | The open storage box: `{ column, cursor, team[], storage[] (species ids), teamSlots, message }`, else `null`. |
+| `window.__E2E__.saveRequests()` | M9 | Reasons of every `save:request` since load (`healer`, `shop`; M10 adds the rest). |
 | `window.__E2E__.npcStates()` | M8 | Enemy NPC states from the game state: `{ id: 'ready' \| 'cooldown' }` (an NPC never beaten is missing = `ready`). |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
@@ -51,6 +57,10 @@ for the plan's 2-minute check.
 
 `tests/e2e/m6-battle.spec.ts` drives battles with `advance()` (presses A through messages until a menu or the overworld is
 back). Loss and forced-switch tests try seeds 1–10 until the case happens, since the opponent's attack is random.
+
+Since M9 the overworld hooks (`playerTile`, `overworldLocked`, `npcs`, `dialogue`…) also answer while the overworld
+is paused under the Shop or Storage scene; `battle().ui` can be `item` / `item_target`.
+`tests/e2e/m9-items.spec.ts` serves `start.json` with a spawn inside `test_house` next to the NPC under test.
 
 Add new helpers to the `E2EHooks` interface in `src/main.ts` and to this table.
 

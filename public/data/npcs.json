@@ -41,5 +41,51 @@
       "min": 80,
       "max": 140
     }
+  },
+  {
+    "id": "recepcionista_oficina",
+    "type": "healer",
+    "name": "Recepcionista",
+    "sprite": "assets/sprites/npcs/recepcionista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "test_house",
+    "spawn": {
+      "x": 1,
+      "y": 4
+    },
+    "facing": "right",
+    "wander": null,
+    "dialogue": ["Aquí siempre hay café para todos."]
+  },
+  {
+    "id": "informatico_caja",
+    "type": "storage",
+    "name": "Informático",
+    "sprite": "assets/sprites/npcs/informatico.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "test_house",
+    "spawn": {
+      "x": 8,
+      "y": 4
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["Te abro la caja de los flexymon."]
+  },
+  {
+    "id": "tendero_alboraya",
+    "type": "shopkeeper",
+    "name": "Tendero",
+    "sprite": "assets/sprites/npcs/tendero.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "test_house",
+    "spawn": {
+      "x": 8,
+      "y": 6
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["¡Bienvenido!"],
+    "shop": "tienda_alboraya"
   }
 ]

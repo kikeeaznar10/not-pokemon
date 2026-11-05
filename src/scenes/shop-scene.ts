@@ -1,0 +1,330 @@
+/**
+ * ShopScene (M9) — the shop opened by a `shopkeeper` NPC, drawn over the paused overworld.
+ *
+ * - Start it with {@link ShopSceneData} (`shopId`, a key of `shops.json`). Money and bag come from the
+ *   game state (`src/core/session.ts`) and every purchase / sale is written back at once.
+ * - Layout: the money box top left ("Dinero: 200 €"), a prompt panel at the bottom, the ChoiceBox
+ *   *Comprar / Vender / Salir* above it on the right.
+ * - Comprar: the shop's stock (`buyRows`, `src/logic/shop.ts`) with item icons and prices; the prompt shows
+ *   the description and how many the player has. A on an item opens the quantity picker (1 … the most the
+ *   money and bag allow: Up/Down ±1, Right/Left ±`QTY_BIG_STEP`, with the total price), A asks
+ *   "¿Compras {n} × {item} por {total} €?" (Sí / No), Sí runs `buy()` (`src/logic/economy.ts`) and thanks
+ *   the player. An item the player cannot afford (or has no room for) gives the reason instead.
+ * - Vender: every item in the bag (`sellRows`) with its sell price (half, rounded down); key items and
+ *   `price: null` items are greyed and cannot be sold. Same picker (1 … count) and confirmation; `sell()`.
+ * - B goes back one step everywhere (picker → list → main menu); B or *Salir* in the main menu closes the
+ *   shop: it asks for an auto-save (`save:request` `shop`), emits `overlay:closed` and stops; the
+ *   overworld resumes.
+ * - The scene computes no price or limit: rows, limits and totals come from `src/logic/shop.ts`.
+ */
+import Phaser from 'phaser';
+import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
+import { events } from '../core/events';
+import { input } from '../core/input';
+import { log } from '../core/log';
+import { gameState, setGameState } from '../core/session';
+import { getGameData } from '../data/game-data';
+import { t } from '../i18n';
+import { QTY_BIG_STEP } from '../logic/constants';
+import { buy, sell } from '../logic/economy';
+import {
+  buyRows,
+  rowError,
+  sellRows,
+  stepQuantity,
+  totalPrice,
+  type ShopMode,
+  type ShopRow,
+} from '../logic/shop';
+import { ChoiceBox } from '../ui/choice-box';
+import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
+import { GridMenu, type GridMenuState } from '../ui/grid-menu';
+
+/** Scene key of {@link ShopScene}. */
+export const SHOP_SCENE = 'Shop';
+
+/** How to open a shop. */
+export interface ShopSceneData {
+  shopId: string;
+}
+
+/** What the shop screen is doing. */
+export type ShopUi = 'main' | 'list' | 'quantity' | 'confirm' | 'message' | 'closed';
+
+/** The shop screen as plain data (for the E2E hooks). */
+export interface ShopView {
+  shopId: string;
+  ui: ShopUi;
+  /** `buy` / `sell` while a list, picker or confirmation is open, else `null`. */
+  mode: ShopMode | null;
+  euros: number;
+  /** The open list or choice (options + cursor), or `null`. */
+  menu: GridMenuState | null;
+  /** Item under the cursor / being bought or sold, and the picked quantity and total. */
+  itemId: string | null;
+  quantity: number;
+  total: number;
+  /** Text of the prompt panel (question, description) and of the open message box. */
+  prompt: string;
+  message: string | null;
+}
+
+const MENU_TOP = GAME_HEIGHT - DIALOG_HEIGHT;
+const MONEY_W = 180;
+const MONEY_H = 28;
+const LIST_Y = MONEY_H + 8;
+const QTY_W = 150;
+const QTY_H = 52;
+const COLOR_PANEL = 0xf8f8f0;
+const COLOR_BORDER = 0x202028;
+const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
+  fontFamily: 'monospace',
+  fontSize: '14px',
+  color: '#202028',
+};
+
+/** The shop. */
+export class ShopScene extends Phaser.Scene {
+  private shopId = '';
+  private ui: ShopUi = 'main';
+  private mode: ShopMode | null = null;
+  private rows: ShopRow[] = [];
+  private row: ShopRow | null = null;
+  private quantity = 0;
+  private listCursor = 0;
+  private dialog!: DialogBox;
+  private menu!: GridMenu;
+  private choice!: ChoiceBox;
+  private moneyText!: Phaser.GameObjects.Text;
+  private promptText!: Phaser.GameObjects.Text;
+  private prompt!: Phaser.GameObjects.Container;
+  private qtyText!: Phaser.GameObjects.Text;
+  private qtyTotal!: Phaser.GameObjects.Text;
+  private qtyBox!: Phaser.GameObjects.Container;
+
+  constructor() {
+    super(SHOP_SCENE);
+  }
+
+  create(data: ShopSceneData): void {
+    this.shopId = data.shopId;
+    this.mode = null;
+    this.row = null;
+    this.quantity = 0;
+    this.listCursor = 0;
+    this.moneyText = this.add.text(10, 7, '', TEXT_STYLE);
+    this.panel(4, 4, MONEY_W, MONEY_H, [this.moneyText]);
+    this.promptText = this.add.text(12, 10, '', { ...TEXT_STYLE, wordWrap: { width: GAME_WIDTH - 24 } });
+    this.prompt = this.panel(0, MENU_TOP, GAME_WIDTH, DIALOG_HEIGHT, [this.promptText]);
+    this.qtyText = this.add.text(12, 8, '', TEXT_STYLE);
+    this.qtyTotal = this.add.text(QTY_W - 12, 28, '', TEXT_STYLE).setOrigin(1, 0);
+    this.qtyBox = this.panel(GAME_WIDTH - QTY_W - 4, MENU_TOP - QTY_H - 2, QTY_W, QTY_H, [
+      this.qtyText,
+      this.qtyTotal,
+    ]).setVisible(false);
+    this.dialog = new DialogBox(this);
+    this.menu = new GridMenu(this);
+    this.choice = new ChoiceBox(this);
+    log(`Shop: open ${this.shopId}`);
+    this.openMain(0);
+  }
+
+  override update(_time: number, delta: number): void {
+    this.moneyText.setText(t('shop.money', { n: gameState().euros }));
+    if (this.dialog.isOpen) this.dialog.update(delta);
+    else if (this.menu.isOpen) this.menu.update();
+    else if (this.choice.isOpen) this.choice.update();
+    else if (this.ui === 'quantity') this.updateQuantity();
+  }
+
+  /** A framed panel at (`x`, `y`) holding `children`. */
+  private panel(x: number, y: number, w: number, h: number, children: Phaser.GameObjects.GameObject[]) {
+    const bg = this.add.rectangle(0, 0, w, h, COLOR_PANEL).setOrigin(0).setStrokeStyle(2, COLOR_BORDER);
+    return this.add.container(x, y, [bg, ...children]).setDepth(90);
+  }
+
+  private setPrompt(text: string): void {
+    this.promptText.setText(text);
+    this.prompt.setVisible(true);
+  }
+
+  /** "¿Qué quieres hacer?" with Comprar / Vender / Salir. */
+  private openMain(initial: number): void {
+    this.ui = 'main';
+    this.mode = null;
+    this.row = null;
+    this.qtyBox.setVisible(false);
+    this.setPrompt(t('shop.prompt'));
+    this.choice.open([t('shop.buy'), t('shop.sell'), t('shop.exit')], {
+      initial,
+      onChoose: (i) => {
+        if (i === 0) this.openList('buy', 0);
+        else if (i === 1) this.openList('sell', 0);
+        else this.close();
+      },
+    });
+  }
+
+  /** Show a message in the dialog box, then run `next`. */
+  private say(text: string, next: () => void): void {
+    this.ui = 'message';
+    this.prompt.setVisible(false);
+    this.qtyBox.setVisible(false);
+    this.dialog.open([text], { onClose: next });
+  }
+
+  /** The buy or sell list; B goes back to the main menu. */
+  private openList(mode: ShopMode, initial: number): void {
+    const data = getGameData();
+    const gs = gameState();
+    this.mode = mode;
+    this.row = null;
+    this.qtyBox.setVisible(false);
+    this.rows = mode === 'buy' ? buyRows(this.shopId, data, gs.euros, gs.items) : sellRows(data, gs.items);
+    if (this.rows.length === 0) {
+      return this.say(t('shop.nothing_to_sell'), () => this.openMain(1));
+    }
+    this.ui = 'list';
+    const options = this.rows.map((r) => ({
+      label: r.name,
+      enabled: mode === 'buy' || r.price !== null,
+      icon: data.items.get(r.id)?.sprite,
+      right:
+        r.price === null
+          ? t('shop.no_price')
+          : `${mode === 'sell' ? `${t('bag.count', { n: r.owned })}  ` : ''}${t('shop.price', { n: r.price })}`,
+    }));
+    this.menu.open(
+      options,
+      {
+        x: 0,
+        y: LIST_Y,
+        width: GAME_WIDTH,
+        height: MENU_TOP - LIST_Y - 2,
+        cols: 1,
+        title: t(mode === 'buy' ? 'shop.buy_title' : 'shop.sell_title'),
+      },
+      {
+        initial,
+        onMove: (i) => {
+          this.listCursor = i;
+          const r = this.rows[i];
+          if (r) this.setPrompt(`${r.description}\n${t('shop.owned', { n: r.owned })}`);
+        },
+        onChoose: (i) => {
+          const r = i === null ? undefined : this.rows[i];
+          if (!r) return this.openMain(mode === 'buy' ? 0 : 1);
+          this.pick(r);
+        },
+      },
+    );
+  }
+
+  /** An item was chosen: open the picker, or say why it cannot be bought / sold. */
+  private pick(row: ShopRow): void {
+    const mode = this.mode ?? 'buy';
+    const err = rowError(mode, row, gameState().euros);
+    if (err) return this.say(t(`shop.${err}`), () => this.openList(mode, this.listCursor));
+    this.row = row;
+    this.quantity = 1;
+    this.ui = 'quantity';
+    this.setPrompt(t('shop.how_many'));
+    this.qtyBox.setVisible(true);
+    this.drawQuantity();
+  }
+
+  private drawQuantity(): void {
+    const price = this.row?.price ?? 0;
+    this.qtyText.setText(t('shop.quantity', { n: this.quantity }));
+    this.qtyTotal.setText(t('shop.total', { n: totalPrice(price, this.quantity) }));
+  }
+
+  /** Up/Down ±1, Right/Left ±`QTY_BIG_STEP`, A confirms, B goes back to the list. */
+  private updateQuantity(): void {
+    const row = this.row;
+    if (!row) return;
+    let delta = 0;
+    if (input.justPressed('up')) delta = 1;
+    else if (input.justPressed('down')) delta = -1;
+    else if (input.justPressed('right')) delta = QTY_BIG_STEP;
+    else if (input.justPressed('left')) delta = -QTY_BIG_STEP;
+    else if (input.justPressed('a')) return this.confirm(row);
+    else if (input.justPressed('b')) return this.openList(this.mode ?? 'buy', this.listCursor);
+    if (delta !== 0) {
+      this.quantity = stepQuantity(this.quantity, delta, row.limit);
+      this.drawQuantity();
+    }
+  }
+
+  /** "¿Compras / Vendes {n} × {item} por {total} €?" with Sí / No (B = No). */
+  private confirm(row: ShopRow): void {
+    const mode = this.mode ?? 'buy';
+    const total = totalPrice(row.price ?? 0, this.quantity);
+    this.ui = 'confirm';
+    this.setPrompt(
+      t(mode === 'buy' ? 'shop.confirm_buy' : 'shop.confirm_sell', {
+        n: this.quantity,
+        item: row.name,
+        total,
+      }),
+    );
+    this.choice.open([t('shop.yes'), t('shop.no')], {
+      onChoose: (i) => {
+        if (i !== 0) return this.openList(mode, this.listCursor);
+        this.trade(mode, row, total);
+      },
+    });
+  }
+
+  /** Run the purchase or sale through the economy rules and write the result to the game state. */
+  private trade(mode: ShopMode, row: ShopRow, total: number): void {
+    const gs = gameState();
+    const item = getGameData().items.get(row.id);
+    if (!item) return this.openList(mode, this.listCursor);
+    const result =
+      mode === 'buy'
+        ? buy(gs.euros, gs.items, item, this.quantity)
+        : sell(gs.euros, gs.items, item, this.quantity);
+    if (!result.ok) {
+      const key =
+        result.reason === 'not_enough_items' || result.reason === 'bad_quantity'
+          ? 'not_for_sale'
+          : result.reason;
+      return this.say(t(`shop.${key}`), () => this.openList(mode, this.listCursor));
+    }
+    setGameState({ ...gs, euros: result.euros, items: result.items });
+    log(`Shop: ${mode} ${this.quantity} ${row.id} for ${total}`);
+    const text =
+      mode === 'buy' ? t('shop.bought') : t('shop.sold', { n: this.quantity, item: row.name, total });
+    this.say(text, () => this.openList(mode, this.listCursor));
+  }
+
+  /** Leave: auto-save request, tell the overworld, stop. */
+  private close(): void {
+    this.ui = 'closed';
+    log(`Shop: close ${this.shopId}`);
+    events.emit('save:request', { reason: 'shop' });
+    events.emit('overlay:closed', { scene: SHOP_SCENE });
+    this.scene.stop();
+  }
+
+  /** The screen as plain data (for the E2E hooks). */
+  view(): ShopView {
+    const c = this.choice.state();
+    const row = this.ui === 'list' ? (this.rows[this.listCursor] ?? null) : this.row;
+    return {
+      shopId: this.shopId,
+      ui: this.ui,
+      mode: this.mode,
+      euros: gameState().euros,
+      menu:
+        this.menu.state() ??
+        (c ? { options: c.options.map((label) => ({ label, enabled: true })), cursor: c.cursor } : null),
+      itemId: row?.id ?? null,
+      quantity: this.quantity,
+      total: totalPrice(this.row?.price ?? 0, this.quantity),
+      prompt: this.prompt.visible ? this.promptText.text : '',
+      message: this.dialog.state()?.full ?? null,
+    };
+  }
+}

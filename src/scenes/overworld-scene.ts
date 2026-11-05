@@ -44,6 +44,11 @@
  *   BattleScene already paid the reward and set `cooldown`) the NPC says its `defeatDialogue`, then
  *   wanders again (back into its rectangle, see `npc-wander.ts`). Cooldowns are refreshed
  *   (`refreshCooldowns`) on map entry and after every player or NPC step.
+ * - Healer, storage, shops (M9): talking to a `healer` fully heals the team and the storage box, then it
+ *   says "Tus flexymon están como nuevos." and its dialogue, and an auto-save is requested
+ *   (`save:request` `healer`). A `storage` NPC opens the StorageScene and a `shopkeeper` its ShopScene
+ *   after their dialogue; while one is open this scene is paused (locked) and it resumes on
+ *   `overlay:closed`.
  * - Losing (M8): the BattleScene applies the Losing rule to the game state; on `battle:ended` with
  *   `lose` this scene restarts at the respawn point (`start.json › respawn`), fades in and shows
  *   `lose.woke_up` ("Te has despertado en la oficina...").
@@ -77,13 +82,16 @@ import { createInstance } from '../logic/instance';
 import { checkStep, resetSafeSteps } from '../logic/encounter';
 import { debugFlags } from '../core/debug-flags';
 import { FACING_DELTA, npcState, type NpcState, type Point } from '../logic/npc-state';
-import { talkLines } from '../logic/talk';
+import { talkAction, talkLines } from '../logic/talk';
+import { healParty } from '../logic/team';
 import { blockedWithWarps, insideWarp, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
 import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
 import { DialogBox, type DialogState } from '../ui/dialog-box';
 import { cameraBounds } from '../world/camera';
 import { NpcActor, npcsOnMap } from '../world/npc';
 import { BATTLE_SCENE, type BattleSceneData } from './battle-scene';
+import { SHOP_SCENE, type ShopSceneData } from './shop-scene';
+import { STORAGE_SCENE } from './storage-scene';
 import { Player } from '../world/player';
 
 /** Scene key of {@link OverworldScene}. */
@@ -158,6 +166,8 @@ export class OverworldScene extends Phaser.Scene {
   private debugMenuOpen = false;
   /** Enemy NPC sequence in progress (M8), or `null`. */
   private engagement: Engagement | null = null;
+  /** Key of the overlay scene open over this one (M9: Shop, Storage), or `null`. */
+  private overlay: string | null = null;
   /** Steps left without encounter rolls (`SAFE_STEPS` after every map entry and battle). */
   safeSteps = 0;
 
@@ -173,6 +183,7 @@ export class OverworldScene extends Phaser.Scene {
     this.choice = null;
     this.locked = false;
     this.engagement = null;
+    this.overlay = null;
     const zone = getGameData().zones.get(data.map);
     if (!zone) throw new Error(`Overworld: unknown zone "${data.map}"`);
     this.zone = zone;
@@ -515,7 +526,9 @@ export class OverworldScene extends Phaser.Scene {
 
   /**
    * Start a conversation with `npc`; the player is frozen until the last box closes. A `ready` enemy
-   * starts its battle sequence instead (M8); a `cooldown` one says its `defeatDialogue`.
+   * starts its battle sequence instead (M8); a `cooldown` one says its `defeatDialogue`. M9: a healer heals
+   * the team and storage first and asks for an auto-save afterwards; a storage NPC opens the storage box
+   * and a shopkeeper its shop after their dialogue (see {@link openOverlay}).
    */
   private talkTo(npc: NpcActor): void {
     const player = this.player;
@@ -528,10 +541,43 @@ export class OverworldScene extends Phaser.Scene {
       return;
     }
     log(`Overworld: talking to ${npc.npc.id}`);
-    this.dialog.open(talkLines(npc.npc, t, state), {
-      voice: npc.npc.voice,
-      onClose: () => npc.finishTalk(rng),
+    const action = talkAction(npc.npc);
+    if (action === 'heal') {
+      const gs = gameState();
+      setGameState({ ...gs, ...healParty(gs, getGameData().flexymon) });
+      log(`Overworld: ${npc.npc.id} healed the team and storage`);
+    }
+    const target = npc.npc;
+    this.dialog.open(talkLines(target, t, state), {
+      voice: target.voice,
+      onClose: () => {
+        if (action === 'storage') return this.openOverlay(npc, STORAGE_SCENE, {});
+        if (action === 'shop' && target.type === 'shopkeeper') {
+          return this.openOverlay(npc, SHOP_SCENE, { shopId: target.shop } satisfies ShopSceneData);
+        }
+        npc.finishTalk(rng);
+        if (action === 'heal') events.emit('save:request', { reason: 'healer' });
+      },
     });
+  }
+
+  /**
+   * Open an overlay scene (M9: Shop, Storage) over this one: launch it and pause this scene (map, player
+   * and NPCs freeze, still drawn underneath). On `overlay:closed` this scene resumes and `npc` goes back
+   * to wandering.
+   */
+  private openOverlay(npc: NpcActor, key: string, data: object): void {
+    this.overlay = key;
+    const off = events.on('overlay:closed', ({ scene }) => {
+      if (scene !== key) return;
+      off();
+      this.overlay = null;
+      this.scene.resume();
+      npc.finishTalk(rng);
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, off);
+    this.scene.launch(key, data);
+    this.scene.pause();
   }
 
   /** Player blocking: solid tiles, map edges (except warp tiles) and any tile an NPC occupies. */
@@ -619,9 +665,18 @@ export class OverworldScene extends Phaser.Scene {
     return { map: this.zone.id, x: s.x, y: s.y, facing: s.facing, moving: s.step !== null };
   }
 
-  /** True while the player cannot move: warp fade, debug menu, a dialogue/choice box, an enemy sequence. */
+  /**
+   * True while the player cannot move: warp fade, debug menu, a dialogue/choice box, an enemy sequence, an
+   * open shop or storage box (M9).
+   */
   isLocked(): boolean {
-    return this.locked || this.debugMenuOpen || this.isTalking() || this.engagement !== null;
+    return (
+      this.locked ||
+      this.debugMenuOpen ||
+      this.isTalking() ||
+      this.engagement !== null ||
+      this.overlay !== null
+    );
   }
 
   private emitMoved(): void {

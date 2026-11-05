@@ -24,6 +24,7 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
 - `secret-names.json`: names may not collide after normalising (case, accents, spaces; ñ is kept).
 - `car.json`: at least one pair of two item ids.
 
-Current content (minimal): 3 flexymon, 6 attacks, 6 items, 2 NPCs, 3 zones (`test`, `test_house`, `test_east`;
+Current content (minimal): 3 flexymon, 6 attacks, 6 items, 5 NPCs (M9 added the office healer
+`recepcionista_oficina`, the storage NPC `informatico_caja` and the shopkeeper `tendero_alboraya`, all in `test_house`), 3 zones (`test`, `test_house`, `test_east`;
 the M4 test maps), 1 shop. Since M4 every zone must have a loadable map and every map point (NPC spawns, start
 spawn/respawn, car endpoints, warp targets) must be a walkable tile; the real zones (`valencia`…) come in M14.

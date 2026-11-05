@@ -1,18 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { talkLines } from '../../src/logic/talk';
+import { talkAction, talkLines } from '../../src/logic/talk';
 
 const t = (k: string): string => `<${k}>`;
 const dialogue = ['Hola.', 'Adiós.'];
 
 describe('talkLines', () => {
-  it.each(['talker', 'shopkeeper', 'enemy'] as const)('%s says its dialogue', (type) => {
+  it.each(['talker', 'shopkeeper', 'enemy', 'storage'] as const)('%s says its dialogue', (type) => {
     expect(talkLines({ type, dialogue }, t)).toEqual(dialogue);
   });
-  it('healer shows the heal placeholder first', () => {
-    expect(talkLines({ type: 'healer', dialogue }, t)).toEqual(['<npc.healer_placeholder>', ...dialogue]);
-  });
-  it('storage shows the box placeholder last', () => {
-    expect(talkLines({ type: 'storage', dialogue }, t)).toEqual([...dialogue, '<npc.storage_placeholder>']);
+  it('healer says it healed the team first (M9)', () => {
+    expect(talkLines({ type: 'healer', dialogue }, t)).toEqual(['<healer.done>', ...dialogue]);
   });
   it('an enemy in cooldown only says its defeatDialogue (M8)', () => {
     const enemy = { type: 'enemy' as const, dialogue, defeatDialogue: ['Vale, vale...'] };
@@ -23,5 +20,15 @@ describe('talkLines', () => {
     const lines = talkLines({ type: 'talker', dialogue }, t);
     lines.push('x');
     expect(dialogue).toHaveLength(2);
+  });
+});
+
+describe('talkAction (M9)', () => {
+  it('healer heals, storage opens the box, shopkeeper opens the shop, others nothing', () => {
+    expect(talkAction({ type: 'healer' })).toBe('heal');
+    expect(talkAction({ type: 'storage' })).toBe('storage');
+    expect(talkAction({ type: 'shopkeeper' })).toBe('shop');
+    expect(talkAction({ type: 'talker' })).toBeNull();
+    expect(talkAction({ type: 'enemy' })).toBeNull();
   });
 });

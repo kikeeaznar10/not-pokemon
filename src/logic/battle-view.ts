@@ -11,11 +11,21 @@
  *   flexymon, through `actionError`), {@link attackMenu} and {@link teamMenu} list the sub-menu rows.
  * - {@link hpColor} picks the HP bar colour band.
  * - {@link catchMessages} (M7) words the outcome of taking a beaten wild flexymon.
+ * - {@link itemMenu} and {@link itemTargetMenu} (M9) list the battle items in the bag and the team members
+ *   an item can be used on (enabled via `actionError`); {@link itemNeedsTarget} says whether the player
+ *   picks a target (heal / heal_full / revive) or the item goes on the active flexymon (buff).
  * Every visible text comes from `src/i18n/es.json` or the content files.
  */
 import type { Attack, Item, Species } from '../data/schemas';
 import { HP_RED_BELOW, HP_YELLOW_BELOW } from './constants';
-import { actionError, type BattleEvent, type BattleKind, type BattleState, type Side } from './battle';
+import {
+  actionError,
+  battleItems,
+  type BattleEvent,
+  type BattleKind,
+  type BattleState,
+  type Side,
+} from './battle';
 import { isFainted, maxHp } from './instance';
 import type { CatchOutcome } from './merge';
 
@@ -320,4 +330,52 @@ export function catchMessages(outcome: CatchOutcome, name: string, t: Translate)
     case 'maxed':
       return [t('catch.maxed', { name })];
   }
+}
+
+/** A row of the battle item list (M9): the item, how many are left ("x3") and its description. */
+export interface ItemOption extends MenuOption {
+  count: number;
+  countText: string;
+  description: string;
+}
+
+/** True if the player picks a team member for `item` (heal, heal_full, revive); buffs go on the active. */
+export function itemNeedsTarget(item: Item): boolean {
+  const type = item.effect.type;
+  return type === 'heal' || type === 'heal_full' || type === 'revive';
+}
+
+/**
+ * The battle items in the bag (`battleItems`: count > 0 and `usableIn` has `"battle"`), in bag order. An
+ * item is enabled when at least one target would accept it (`actionError` is null for some team member;
+ * for a buff, the active one).
+ */
+export function itemMenu(state: BattleState, data: ViewData, t: Translate): ItemOption[] {
+  return battleItems(state, data).map((id) => {
+    const item = lookup(data.items, id, 'item');
+    const count = state.items[id] ?? 0;
+    return {
+      id,
+      label: item.name,
+      count,
+      countText: t('bag.count', { n: count }),
+      description: item.description,
+      enabled: state.player.team.some(
+        (m) => actionError(state, { type: 'item', itemId: id, targetUid: m.uid }, data) === null,
+      ),
+    };
+  });
+}
+
+/** The team as targets for `itemId` (M9): the rows of {@link teamMenu}, enabled when the item works on it. */
+export function itemTargetMenu(
+  state: BattleState,
+  itemId: string,
+  data: ViewData,
+  t: Translate,
+): TeamOption[] {
+  return teamMenu(state, data, t).map((row) => ({
+    ...row,
+    enabled: actionError(state, { type: 'item', itemId, targetUid: row.id }, data) === null,
+  }));
 }

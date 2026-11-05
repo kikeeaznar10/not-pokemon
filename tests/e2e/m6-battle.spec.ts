@@ -1,6 +1,6 @@
 // M6 "Done when": a debug battle Portátil vs Ratón can be won, lost and fled; HP bars match the numbers
 // (the scene only plays logic events); B never gets the player stuck in a menu. Plus: the debug menu
-// starts a battle, Huir is greyed out against NPCs, switching (voluntary and forced), Objeto = "Pronto",
+// starts a battle, Huir is greyed out against NPCs, switching (voluntary and forced), Objeto (item list since M9) and B,
 // and the player returns to the same tile with the team's HP kept (after a loss: the M8 Losing rule).
 // Battles start through `__E2E__.startBattle(seed, species, kind)`; the team is set with `setTeam`.
 import { test, expect, type Page } from '@playwright/test';
@@ -250,7 +250,7 @@ test('fleeing a wild battle; Huir is greyed out against an NPC', async ({ page }
   expect(errors).toEqual([]);
 });
 
-test('B always goes back; Objeto says Pronto; switching works', async ({ page }, testInfo) => {
+test('B always goes back (also from Objeto); switching works', async ({ page }, testInfo) => {
   const errors = await enterOverworld(page);
   await hook(page, 'setTeam', [{ speciesId: 'portatil' }, { speciesId: 'teclado', currentHp: 20 }]);
   await hook(page, 'startBattle', 4);
@@ -278,12 +278,14 @@ test('B always goes back; Objeto says Pronto; switching works', async ({ page },
   await press(page, 'x');
   await expect.poll(ui).toBe('main');
   expect((await battle(page))!.menu!.cursor).toBe(2);
-  // Objeto → "Pronto" → back.
+  // Objeto → the item list (M9 replaced the "Pronto" placeholder) → B → back, no turn used.
   await press(page, 'ArrowUp');
   await press(page, 'ArrowRight');
   await press(page, 'z');
-  const soon = await advance(page, ['main']);
-  expect(soon.messages).toEqual(['Pronto']);
+  await expect.poll(ui).toBe('item');
+  await press(page, 'x');
+  await expect.poll(ui).toBe('main');
+  expect((await battle(page))!.menu!.cursor).toBe(1);
   expect((await battle(page))!.round).toBe(0);
 
   // Cambiar → Teclado: called back, sent out, then the opponent acts.

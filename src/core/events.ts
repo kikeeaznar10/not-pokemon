@@ -25,6 +25,13 @@ export interface GameEvents {
   'debug:battle': { speciesId: string };
   /** The BattleScene finished (M6); the game state already holds the team after the battle. */
   'battle:ended': { result: 'win' | 'lose' | 'fled' };
+  /**
+   * A point where the game auto-saves (M9 emits `healer` and `shop`; M10 adds the rest and does the
+   * actual saving to `localStorage`).
+   */
+  'save:request': { reason: 'healer' | 'shop' | 'map' | 'battle' | 'menu' };
+  /** An overlay scene opened from the overworld (M9: Shop, Storage) closed; the overworld resumes. */
+  'overlay:closed': { scene: string };
 }
 
 type Handler<P> = P extends void ? () => void : (payload: P) => void;

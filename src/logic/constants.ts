@@ -75,3 +75,6 @@ export const HP_RED_BELOW = 0.2;
 
 /** Enemy NPC (M8): the "!" bubble shows this long before the NPC walks up to the player (ms). */
 export const NPC_ALERT_MS = 600;
+
+/** Shop quantity picker (M9): Right / Left change the quantity by this much (Up / Down by 1). */
+export const QTY_BIG_STEP = 10;

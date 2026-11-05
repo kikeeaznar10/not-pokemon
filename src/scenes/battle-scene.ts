@@ -15,7 +15,10 @@
  *   accuracy beside it; team list with icons, names and HP (fainted greyed). B goes back to the main
  *   menu from every sub-menu; in the main menu B does nothing. The forced switch after a faint cannot
  *   be cancelled (the player must pick someone; there is always someone alive in that phase).
- *   Objeto shows "Pronto" until M9.
+ * - Objeto (M9): the battle items in the bag with "x{n}" (`itemMenu`; greyed when no target would accept
+ *   it); a heal / revive item then asks for a team member (`itemTargetMenu`, greyed when it would do
+ *   nothing), a buff goes on the active flexymon. Using it plays the round (`chooseAction` `item`: the
+ *   item is consumed and the opponent acts). No battle items → "No tienes objetos…". B goes back a step.
  * - Catching (M7): after a won wild battle (and `canCatch()`), "¿Te llevas a {name}?" shows in the
  *   prompt panel with a ChoiceBox *Llevármelo* / *Dejarlo* (B = Dejarlo). Taking it runs
  *   `takeFlexymon` (`src/logic/merge.ts`: added to the team, to storage when the team is full, or merged)
@@ -51,6 +54,9 @@ import {
 import {
   attackMenu,
   catchMessages,
+  itemMenu,
+  itemNeedsTarget,
+  itemTargetMenu,
   mainMenu,
   teamMenu,
   viewSteps,
@@ -78,8 +84,11 @@ export interface BattleSceneData {
   npcId?: string;
 }
 
-/** What the battle screen is doing. `catch`: the Llevármelo / Dejarlo choice after a wild win (M7). */
-export type BattleUi = 'anim' | 'main' | 'attack' | 'team' | 'catch' | 'end';
+/**
+ * What the battle screen is doing. `catch`: the Llevármelo / Dejarlo choice after a wild win (M7);
+ * `item` / `item_target`: the Objeto list and its target list (M9).
+ */
+export type BattleUi = 'anim' | 'main' | 'attack' | 'team' | 'item' | 'item_target' | 'catch' | 'end';
 
 /** One side as shown (for the E2E hooks). `hp`/`maxHp` are the logic numbers, `shownHp` the bar's. */
 export interface BattleSideView {
@@ -327,7 +336,7 @@ export class BattleScene extends Phaser.Scene {
             case 'attack':
               return this.openAttacks();
             case 'item':
-              return this.itemsSoon();
+              return this.openItems();
             case 'switch':
               return this.openTeam(false);
             case 'flee':
@@ -403,11 +412,75 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
-  /** Objeto before M9: a "Pronto" message, then back to the main menu. */
-  private itemsSoon(): void {
-    this.ui = 'anim';
+  /** Objeto (M9): the battle items in the bag. B goes back to the main menu. */
+  private openItems(initial = 0): void {
+    const data = getGameData();
+    const options = itemMenu(this.battle, data, t);
     this.prompt.setVisible(false);
-    this.dialog.open([t('battle.item_soon')], { onClose: () => this.openMain(1) });
+    this.info.setVisible(false);
+    if (options.length === 0) {
+      this.ui = 'anim';
+      this.dialog.open([t('battle.no_items')], { onClose: () => this.openMain(1) });
+      return;
+    }
+    this.ui = 'item';
+    this.menu.open(
+      options.map((o) => ({
+        label: o.label,
+        enabled: o.enabled,
+        icon: data.items.get(o.id)?.sprite,
+        right: o.countText,
+      })),
+      {
+        x: 0,
+        y: 0,
+        width: GAME_WIDTH,
+        height: GAME_HEIGHT,
+        cols: 1,
+        rowH: 26,
+        title: t('battle.item_title'),
+      },
+      {
+        initial,
+        onChoose: (i) => {
+          const opt = i === null ? undefined : options[i];
+          if (!opt) return this.openMain(1);
+          const item = data.items.get(opt.id);
+          if (item && itemNeedsTarget(item)) return this.openItemTarget(opt.id, i ?? 0);
+          this.act({ type: 'item', itemId: opt.id, targetUid: activeFlexymon(this.battle, 'player').uid });
+        },
+      },
+    );
+  }
+
+  /** Pick the team member a heal / revive item goes on. B goes back to the item list. */
+  private openItemTarget(itemId: string, itemIndex: number): void {
+    const data = getGameData();
+    const options = itemTargetMenu(this.battle, itemId, data, t);
+    this.ui = 'item_target';
+    this.menu.open(
+      options.map((o) => ({ label: o.label, enabled: o.enabled, icon: o.icon, right: o.hpText })),
+      {
+        x: 0,
+        y: 0,
+        width: GAME_WIDTH,
+        height: GAME_HEIGHT,
+        cols: 1,
+        rowH: 26,
+        title: t('battle.item_target', { item: data.items.get(itemId)?.name ?? itemId }),
+      },
+      {
+        initial: Math.max(
+          0,
+          options.findIndex((o) => o.enabled),
+        ),
+        onChoose: (i) => {
+          const opt = i === null ? undefined : options[i];
+          if (!opt) return this.openItems(itemIndex);
+          this.act({ type: 'item', itemId, targetUid: opt.id });
+        },
+      },
+    );
   }
 
   /**

@@ -1,7 +1,7 @@
 // M5 "Done when": adding a new talker to npcs.json makes it appear and talk with no code change;
 // wandering NPCs never leave their rectangle; the player can never end up inside an NPC. Plus: the
-// dialogue box types, A reveals then advances, the arrow/`more` flag, the voice, healer/storage
-// placeholders and the ChoiceBox.
+// dialogue box types, A reveals then advances, the arrow/`more` flag, the voice, the healer/storage
+// talk order (M9 replaced the "[curar]"/"[caja]" placeholders with the real heal and storage box) and the ChoiceBox.
 // Extra NPCs are injected by intercepting `data/npcs.json` (no code or shipped data changes).
 // The shipped becario wanders in the same rectangle, so three wanderers share it with the player. Since M8
 // an enemy walks out of its rectangle to challenge the player, so this test serves it as a talker.
@@ -187,7 +187,7 @@ test('a talker added to npcs.json appears, turns to the player and talks through
   expect(errors).toEqual([]);
 });
 
-test('healer and storage NPCs show their placeholder actions', async ({ page }) => {
+test('healer heals before its dialogue; storage opens the box after it (M9)', async ({ page }) => {
   await patchData(page, [
     npc({
       id: 'enfermera_test',
@@ -201,19 +201,22 @@ test('healer and storage NPCs show their placeholder actions', async ({ page }) 
 
   await page.keyboard.press('ArrowUp');
   await standing(page, { facing: 'up' });
-  await pressA(page, { page: 0, full: '[curar]' });
+  await pressA(page, { page: 0, full: 'Tus flexymon están como nuevos.' });
   await pressA(page, { page: 0, typed: true });
   await pressA(page, { page: 1, full: '¡Ya estás como nuevo!' });
   await pressA(page, { typed: true });
   await pressA(page, null);
+  await standing(page, { facing: 'up' });
 
   await page.keyboard.press('ArrowRight');
   await standing(page, { facing: 'right', x: 15 });
   await pressA(page, { page: 0, full: 'Aquí guardas tus cosas.' });
   await pressA(page, { typed: true });
-  await pressA(page, { page: 1, full: '[caja]' });
-  await pressA(page, { typed: true });
   await pressA(page, null);
+  await expect.poll(() => hook(page, 'storage')).not.toBeNull();
+  await nextFrames(page);
+  await page.keyboard.press('x');
+  await expect.poll(() => hook(page, 'storage')).toBeNull();
   await standing(page, { x: 15, y: 10 });
 });
 

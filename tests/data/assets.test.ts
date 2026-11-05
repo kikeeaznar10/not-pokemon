@@ -8,8 +8,8 @@ describe('collectAssets', () => {
     const result = validateGameData(validFiles());
     if (!result.ok) throw new Error('fixture invalid');
     const { images, sounds } = collectAssets(result.data);
-    // 3 flexymon × 3 sprites + 6 items + 2 NPCs.
-    expect(images).toHaveLength(17);
+    // 3 flexymon × 3 sprites + 6 items + 5 NPCs (M9 added the healer, storage and shopkeeper).
+    expect(images).toHaveLength(20);
     expect(images).toContain('assets/sprites/flexymon/portatil_icon.png');
     expect(images).toContain('assets/sprites/items/lata.png');
     expect(images).toContain('assets/sprites/npcs/becario.png');

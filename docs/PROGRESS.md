@@ -14,7 +14,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M6 — Battle scene
 - [x] M7 — Wild encounters, catching and merging
 - [x] M8 — Enemy NPCs
-- [ ] M9 — Items, team, storage, shops and healing
+- [x] M9 — Items, team, storage, shops and healing
 - [ ] M10 — Start menu and saving
 - [ ] M11 — Title screen, intro and secret names
 - [ ] M12 — Mobile controls and minimap
@@ -239,6 +239,35 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - For M9/M10: the game state's `npcs` and `euros` are live (session); M10 just saves them. `loseBattle` heals
   through `healParty`; M9's healer can reuse it.
 
+### M9
+
+- Built: battle Objeto (`itemMenu` / `itemTargetMenu` in `battle-view.ts`: items "x{n}", heal/revive ask for a team
+  member, buffs go on the active one; the round runs through the existing `chooseAction` `item`, so the item is
+  consumed and the opponent acts); `ShopScene` (Comprar / Vender / Salir, icon + price lists, quantity picker 1 … the
+  most money and bag allow, Up/Down ±1, Right/Left ±`QTY_BIG_STEP` 10, Sí/No confirmation, money box; rules in
+  `logic/shop.ts`, money in `economy.ts`); `StorageScene` (Equipo / Caja columns, A moves, last-member and slot rules
+  via `logic/storage-box.ts` → `team.ts`, scrolling); healer (heals team + storage, "Tus flexymon están como
+  nuevos.", then its dialogue); pure `useFieldItem(state, data, itemId, targetUid?)` in `logic/field-items.ts`
+  (tested; M10's Mochila calls it). NPCs added to `test_house`: recepcionista (healer, 1, 4), informático
+  (storage, 8, 4), tendero (shopkeeper `tienda_alboraya`, 8, 6) with placeholder sprites.
+- Auto-save: there is no save store before M10, so the healer and leaving a shop emit `save:request`
+  (`healer` / `shop`) on the event bus; M10 must listen to it and save (hook `saveRequests()` records them).
+  Shop and Storage are overlay scenes launched over the overworld, which pauses until `overlay:closed`.
+- Files outside the M9 list (none is given): `src/logic/{field-items,shop,storage-box}.ts`, `battle-view.ts`,
+  `talk.ts`, `constants.ts`, `core/events.ts` (`save:request`, `overlay:closed`), `ui/grid-menu.ts` (long lists
+  scroll — the sell list and battle items can outgrow the frame), `config/game.ts`, `overworld-scene.ts`,
+  `battle-scene.ts`, `main.ts` (hooks `items`, `setItems`, `setParty`, `useFieldItem`, `shop`, `storage`,
+  `saveRequests`; overworld hooks also answer while it is paused), `es.json` (placeholders `npc.healer_placeholder`,
+  `npc.storage_placeholder`, `battle.item_soon` removed), READMEs. Tests changed on purpose: `m5-dialogue.spec.ts`
+  checks the real healer message and that the storage box opens (were the "[curar]"/"[caja]" placeholders),
+  `m6-battle.spec.ts` checks Objeto opens the item list and B returns (was "Pronto"), `talk.test.ts`, the asset
+  count (`assets.test.ts`) and `m1-data.spec.ts`'s NPC count (5) follow the new content.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m9-items.spec.ts`): 3 Cafés with 200 € →
+  50 € and 6 Cafés, selling one → 75 € (+25); Regleta says "No tienes suficiente dinero."; B backs out of picker,
+  list and shop; a Café in battle shows "Usas Café con Portátil." / "recupera 20 PS." then the wild Ratón attacks,
+  and 2 Cafés are left after fleeing; the box refuses to empty the team and to exceed 2 slots; the healer heals
+  team and storage and requests a save. Unit tests: `field-items`, `shop`, `storage-box`, battle-view items.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -250,6 +279,21 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M9 (safe assumptions in brackets)
+
+- [ ] "Auto-save" after healing comes before saving exists (M10). [`save:request` event; M10 saves on it.]
+- [ ] Healer message wording and order. ["Tus flexymon están como nuevos." (`healer.done`), shown after the heal
+  and before the NPC's dialogue, as the plan's "heals the team, then says its dialogue".]
+- [ ] Can field items target the storage box? [No: team only (`not_in_team`), the field menu only shows the team.]
+  Can a buff item marked `"field"` be used outside battle? [No: refused, it would last no turns.]
+- [ ] Shop details not in the plan: B in the picker goes back to the list; the picker does not wrap; the sell list
+  shows key items greyed ("—") instead of hiding them; an unaffordable item stays selectable and says "No tienes
+  suficiente dinero."; purchases are capped by bag room (99) as well as money; no goodbye line when leaving.
+- [ ] Storage: a moved flexymon goes to the end of the other column; the box needs no Sí/No confirmation; fainted
+  flexymon can be moved (shown greyed).
+- [ ] Shop and storage NPCs live in `test_house` with the healer (plan: healer and storage there; the shopkeeper had
+  no map before). [All three in `test_house` until M14 places the real shops.]
 
 ### Raised in M8 (safe assumptions in brackets)
 

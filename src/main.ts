@@ -19,6 +19,10 @@ import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
 import { ERROR_SCENE, type ErrorScene } from './scenes/error-scene';
 import { OVERWORLD_SCENE, type NpcView, type OverworldScene } from './scenes/overworld-scene';
 import type { NpcStates } from './logic/npc-state';
+import { useFieldItem, type FieldItemUse } from './logic/field-items';
+import type { Inventory } from './logic/inventory';
+import { SHOP_SCENE, type ShopScene, type ShopView } from './scenes/shop-scene';
+import { STORAGE_SCENE, type StorageScene, type StorageView } from './scenes/storage-scene';
 import { PRELOAD_SCENE, type PreloadScene } from './scenes/preload-scene';
 import type { ChoiceState } from './ui/choice-box';
 import type { DialogState } from './ui/dialog-box';
@@ -119,11 +123,44 @@ export interface E2EHooks {
   setEuros(n: number): void;
   /** Enemy NPC states in the game state (M8): id → `ready` / `cooldown` (missing = `ready`). */
   npcStates(): NpcStates;
+  /** The bag in the game state (M9): item id → count. */
+  items(): Inventory;
+  /** Replace the bag (M9). */
+  setItems(items: Inventory): void;
+  /**
+   * Replace team, storage and/or team slots with fresh flexymon of these species (M9; `currentHp` optional).
+   * Fields left out stay as they are.
+   */
+  setParty(party: {
+    team?: { speciesId: string; currentHp?: number }[];
+    storage?: { speciesId: string; currentHp?: number }[];
+    teamSlots?: number;
+  }): void;
+  /** Use an item outside battle through `useFieldItem` (M9): the result's `use`, or the refusal reason. */
+  useFieldItem(itemId: string, targetUid?: string): FieldItemUse | { error: string };
+  /** The open shop screen (M9): ui, mode, euros, menu, item, quantity, total, prompt, message; else `null`. */
+  shop(): ShopView | null;
+  /** The open storage box (M9): column, cursor, species per column, team slots, message; else `null`. */
+  storage(): StorageView | null;
+  /** Reasons of every `save:request` since the page loaded (M9: `healer`, `shop`). */
+  saveRequests(): string[];
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
+  // Running, or paused under a Shop / Storage overlay (M9).
   const overworld = (): OverworldScene | null =>
-    game.scene.isActive(OVERWORLD_SCENE) ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene) : null;
+    game.scene.isActive(OVERWORLD_SCENE) || game.scene.isPaused(OVERWORLD_SCENE)
+      ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene)
+      : null;
+  const saveRequests: string[] = [];
+  events.on('save:request', ({ reason }) => saveRequests.push(reason));
+  const fresh = (members: { speciesId: string; currentHp?: number }[]): FlexymonInstance[] =>
+    members.map((m) => {
+      const species = getGameData().flexymon.get(m.speciesId);
+      if (!species) throw new Error(`unknown species "${m.speciesId}"`);
+      const inst = createInstance(species, rng);
+      return m.currentHp === undefined ? inst : { ...inst, currentHp: m.currentHp };
+    });
   const preload = (): PreloadScene => game.scene.getScene(PRELOAD_SCENE) as PreloadScene;
   const hooks: E2EHooks = {
     activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
@@ -152,16 +189,11 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     failedAssets: () => [...preload().failed],
     hasTexture: (key) => game.textures.exists(key),
     hasSound: (key) => game.cache.audio.exists(key),
-    playerTile: () =>
-      game.scene.isActive(OVERWORLD_SCENE)
-        ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene).playerTile()
-        : null,
+    playerTile: () => overworld()?.playerTile() ?? null,
     currentMusic: () => music.currentKey(),
     debugMode: () =>
       game.scene.isActive(DEBUG_SCENE) ? (game.scene.getScene(DEBUG_SCENE) as DebugScene).mode : null,
-    overworldLocked: () =>
-      game.scene.isActive(OVERWORLD_SCENE) &&
-      (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene).isLocked(),
+    overworldLocked: () => overworld()?.isLocked() ?? false,
     npcs: () => overworld()?.npcList() ?? [],
     dialogue: () => overworld()?.dialogState() ?? null,
     openChoice: (options) => overworld()?.openChoice(options),
@@ -172,16 +204,7 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     battle: () =>
       game.scene.isActive(BATTLE_SCENE) ? (game.scene.getScene(BATTLE_SCENE) as BattleScene).view() : null,
     team: () => structuredClone(gameState().team),
-    setTeam: (members) => {
-      const data = getGameData();
-      const team = members.map((m) => {
-        const species = data.flexymon.get(m.speciesId);
-        if (!species) throw new Error(`setTeam: unknown species "${m.speciesId}"`);
-        const inst = createInstance(species, rng);
-        return m.currentHp === undefined ? inst : { ...inst, currentHp: m.currentHp };
-      });
-      setGameState({ ...gameState(), team });
-    },
+    setTeam: (members) => setGameState({ ...gameState(), team: fresh(members) }),
     party: () => {
       const gs = gameState();
       return structuredClone({ team: gs.team, storage: gs.storage, teamSlots: gs.teamSlots });
@@ -197,6 +220,28 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     euros: () => gameState().euros,
     setEuros: (n) => setGameState({ ...gameState(), euros: n }),
     npcStates: () => ({ ...gameState().npcs }),
+    items: () => ({ ...gameState().items }),
+    setItems: (items) => setGameState({ ...gameState(), items: { ...items } }),
+    setParty: (p) => {
+      const gs = gameState();
+      setGameState({
+        ...gs,
+        ...(p.team ? { team: fresh(p.team) } : {}),
+        ...(p.storage ? { storage: fresh(p.storage) } : {}),
+        ...(p.teamSlots !== undefined ? { teamSlots: p.teamSlots } : {}),
+      });
+    },
+    useFieldItem: (itemId, targetUid) => {
+      const r = useFieldItem(gameState(), getGameData(), itemId, targetUid);
+      if (!r.ok) return { error: r.reason };
+      setGameState(r.state);
+      return r.use;
+    },
+    shop: () =>
+      game.scene.isActive(SHOP_SCENE) ? (game.scene.getScene(SHOP_SCENE) as ShopScene).view() : null,
+    storage: () =>
+      game.scene.isActive(STORAGE_SCENE) ? (game.scene.getScene(STORAGE_SCENE) as StorageScene).view() : null,
+    saveRequests: () => [...saveRequests],
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

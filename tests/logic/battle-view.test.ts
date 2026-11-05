@@ -12,6 +12,9 @@ import {
   attackMenu,
   catchMessages,
   hpColor,
+  itemMenu,
+  itemNeedsTarget,
+  itemTargetMenu,
   mainMenu,
   teamMenu,
   viewSteps,
@@ -259,5 +262,61 @@ describe('battle-view: catching (M7)', () => {
       '¡Ratón se ha fusionado! PS +3',
     ]);
     expect(catchMessages({ type: 'maxed', uid: 'u' }, 'Ratón', t)).toEqual(['Ratón ya está al máximo']);
+  });
+});
+
+describe('battle-view: Objeto lists (M9)', () => {
+  it('lists battle items in the bag with counts; greyed when no target accepts it', () => {
+    const s = createBattle([inst('portatil', 'p', { currentHp: 10 })], [inst('raton', 'w')], 'wild', {
+      cafe: 3,
+      regleta: 1,
+      redbull: 2,
+    });
+    expect(itemMenu(s, data, t).map((o) => [o.id, o.label, o.countText, o.enabled])).toEqual([
+      ['cafe', 'Café', 'x3', true],
+      ['redbull', 'Lata energética', 'x2', true],
+    ]);
+    expect(itemMenu(s, data, t)[0]!.description).toBe('Recupera 20 PS.');
+    const full = createBattle([inst('portatil', 'p')], [inst('raton', 'w')], 'wild', { cafe: 1 });
+    expect(itemMenu(full, data, t)[0]!.enabled).toBe(false); // nobody to heal
+  });
+
+  it('targets: team members the item would help; buffs need no target', () => {
+    const s = createBattle(
+      [
+        inst('portatil', 'p'),
+        inst('teclado', 't', { currentHp: 5 }),
+        inst('raton', 'down', { currentHp: 0 }),
+      ],
+      [inst('raton', 'w')],
+      'wild',
+      { cafe: 1 },
+    );
+    expect(itemTargetMenu(s, 'cafe', data, t).map((o) => [o.id, o.enabled, o.hpText])).toEqual([
+      ['p', false, 'PS 40/40'],
+      ['t', true, 'PS 5/38'],
+      ['down', false, `PS 0/${data.flexymon.get('raton')!.stats.hp}`],
+    ]);
+    expect(itemNeedsTarget(data.items.get('cafe')!)).toBe(true);
+    expect(itemNeedsTarget(data.items.get('redbull')!)).toBe(false);
+  });
+
+  it('a Café in battle shows "Usas Café con Portátil", the heal, then the opponent attacks', () => {
+    const s = createBattle([inst('portatil', 'p', { currentHp: 10 })], [inst('raton', 'w')], 'wild', {
+      cafe: 1,
+    });
+    const step = chooseAction(
+      s,
+      { type: 'item', itemId: 'cafe', targetUid: 'p' },
+      {
+        data,
+        rng: scriptedRng({ pick: [0], int: [1], float: [1] }),
+      },
+    );
+    expect(texts(viewSteps(step.events, ctx(s)))).toEqual([
+      'Usas Café con Portátil.',
+      'Portátil recupera 20 PS.',
+      '¡Ratón salvaje usa Pulsación!',
+    ]);
   });
 });

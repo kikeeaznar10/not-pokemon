@@ -1,6 +1,7 @@
 # data — game content JSON
 
-The nine files from docs/PLAN.md › Config specification. Validated at boot by the zod schemas in
+The nine files from docs/PLAN.md › Config specification, plus `intro.json` (M11, the title image and the
+new-game intro script). Validated at boot by the zod schemas in
 `src/data/schemas/` (one per file) plus cross-reference checks; any error shows the red ErrorScene as
 `file › JSON path › message`. After adding asset paths, run `npm run placeholders`.
 
@@ -23,6 +24,16 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
 - `start.json`: euros 0–999 999, `teamSlots` 1–6, item counts 1–99, spawn/respawn `{ map, x, y, facing }`.
 - `secret-names.json`: names may not collide after normalising (case, accents, spaces; ñ is kept).
 - `car.json`: at least one pair of two item ids.
+- `intro.json` (M11): `titleImage` (PNG, 512 × 288), `jingle` (sound played at the handover), `coworker`
+  `{ name, sprite, voice, x, y, facing }` (stands on the `start.json › spawn` map; exists only in the intro) and
+  `steps`, run in order, the player starting on `start.json › spawn`:
+  `{ "type": "fade_in", "ms" }`, `{ "type": "wait", "ms" }` (ms 0–10 000),
+  `{ "type": "walk", "actor": "player" | "coworker", "path": ["up", …] }` (one tile per direction),
+  `{ "type": "face", "actor", "facing" }`, `{ "type": "say", "lines": [...] }` (the coworker speaks; `{name}` = the
+  player's name, `{starter}` = the starter's name) and exactly one `{ "type": "handover" }` (jingle + "¡Recibes a
+  {starter}!", then the secret name's items and message). Boot checks: the coworker's tile and every tile walked
+  onto are walkable, and no walk enters the other actor's tile. Control starts where the script leaves the player
+  (the shipped script: two tiles up from the spawn, (15, 8) on `test`); walk the coworker out of view at the end.
 
 Current content (minimal): 3 flexymon, 6 attacks, 6 items, 5 NPCs (M9 added the office healer
 `recepcionista_oficina`, the storage NPC `informatico_caja` and the shopkeeper `tendero_alboraya`, all in `test_house`), 3 zones (`test`, `test_house`, `test_east`;

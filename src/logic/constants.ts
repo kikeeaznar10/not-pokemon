@@ -91,3 +91,9 @@ export const VOLUME_STEPS = 10;
 
 /** Options (M10): the "Guardando…" icon shows this long after every auto-save (ms). */
 export const SAVE_ICON_MS = 600;
+
+/** Name entry (M11): the player's name has at most this many characters. */
+export const NAME_MAX_LENGTH = 10;
+
+/** Title (M11): "Pulsa START" blinks with this half-period (ms). */
+export const TITLE_BLINK_MS = 500;

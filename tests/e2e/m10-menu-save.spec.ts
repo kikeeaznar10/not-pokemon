@@ -88,13 +88,16 @@ function watchErrors(page: Page): string[] {
   return errors;
 }
 
-/** Wait for the title, press Start and wait until the player stands free in the overworld. */
+/** Wait for the title, quick-start (continue / new game, M11) and wait until the player stands free in the overworld. */
 async function enterGame(page: Page, expected: Partial<Tile> = {}): Promise<void> {
   await page.waitForFunction(
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  await page.keyboard.press('Enter');
+  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  await page.waitForFunction(() =>
+    (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
+  );
   await standing(page, expected);
 }
 
@@ -163,7 +166,7 @@ async function readMessages(page: Page): Promise<string[]> {
   }
 }
 
-/** Reload the page and continue the saved game (Start on the title). */
+/** Reload the page and continue the saved game (quick start on the title). */
 async function reloadAndContinue(page: Page, expected: Partial<Tile>): Promise<void> {
   await page.reload();
   await enterGame(page, expected);
@@ -500,7 +503,10 @@ test('debug "Borrar partida" deletes the save and the next start is a new game',
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
   expect(await stored(page, SAVE_KEY)).toBeNull();
-  await page.keyboard.press('Enter');
+  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  await page.waitForFunction(() =>
+    (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
+  );
   await standing(page, { map: 'test', x: 15, y: 10 });
   expect(await hook(page, 'euros')).toBe(200);
 });

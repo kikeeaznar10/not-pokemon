@@ -15,6 +15,11 @@
  *
  * Keyboard (docs/PLAN.md › Locked decisions): arrows/WASD move, Z = A, X = B, Enter = Start, M = map.
  * F2 = `debug` (only used by the DebugScene). No gamepad.
+ *
+ * Text mode (M11, name entry): while {@link Input.setTextMode} is on, a key that types one character
+ * (`KeyboardEvent.key` of length 1: letters, digits, space…) is queued as text and does NOT press its
+ * action, so Z / X / WASD / M type letters; Backspace is queued as `'\b'`. Arrows, Enter and F2 keep their
+ * actions. Scenes read the queue with {@link Input.takeTyped}.
  */
 
 /** Every action the game understands. `debug` is a developer key (F2), not a game control. */
@@ -44,6 +49,17 @@ export const KEY_BINDINGS: Readonly<Record<string, Action>> = {
   F2: 'debug',
 };
 
+/** Keys that keep their action in text mode (everything else that types a character is text). */
+const TEXT_MODE_ACTION_KEYS: Readonly<Record<string, true>> = {
+  ArrowUp: true,
+  ArrowDown: true,
+  ArrowLeft: true,
+  ArrowRight: true,
+  Enter: true,
+  NumpadEnter: true,
+  F2: true,
+};
+
 /** Holds the state of every action. Use the shared {@link input}; tests create their own. */
 export class Input {
   /** Source ids (`key:KeyW`, `touch:a`…) currently down, per action. */
@@ -54,6 +70,9 @@ export class Input {
   private current = new Set<Action>();
   /** Held directions, most recent last. */
   private dirOrder: Direction[] = [];
+  /** Text mode (M11): typed characters are queued instead of pressing actions. */
+  private textMode = false;
+  private typed: string[] = [];
 
   /** True while the action is held. */
   isDown(action: Action): boolean {
@@ -110,8 +129,39 @@ export class Input {
     this.dirOrder = this.dirOrder.filter((d) => d !== action);
   }
 
-  /** A keyboard key went down; returns true if the key is bound (the caller then prevents default). */
-  keyDown(code: string): boolean {
+  /** Switch text mode on or off (M11); the queue is emptied either way. */
+  setTextMode(on: boolean): void {
+    this.textMode = on;
+    this.typed = [];
+  }
+
+  /** True while text mode is on. */
+  get isTextMode(): boolean {
+    return this.textMode;
+  }
+
+  /** Characters typed since the last call (`'\b'` = Backspace), oldest first; empties the queue. */
+  takeTyped(): string[] {
+    const out = this.typed;
+    this.typed = [];
+    return out;
+  }
+
+  /**
+   * A keyboard key went down; returns true if the key is bound or (text mode) typed, so the caller prevents
+   * the default. `key` is `KeyboardEvent.key`, used only in text mode.
+   */
+  keyDown(code: string, key?: string): boolean {
+    if (this.textMode && key !== undefined && !(code in TEXT_MODE_ACTION_KEYS)) {
+      if (code === 'Backspace') {
+        this.typed.push('\b');
+        return true;
+      }
+      if ([...key].length === 1) {
+        this.typed.push(key);
+        return true;
+      }
+    }
     const action = KEY_BINDINGS[code];
     if (!action) return false;
     this.press(action, `key:${code}`);
@@ -150,10 +200,10 @@ export interface KeyboardTarget {
 export function bindKeyboard(target: KeyboardTarget, service: Input = input): void {
   target.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.repeat) {
-      if (KEY_BINDINGS[e.code]) e.preventDefault();
+      if (KEY_BINDINGS[e.code] || service.isTextMode) e.preventDefault();
       return;
     }
-    if (service.keyDown(e.code)) e.preventDefault();
+    if (service.keyDown(e.code, e.key)) e.preventDefault();
   });
   target.addEventListener('keyup', (e: KeyboardEvent) => {
     if (service.keyUp(e.code)) e.preventDefault();

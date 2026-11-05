@@ -183,4 +183,33 @@ describe('schemas: one broken fixture per rule', () => {
     });
     expect(errors.map((e) => e.split(' › ')[0])).toEqual(['flexymon.json', 'car.json']);
   });
+
+  it('intro (M11): exactly one handover, walk paths not empty, known step types and actors', () => {
+    expect(errorsAfter((f) => f['intro.json'].steps.push({ type: 'handover' }))).toEqual([
+      'intro.json › steps › needs exactly one "handover" step (found 2)',
+    ]);
+    expect(
+      errorsAfter(
+        (f) =>
+          (f['intro.json'].steps = f['intro.json'].steps.filter(
+            (s: { type: string }) => s.type !== 'handover',
+          )),
+      ),
+    ).toEqual(['intro.json › steps › needs exactly one "handover" step (found 0)']);
+    expect(errorsAfter((f) => (f['intro.json'].steps[1].path = []))).toEqual([
+      'intro.json › steps[1].path › needs at least one direction',
+    ]);
+    expect(errorsAfter((f) => (f['intro.json'].steps[1].actor = 'jefe'))[0]).toMatch(
+      /^intro\.json › steps\[1\]\.actor › /,
+    );
+    expect(errorsAfter((f) => f['intro.json'].steps.push({ type: 'dance' }))[0]).toMatch(
+      /^intro\.json › steps\[8\]\.type › /,
+    );
+    expect(errorsAfter((f) => (f['intro.json'].titleImage = 'assets/ui/title.jpg'))).toEqual([
+      'intro.json › titleImage › must be a path like assets/….png',
+    ]);
+    expect(errorsAfter((f) => (f['intro.json'].steps[4].lines = []))).toEqual([
+      'intro.json › steps[4].lines › needs at least one line',
+    ]);
+  });
 });

@@ -23,7 +23,7 @@ const readState = (page: Page) =>
     };
     const game = w.__GAME__;
     const texts: TextInfo[] = game.scene
-      .getScene('Preload')
+      .getScene('Title')
       .children.list.filter((o) => o.type === 'Text')
       .map((o) => ({ text: o.text ?? '', x: o.x, y: o.y }));
     return {
@@ -38,10 +38,11 @@ const readState = (page: Page) =>
 
 test('shows "Flexymon" centred on a 16:9 canvas that scales with the window', async ({ page }, testInfo) => {
   await page.goto('/');
-  // Since M1 Preload first loads every asset; the title shows once it is complete.
+  // Since M1 Preload first loads every asset; since M11 the TitleScene shows once it is complete.
   await page.waitForFunction(
     () =>
-      (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
+      (window as unknown as { __E2E__?: { currentScene(): string | null } }).__E2E__?.currentScene() ===
+      'Title',
   );
 
   const state = await readState(page);
@@ -50,10 +51,11 @@ test('shows "Flexymon" centred on a 16:9 canvas that scales with the window', as
   // pixelArt: true turns antialiasing off (nearest-neighbour scaling, no blur).
   expect(state.antialias).toBe(false);
   expect(state.roundPixels).toBe(true);
-  // Since M3 the title also shows the "Pulsa START" hint below it (Start enters the overworld).
+  // M11: the TitleScene shows the logo near the top and the "Pulsa START" hint near the bottom, both centred
+  // (over the office picture; M0–M10 drew them in Preload at y 144 / 192).
   expect(state.texts).toEqual([
-    { text: 'Flexymon', x: 256, y: 144 },
-    { text: 'Pulsa START', x: 256, y: 192 },
+    { text: 'Flexymon', x: 256, y: 48 },
+    { text: 'Pulsa START', x: 256, y: 248 },
   ]);
 
   const checkCanvas = async () => {

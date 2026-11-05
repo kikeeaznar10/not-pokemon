@@ -8,11 +8,14 @@ import { BootScene } from '../scenes/boot-scene';
 import { DebugScene } from '../scenes/debug-scene';
 import { ErrorScene } from '../scenes/error-scene';
 import { HudScene } from '../scenes/hud-scene';
+import { IntroScene } from '../scenes/intro-scene';
+import { NameScene } from '../scenes/name-scene';
 import { MenuScene } from '../scenes/menu-scene';
 import { OverworldScene } from '../scenes/overworld-scene';
 import { PreloadScene } from '../scenes/preload-scene';
 import { ShopScene } from '../scenes/shop-scene';
 import { StorageScene } from '../scenes/storage-scene';
+import { TitleScene } from '../scenes/title-scene';
 
 /** Size of one map tile in base pixels. */
 export const TILE_SIZE = 32;
@@ -38,12 +41,15 @@ export function createGameConfig(parent: string): Phaser.Types.Core.GameConfig {
     // Scenes never read the keyboard: the Input service (src/core/input.ts) does. Pointer/touch stay on.
     input: { keyboard: false },
     // No physics: movement is grid-based and handled by the game rules.
-    // Shop, Storage (M9) and Menu (M10) draw over the paused overworld. Hud (M10, the save icon) draws over
+    // Title, Name and Intro (M11) come before the overworld. Shop, Storage (M9) and Menu (M10) draw over the paused overworld. Hud (M10, the save icon) draws over
     // every game scene; DebugScene is last so it draws on top of everything.
     scene: [
       BootScene,
       PreloadScene,
       ErrorScene,
+      TitleScene,
+      NameScene,
+      IntroScene,
       OverworldScene,
       BattleScene,
       ShopScene,

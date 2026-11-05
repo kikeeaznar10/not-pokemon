@@ -65,7 +65,10 @@ async function enterOverworld(page: Page, url = '/'): Promise<string[]> {
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  await page.keyboard.press('Enter');
+  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  await page.waitForFunction(() =>
+    (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
+  );
   await standing(page, { map: 'test', x: 15, y: 10 });
   return errors;
 }

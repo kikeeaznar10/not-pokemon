@@ -44,7 +44,8 @@ test('valid data loads every asset and reaches Preload complete with no errors',
     () => (window as unknown as { __E2E__?: Hooks }).__E2E__?.preloadComplete() === true,
   );
 
-  expect(await hook(page, 'currentScene')).toBe('Preload');
+  // M11: Preload hands over to the TitleScene as soon as it is complete.
+  await expect.poll(() => hook(page, 'currentScene')).toBe('Title');
   expect(await hook(page, 'dataSummary')).toEqual({
     flexymon: 3,
     attacks: 6,

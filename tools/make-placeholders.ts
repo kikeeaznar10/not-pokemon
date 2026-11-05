@@ -7,7 +7,8 @@
  * - Any JSON string value of the form `assets/….png|ogg|mp3` is an asset path (relative to `public/`).
  * - PNG: a solid colour square (colour derived from the file name) with the name written on it
  *   in a tiny pixel font. Size: `*_front` / `*_back` 64×64, `*_icon` and `sprites/items/` 16×16,
- *   anything else 32×32.
+ *   anything else 32×32. `assets/ui/title.png` (M11) is a 512×288 pixel office scene instead (sky, a building
+ *   with windows and a door, a path), so the title screen has something to show until real art exists.
  * - Audio: an `.ogg` or `.mp3` path produces BOTH `<name>.ogg` and `<name>.mp3` (0.2 s beep made with
  *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`).
  *
@@ -88,6 +89,69 @@ export function pngSize(assetPath: string): number {
   if (/_(front|back)$/.test(name)) return 64;
   if (/_icon$/.test(name) || assetPath.includes('sprites/items/')) return 16;
   return 32;
+}
+
+/** Path of the title image (M11, `intro.json › titleImage`); it gets {@link makeTitlePng} instead of a square. */
+export const TITLE_IMAGE = 'assets/ui/title.png';
+
+/** Title placeholder size: the whole 512 × 288 screen. */
+export const TITLE_SIZE = { width: 512, height: 288 } as const;
+
+/**
+ * Build the title placeholder: a simple pixel-art office front (sky, hills, a building with a sign strip,
+ * windows and a door, a path, grass). Real art replaces the file at the same path.
+ */
+export function makeTitlePng(width: number = TITLE_SIZE.width, height: number = TITLE_SIZE.height): Buffer {
+  const png = new PNG({ width, height });
+  const rect = (x0: number, y0: number, w: number, h: number, rgb: [number, number, number]): void => {
+    for (let y = Math.max(0, y0); y < Math.min(height, y0 + h); y++)
+      for (let x = Math.max(0, x0); x < Math.min(width, x0 + w); x++) {
+        const i = (y * width + x) * 4;
+        png.data[i] = rgb[0];
+        png.data[i + 1] = rgb[1];
+        png.data[i + 2] = rgb[2];
+        png.data[i + 3] = 255;
+      }
+  };
+  const ground = Math.round(height * 0.72);
+  // Sky in four bands, then grass.
+  const sky: [number, number, number][] = [
+    [96, 152, 232],
+    [120, 172, 240],
+    [148, 192, 244],
+    [176, 212, 248],
+  ];
+  sky.forEach((c, i) => rect(0, Math.floor((ground * i) / 4), width, Math.ceil(ground / 4) + 1, c));
+  rect(0, ground, width, height - ground, [88, 168, 72]);
+  for (let x = 0; x < width; x += 16) rect(x + ((x / 16) % 2) * 8, ground + 6, 4, 2, [64, 136, 56]);
+  // Building.
+  const bw = Math.round(width * 0.5);
+  const bh = Math.round(height * 0.42);
+  const bx = Math.round((width - bw) / 2);
+  const by = ground - bh;
+  rect(bx - 4, by - 4, bw + 8, bh + 4, [64, 64, 80]);
+  rect(bx, by, bw, bh, [232, 228, 216]);
+  rect(bx, by, bw, 18, [216, 72, 56]); // sign strip
+  const cols = 6;
+  const winW = 24;
+  const gap = Math.floor((bw - cols * winW) / (cols + 1));
+  for (let row = 0; row < 2; row++)
+    for (let c = 0; c < cols; c++) {
+      const wx = bx + gap + c * (winW + gap);
+      const wy = by + 28 + row * 30;
+      if (row === 1 && (c === 2 || c === 3)) continue; // door below
+      rect(wx - 2, wy - 2, winW + 4, 20, [64, 64, 80]);
+      rect(wx, wy, winW, 16, [168, 208, 240]);
+      rect(wx, wy, winW / 2, 6, [208, 232, 248]);
+    }
+  const dw = 36;
+  const dx = Math.round(width / 2 - dw / 2);
+  rect(dx - 2, ground - 44, dw + 4, 44, [64, 64, 80]);
+  rect(dx, ground - 42, dw, 42, [136, 96, 64]);
+  rect(dx + dw - 8, ground - 22, 3, 3, [240, 208, 96]);
+  // Path to the door.
+  rect(dx - 6, ground, dw + 12, height - ground, [208, 192, 152]);
+  return PNG.sync.write(png);
 }
 
 /** Stable RGB colour derived from a string. */
@@ -233,7 +297,10 @@ function main(): void {
       created.push(assetPath);
       if (dryRun) continue;
       mkdirSync(dirname(file), { recursive: true });
-      writeFileSync(file, makePng(basename(assetPath, ext), pngSize(assetPath)));
+      writeFileSync(
+        file,
+        assetPath === TITLE_IMAGE ? makeTitlePng() : makePng(basename(assetPath, ext), pngSize(assetPath)),
+      );
     } else {
       const stem = assetPath.slice(0, -ext.length);
       for (const audioExt of AUDIO_EXTS) {

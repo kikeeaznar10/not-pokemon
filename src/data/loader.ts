@@ -1,5 +1,5 @@
 /**
- * Content loader: fetches the nine JSON files from `public/data/`, parses them, validates each with
+ * Content loader: fetches the content JSON files (`DATA_FILES`) from `public/data/`, parses them, validates each with
  * its zod schema, runs the cross-reference checks and builds the frozen {@link GameData}. With
  * `mapsBaseUrl` it then fetches every zone's Tiled map, parses it (`src/data/tiled.ts`) and runs the
  * map checks (`src/data/map-checks.ts`).
@@ -62,6 +62,7 @@ export function validateGameData(files: RawFiles): LoadResult {
     start: parsed['start.json'],
     secretNames: parsed['secret-names.json'],
     car: parsed['car.json'],
+    intro: parsed['intro.json'],
   } as RawGameData; // Safe: every entry passed its schema above.
 
   const refErrors = checkCrossRefs(raw);

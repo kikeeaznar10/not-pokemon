@@ -135,4 +135,24 @@ describe('maps at load time (M4)', () => {
       'maps/test_east.tmj › (root) › could not load map (HTTP 404)',
     ]);
   });
+
+  it('the intro (M11) may not walk into walls or into the other actor', async () => {
+    // The player walks left from (15, 8) into the wall at x = 11.
+    expect(
+      await load((file, json) => {
+        if (file === 'intro.json')
+          json.steps.push({ type: 'walk', actor: 'player', path: ['left', 'left', 'left', 'left'] });
+      }),
+    ).toEqual(['intro.json › steps[8] › player: tile (11, 8) on map "test" is not walkable']);
+    // The coworker starts on the wall.
+    const errors = await load((file, json) => {
+      if (file === 'intro.json') Object.assign(json.coworker, { x: 11, y: 12 });
+    });
+    expect(errors).toContain('intro.json › coworker › coworker: tile (11, 12) on map "test" is not walkable');
+    expect(
+      await load((file, json) => {
+        if (file === 'intro.json') json.steps[3].path.push('down'); // into the player at (15, 8)
+      }),
+    ).toEqual(["intro.json › steps[3] › coworker would stand on the other actor's tile (15, 8)"]);
+  });
 });

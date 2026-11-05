@@ -126,4 +126,56 @@ describe('Input service', () => {
     handlers.blur!();
     expect(i.isDown('b')).toBe(false);
   });
+
+  it('text mode (M11): typed keys are queued instead of pressing actions; arrows and Enter still act', () => {
+    const i = new Input();
+    i.setTextMode(true);
+    expect(i.isTextMode).toBe(true);
+    expect(i.keyDown('KeyZ', 'z')).toBe(true);
+    expect(i.keyDown('KeyX', 'X')).toBe(true);
+    expect(i.keyDown('Space', ' ')).toBe(true);
+    expect(i.keyDown('Backspace', 'Backspace')).toBe(true);
+    expect(i.keyDown('Semicolon', 'ñ')).toBe(true);
+    i.beginFrame();
+    expect(i.isDown('a')).toBe(false);
+    expect(i.isDown('b')).toBe(false);
+    expect(i.takeTyped()).toEqual(['z', 'X', ' ', '\b', 'ñ']);
+    expect(i.takeTyped()).toEqual([]);
+    // Releasing a key that typed does not touch the actions.
+    i.keyUp('KeyZ');
+    expect(i.keyDown('ArrowLeft', 'ArrowLeft')).toBe(true);
+    expect(i.keyDown('Enter', 'Enter')).toBe(true);
+    i.beginFrame();
+    expect(i.justPressed('left')).toBe(true);
+    expect(i.justPressed('start')).toBe(true);
+    expect(i.takeTyped()).toEqual([]);
+    // Keys that type nothing (Shift, F-keys) are neither text nor bound.
+    expect(i.keyDown('ShiftLeft', 'Shift')).toBe(false);
+    // Off again: Z is the A button; the queue was emptied.
+    i.keyDown('KeyQ', 'q');
+    i.setTextMode(false);
+    expect(i.takeTyped()).toEqual([]);
+    i.keyDown('KeyZ', 'z');
+    i.beginFrame();
+    expect(i.justPressed('a')).toBe(true);
+  });
+
+  it('bindKeyboard passes the typed key in text mode and prevents its default', () => {
+    const handlers: Record<string, (e?: KeyboardEvent) => void> = {};
+    const target = {
+      addEventListener: (type: string, fn: (e?: KeyboardEvent) => void) => {
+        handlers[type] = fn;
+      },
+    } as KeyboardTarget;
+    const i = new Input();
+    bindKeyboard(target, i);
+    i.setTextMode(true);
+    let prevented = 0;
+    const ev = (code: string, key: string, repeat = false) =>
+      ({ code, key, repeat, preventDefault: () => (prevented += 1) }) as unknown as KeyboardEvent;
+    handlers.keydown!(ev('Space', ' '));
+    handlers.keydown!(ev('KeyQ', 'q', true)); // repeat: ignored but no page scroll / typing default
+    expect(i.takeTyped()).toEqual([' ']);
+    expect(prevented).toBe(2);
+  });
 });

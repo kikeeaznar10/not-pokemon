@@ -34,7 +34,7 @@ const expectStanding = async (page: Page, expected: Partial<Tile>): Promise<void
   expect(await tile(page)).toMatchObject({ ...expected, moving: false });
 };
 
-/** Load the game, press Start on the title and wait for the overworld. */
+/** Load the game, quick-start from the title (M11) and wait for the overworld. */
 async function enterOverworld(page: Page, query = ''): Promise<string[]> {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -46,7 +46,10 @@ async function enterOverworld(page: Page, query = ''): Promise<string[]> {
     () =>
       (window as unknown as { __E2E__?: { preloadComplete(): boolean } }).__E2E__?.preloadComplete() === true,
   );
-  await page.keyboard.press('Enter');
+  // M11: the title replaced "Pulsa START"; quickStart() continues a save or starts at the spawn (no intro).
+  await page.waitForFunction(() =>
+    (window as unknown as { __E2E__: { quickStart(): boolean } }).__E2E__.quickStart(),
+  );
   await expect.poll(() => tile(page)).toMatchObject({ map: 'test', x: 15, y: 10, facing: 'down' });
   return errors;
 }

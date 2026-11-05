@@ -31,6 +31,9 @@ import type { Inventory } from './logic/inventory';
 import { SHOP_SCENE, type ShopScene, type ShopView } from './scenes/shop-scene';
 import { STORAGE_SCENE, type StorageScene, type StorageView } from './scenes/storage-scene';
 import { PRELOAD_SCENE, type PreloadScene } from './scenes/preload-scene';
+import { TITLE_SCENE, type TitleScene, type TitleView } from './scenes/title-scene';
+import { NAME_SCENE, type NameScene, type NameView } from './scenes/name-scene';
+import { INTRO_SCENE, type IntroScene, type IntroView } from './scenes/intro-scene';
 import type { ChoiceState } from './ui/choice-box';
 import type { DialogState } from './ui/dialog-box';
 
@@ -180,6 +183,19 @@ export interface E2EHooks {
   musicGain(): number;
   /** Merge these fields into the game state (M10 tests: bonuses, NPC states…); the position follows the player. */
   patchState(patch: Partial<GameState>): void;
+  /** The title screen (M11): ui, menu options and cursor, confirm box, whether a save exists; else `null`. */
+  title(): TitleView | null;
+  /**
+   * From the title (M11): continue a valid save, or start a new game with the default name at the spawn,
+   * skipping the menu, the name and the intro (what Start did before M11). False if the title is not showing.
+   */
+  quickStart(): boolean;
+  /** The name screen (M11): name, cursor, cell labels, message; else `null`. */
+  nameEntry(): NameView | null;
+  /** The intro (M11): step, actors' tiles, dialogue, handover, secret message, jingle plays; else `null`. */
+  intro(): IntroView | null;
+  /** The player's name in the game state (M11). */
+  playerName(): string;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -290,6 +306,17 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     setOptions: (o) => setOptions(o),
     musicGain: () => music.getGain(),
     patchState: (patch) => setGameState({ ...gameState(), ...structuredClone(patch) }),
+    title: () =>
+      game.scene.isActive(TITLE_SCENE) ? (game.scene.getScene(TITLE_SCENE) as TitleScene).view() : null,
+    quickStart: () =>
+      game.scene.isActive(TITLE_SCENE)
+        ? (game.scene.getScene(TITLE_SCENE) as TitleScene).quickStart()
+        : false,
+    nameEntry: () =>
+      game.scene.isActive(NAME_SCENE) ? (game.scene.getScene(NAME_SCENE) as NameScene).view() : null,
+    intro: () =>
+      game.scene.isActive(INTRO_SCENE) ? (game.scene.getScene(INTRO_SCENE) as IntroScene).view() : null,
+    playerName: () => gameState().player.name,
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

@@ -132,5 +132,19 @@
   "options.speed_fast": "rápida",
   "options.hint": "Izq./Der.: cambiar · B: volver",
   "save.saving": "Guardando…",
-  "debug.delete_save": "Borrar partida"
+  "debug.delete_save": "Borrar partida",
+  "title.continue": "Continuar",
+  "title.new_game": "Nueva partida",
+  "title.confirm_new": "Ya hay una partida guardada. ¿Empezar una nueva? Se perderá la anterior.",
+  "title.yes": "Sí",
+  "title.no": "No",
+  "title.broken_save": "No se pudo leer la partida guardada.",
+  "name.title": "¿Cómo te llamas?",
+  "name.letters": "ABCDEFGHIJKLMNÑOPQRSTUVWXYZáéíóú",
+  "name.space": "␣",
+  "name.delete": "Borrar",
+  "name.ok": "OK",
+  "name.hint": "Escribe o elige letras · START: OK",
+  "name.empty": "Escribe al menos una letra.",
+  "intro.received": "¡Recibes a {starter}!"
 }

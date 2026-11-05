@@ -14,7 +14,7 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | --- | --- | --- |
 | `window.__GAME__` | M0 | The `Phaser.Game` instance (`isBooted`, `scene`, `config`…). |
 | `window.__E2E__.activeScenes()` | M0 | Keys of the active scenes, bottom to top. |
-| `window.__E2E__.currentScene()` | M0 | Key of the topmost active scene, ignoring the Debug overlay (`'Preload'` on the title, `'Overworld'` after Start), or `null`. |
+| `window.__E2E__.currentScene()` | M0 | Key of the topmost active scene, ignoring the Debug overlay and the HUD (`'Title'` on the title since M11, `'Name'`, `'Intro'`, `'Overworld'`…), or `null`. |
 | `window.__E2E__.dataSummary()` | M1 | Counts per content collection, or `null` if data is not loaded. |
 | `window.__E2E__.dataErrors()` | M1 | The `file › path › message` lines shown by the ErrorScene (`[]` if not shown). |
 | `window.__E2E__.preloadComplete()` | M1 | True once Preload loaded every asset. |
@@ -50,8 +50,16 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.musicGain()` | M10 | The music option's gain applied to the music player (0–1). |
 | `window.__E2E__.patchState(patch)` | M10 | Merge fields into the game state (e.g. `team` with bonuses, `npcs`); the position follows the player. |
 | `window.__E2E__.npcStates()` | M8 | Enemy NPC states from the game state: `{ id: 'ready' \| 'cooldown' }` (an NPC never beaten is missing = `ready`). |
+| `window.__E2E__.title()` | M11 | The title screen: `{ ui ('press'/'menu'/'confirm'/'leaving'), options (menu labels), cursor, confirm (Sí/No box or null), hasSave, brokenSave, logo, hint }`, else `null`. |
+| `window.__E2E__.quickStart()` | M11 | On the title: continue a valid save, else a new game with the default name at `start.json › spawn`, skipping menu, name and intro (what Start did before M11). `false` if the title is not showing. |
+| `window.__E2E__.nameEntry()` | M11 | The name screen: `{ name, cursor, cell (label under the cursor), cells (labels), message, rects (cell rectangles in base pixels) }`, else `null`. |
+| `window.__E2E__.intro()` | M11 | The intro: `{ step, type, name, player, coworker ({ x, y, facing }), dialogue, handedOver, secretMessage, jinglePlays }`, else `null`. |
+| `window.__E2E__.playerName()` | M11 | The player's name in the game state. |
 
-To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
+To reach the overworld in a test: wait for `preloadComplete()`, then call `quickStart()` until it returns true
+(`page.waitForFunction(() => window.__E2E__.quickStart())`; M11 — the title needs a frame to start). To test the
+real flow, press Enter on the title and choose from its menu (`tests/e2e/m11-title-intro.spec.ts`). In the name
+screen letter keys (Z and X too) type text, so press Enter for OK.
 Keys pressed with Playwright are seen on the next game frame: poll for the expected state
 (`expect.poll(...)`) instead of reading it right after the key press, and wait for one press to take effect
 before the next (two presses in one frame count once). After a warp, also wait for `overworldLocked()` to be false
@@ -69,7 +77,7 @@ Since M9 the overworld hooks (`playerTile`, `overworldLocked`, `npcs`, `dialogue
 is paused under the Shop or Storage scene; `battle().ui` can be `item` / `item_target`.
 `tests/e2e/m9-items.spec.ts` serves `start.json` with a spawn inside `test_house` next to the NPC under test.
 
-Since M10 every page load that reaches the overworld writes `flexymon.save.v1`, and the next Start on the title
+Since M10 every page load that reaches the overworld writes `flexymon.save.v1`, and the next quick start (or Continuar, M11) on the title
 continues that game: tests start with an empty `localStorage` (a new browser context per test), so only tests that
 reload see a save. `currentScene()` ignores the always-on `Hud` scene. `tests/e2e/m10-menu-save.spec.ts` reloads with
 `page.reload()` (the quiet save on `pagehide` keeps the exact tile) and writes garbage with `localStorage.setItem`.

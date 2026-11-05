@@ -16,7 +16,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M8 — Enemy NPCs
 - [x] M9 — Items, team, storage, shops and healing
 - [x] M10 — Start menu and saving
-- [ ] M11 — Title screen, intro and secret names
+- [x] M11 — Title screen, intro and secret names
 - [ ] M12 — Mobile controls and minimap
 - [ ] M13 — The Audi to Murcia
 - [ ] M14 — Build the world
@@ -302,6 +302,33 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   `resetGameState()` + `gameState()`. Move the load from Preload to the Title. Sound effects pass
   `{ volume: sfxVolume() }`.
 
+### M11
+
+- Built: `TitleScene` (the pixel office from `intro.json › titleImage`, logo, blinking "Pulsa START"; menu *Continuar*
+  only with a valid save, *Nueva partida* asking Sí / No over a save), `NameScene` (grid A–Z, Ñ, á é í ó ú, space,
+  Borrar, OK from `es.json › name.letters`; max 10; physical keyboard through a new Input *text mode*; clicks/taps on
+  cells), `IntroScene` playing the new `public/data/intro.json` (schema `src/data/schemas/intro.ts`: `fade_in`,
+  `wait`, `walk`, `face`, `say`, one `handover`) on the `start.json › spawn` map; the handover plays the jingle, shows
+  "¡Recibes a Portátil!" and then the secret name's items and message. Pure rules: `logic/intro.ts`,
+  `logic/name-entry.ts`. Preload now hands over to the Title; the save is read there (M10 note).
+- Content: `intro.json` (10th data file; coworker "Compañera" walks down the path from (15, 3), control starts at
+  (15, 8) on `test`), placeholders `assets/ui/title.png` (512 × 288 office drawn by `npm run placeholders`),
+  `sprites/npcs/companera.png`, `audio/sfx/jingle_starter.{ogg,mp3}`. Boot checks the intro walks (`map-checks.ts`).
+- Files outside the M11 list: `src/core/input.ts` (text mode), `src/world/zone-map.ts` (map drawing moved out of the
+  Overworld so the Intro reuses it), `overworld-scene.ts`, `preload-scene.ts`, `config/game.ts`, data loader /
+  game-data / assets / map-checks, `constants.ts` (`NAME_MAX_LENGTH`, `TITLE_BLINK_MS`), `main.ts` (hooks `title`,
+  `quickStart`, `nameEntry`, `intro`, `playerName`), `tools/make-placeholders.ts` (title image), `es.json`, READMEs.
+  Tests changed on purpose: every e2e helper that pressed Enter on the old Preload title now calls `quickStart()`
+  (same behaviour: continue the save or new game at the spawn, no intro); `m0-title` reads the logo / hint from the
+  Title scene (new positions), `m1-data` expects `Title` after Preload; `assets.test.ts` counts the new assets.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m11-title-intro.spec.ts`): title → name
+  "Ana" → intro → free movement in about 9–23 s (under 60 s), starting state from `start.json` and saved; "PACO" gets
+  +10 Cafés and the message, "Pacoo" does not; Continuar hidden with no save and restores position and euros;
+  Nueva partida over a save: No keeps it, Sí replaces it; name screen keyboard / grid / limit / empty name.
+- For M12: B in the name screen only comes from touch (the X key types "x" there); touch buttons must call
+  `input.press/release`, which text mode does not affect. For M14: replace the intro script and coworker for the real
+  office (`intro.json`), and keep the coworker's final walk out of view.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -314,6 +341,24 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
 
+### Raised in M11 (safe assumptions in brackets)
+
+- [ ] Where does the intro happen, and who is the coworker? [On the `start.json › spawn` map (still the test map)
+  with an intro-only coworker defined in `intro.json`; the plan's "walk into the office" waits for M14's real office.
+  The intro starts on the spawn tile and control begins where the script leaves the player.]
+- [ ] Where is the title image path configured? [`intro.json › titleImage`, so it is content, not code.]
+- [ ] The letter grid mixes upper-case A–Z / Ñ with lower-case á é í ó ú, as the plan lists them. [Kept literally; the
+  physical keyboard types any case. A Mayús/minús key would be easy to add.]
+- [ ] Physical keyboard vs. the A/B keys in the name screen. [Letter keys type, including Z and X, so on a keyboard
+  Enter is OK and Backspace deletes; arrows still move the grid cursor. B (touch, M12) deletes, and on an empty name
+  goes back to the title.] Which characters are allowed? [Letters of any alphabet and single spaces; no digits.]
+- [ ] Does "Pulsa START" lead straight to the game when there is no save? [No: the menu shows with only Nueva
+  partida, so the player sees the choice.] Confirmation wording and default. [Sí / No with the cursor on No.]
+- [ ] A broken save on the title. [Only Nueva partida, plus the line "No se pudo leer la partida guardada."]
+- [ ] The secret-name message order. ["¡Recibes a Portátil!" first, then the secret name's message, in the same
+  dialogue; items capped at 99 each like any gain.]
+- [ ] No music during the intro. [Zone music starts when the overworld enters the map (`zone:entered`), as before.]
+
 ### Raised in M10 (safe assumptions in brackets)
 
 - [ ] "Reload at any time" vs. the list of save points. [Also a quiet save on page hide / close, not shown with
@@ -323,8 +368,9 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Opciones ranges and defaults are not in the plan. [Volumes 0–10, both start at 10 (the music's mix level stays
   `MUSIC_VOLUME` 0.6 at 10); text 15 / 30 / 60 characters per second, normal = the old `TEXT_CPS`.]
 - [ ] Mochila: are items not usable outside battle listed? [Yes, greyed with their description; key items too.]
-- [ ] Until M11 the game still starts from the "Pulsa START" screen (needed for the audio unlock); Start continues a
+- [x] Until M11 the game still starts from the "Pulsa START" screen (needed for the audio unlock); Start continues a
   valid save. [The plan's "load straight into the game" is read as "no Continuar / Nueva partida choice yet".]
+  **Resolved in M11:** the Title scene offers Continuar / Nueva partida.
 - [ ] The "Guardando…" icon look. [Small dark box top right, `HudScene`, until real UI art.]
 
 ### Raised in M9 (safe assumptions in brackets)
@@ -403,8 +449,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Does `solid = true` block only in the `collision` layer, or in any layer? [Any tile layer.]
 - [ ] What is the `spawns` object layer for? [Named spawn points; `default` is the zone spawn, used when no
   position is given (and by M4's debug teleport). New games still use `start.json › spawn`.]
-- [ ] Until the Title scene (M11), how does the player get from the title to the game? [The Preload screen says
-  "Pulsa START"; Start, A or a tap enters the overworld at `start.json › spawn`.]
+- [x] Until the Title scene (M11), how does the player get from the title to the game? [The Preload screen says
+  "Pulsa START"; Start, A or a tap enters the overworld at `start.json › spawn`.] **Resolved in M11.**
 - [ ] The player sprite path (`assets/sprites/player.png`) is not in any content file. [Constant in
   `src/world/player.ts`; move it to config if the plan wants several player sprites.]
 
@@ -422,8 +468,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 
 ### Raised in M1 (safe assumptions in brackets)
 
-- [ ] The plan does not say what a "Preload-complete screen" looks like. [It still shows the "Flexymon" title
-  until the Title scene exists (M11).]
+- [x] The plan does not say what a "Preload-complete screen" looks like. [It still shows the "Flexymon" title
+  until the Title scene exists (M11).] **Resolved in M11:** Preload only shows the loading bar, then the Title.
 - [ ] Should key items be allowed a price, or should `key` imply `price: null`? [Not enforced; only shops are
   checked.]
 

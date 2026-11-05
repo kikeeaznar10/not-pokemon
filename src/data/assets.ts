@@ -16,7 +16,7 @@ export interface AssetList {
   sounds: SoundAsset[];
 }
 
-/** Collect sprites (flexymon, items, NPCs) and sounds (cries, attacks, voices, zone music). */
+/** Collect sprites (flexymon, items, NPCs, M11 title + coworker) and sounds (cries, attacks, voices, zone music, M11 jingle). */
 export function collectAssets(data: GameData): AssetList {
   const images = new Set<string>();
   const sounds = new Set<string>();
@@ -31,6 +31,9 @@ export function collectAssets(data: GameData): AssetList {
   }
   for (const a of data.attacks.values()) sounds.add(a.sound);
   for (const z of data.zones.values()) sounds.add(z.music);
+  // M11: the title image, the intro coworker and the handover jingle.
+  images.add(data.intro.titleImage).add(data.intro.coworker.sprite);
+  sounds.add(data.intro.coworker.voice).add(data.intro.jingle);
 
   return {
     images: [...images].sort(),

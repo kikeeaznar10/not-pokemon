@@ -1,6 +1,13 @@
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
-import { collectAssetPaths, makePng, pngSize, wrapLabel } from '../../tools/make-placeholders';
+import {
+  collectAssetPaths,
+  makePng,
+  makeTitlePng,
+  pngSize,
+  TITLE_IMAGE,
+  wrapLabel,
+} from '../../tools/make-placeholders';
 
 describe('make-placeholders', () => {
   it('collects asset paths from nested JSON', () => {
@@ -39,5 +46,12 @@ describe('make-placeholders', () => {
     expect(png.width).toBe(64);
     expect(png.height).toBe(64);
     expect(png.data[3]).toBe(255);
+  });
+
+  it('M11: the title placeholder fills the 512 × 288 screen, opaque', () => {
+    expect(TITLE_IMAGE).toBe('assets/ui/title.png');
+    const png = PNG.sync.read(makeTitlePng());
+    expect([png.width, png.height]).toEqual([512, 288]);
+    for (let i = 3; i < png.data.length; i += 4 * 997) expect(png.data[i]).toBe(255);
   });
 });

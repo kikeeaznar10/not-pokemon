@@ -6,6 +6,8 @@
  * - every warp points at an existing zone, and every tile it can land on there is walkable (for edge
  *   warps that keep the row/column, every tile of the rectangle is checked).
  * - every encounter rectangle's `group` exists in its zone's `encounters` in zones.json (M7).
+ * - the intro (M11, `intro.json`) plays on the `start.json › spawn` map: the coworker's start tile and every
+ *   tile either actor walks onto are walkable, and no walk enters the tile where the other actor stands.
  * {@link mapWarnings} lists the opposite case (a group in zones.json drawn on no rectangle): a warning,
  * not an error, so content can be added to zones.json before the map is drawn.
  * "Walkable" = inside the map and not solid (`src/data/tiled.ts`). Errors use the usual
@@ -17,6 +19,7 @@ import type { GameData } from './game-data';
 import type { MapPoint } from './schemas';
 import { isWalkable, type MapInfo } from './tiled';
 import { warpTargetTiles } from '../logic/warp';
+import { traceIntro } from '../logic/intro';
 
 /** Why a tile on `mapId` is not a valid place to stand, or `null` if it is. */
 function tileProblem(maps: ReadonlyMap<string, MapInfo>, mapId: string, x: number, y: number): string | null {
@@ -42,6 +45,23 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
   point('start.json', ['respawn'], data.start.respawn);
   point('car.json', ['toMurcia'], data.car.toMurcia);
   point('car.json', ['toValencia'], data.car.toValencia);
+
+  // M11: the intro script walks on the start map.
+  const { spawn } = data.start;
+  const { coworker } = data.intro;
+  const trace = traceIntro(data.intro.steps, spawn, coworker);
+  for (const v of trace.visits) {
+    const path: PropertyKey[] = v.step < 0 ? (v.actor === 'coworker' ? ['coworker'] : []) : ['steps', v.step];
+    if (v.step < 0 && v.actor === 'player') continue; // start.json › spawn is checked above.
+    const problem = tileProblem(maps, spawn.map, v.x, v.y);
+    if (problem) errors.push({ file: 'intro.json', path, message: `${v.actor}: ${problem}` });
+    else if (v.x === v.other.x && v.y === v.other.y)
+      errors.push({
+        file: 'intro.json',
+        path,
+        message: `${v.actor} would stand on the other actor's tile (${v.x}, ${v.y})`,
+      });
+  }
 
   for (const zone of data.zones.values()) {
     const info = maps.get(zone.id);

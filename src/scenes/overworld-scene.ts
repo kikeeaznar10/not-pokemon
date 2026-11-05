@@ -4,9 +4,9 @@
  *
  * - Start it with {@link OverworldData}: the zone id (a key of `zones.json`) and optionally the tile and
  *   facing; without a position the map's `default` spawn point is used.
- * - The map was loaded and checked at boot (`GameData.maps`); its JSON goes into Phaser's tilemap
- *   cache under the map path (e.g. `maps/test.tmj`). Tileset images and the player sheet are loaded by
- *   Preload.
+ * - The map was loaded and checked at boot (`GameData.maps`) and is drawn by `drawZoneMap`
+ *   (`src/world/zone-map.ts`, shared with the M11 IntroScene). Tileset images and the player sheet are
+ *   loaded by Preload.
  * - Layers: `ground` (depth 0), `deco` (1), the player (2), `above` (3); `collision` is never drawn.
  *   Blocking: solid tiles and the map edges, except off-map tiles covered by a step warp.
  * - Camera: follows the player, clamped to the map. A map smaller than the screen (interiors) is
@@ -89,7 +89,7 @@ import { healParty } from '../logic/team';
 import { blockedWithWarps, insideWarp, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
 import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
 import { DialogBox, type DialogState } from '../ui/dialog-box';
-import { cameraBounds } from '../world/camera';
+import { drawZoneMap } from '../world/zone-map';
 import { NpcActor, npcsOnMap } from '../world/npc';
 import { BATTLE_SCENE, type BattleSceneData } from './battle-scene';
 import { SHOP_SCENE, type ShopSceneData } from './shop-scene';
@@ -144,13 +144,6 @@ const BATTLE_FLASHES = 3;
 /** Longest frame time fed to movement (ms), so a stalled tab does not teleport the player. */
 const MAX_FRAME_MS = 250;
 
-/** Tile layers drawn, with their depth. */
-const DRAWN_LAYERS: [name: string, depth: number][] = [
-  ['ground', 0],
-  ['deco', 1],
-  ['above', 3],
-];
-
 /** The walking-around scene. */
 export class OverworldScene extends Phaser.Scene {
   private target!: OverworldData;
@@ -193,26 +186,8 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   create(): void {
-    const loaded = getGameData().maps.get(this.zone.id);
-    if (!loaded) throw new Error(`Overworld: map of "${this.zone.id}" not loaded`);
-    this.info = loaded.info as MapInfo;
+    this.info = drawZoneMap(this, this.zone);
     const info = this.info;
-    const file = this.zone.file;
-    if (!this.cache.tilemap.exists(file)) {
-      this.cache.tilemap.add(file, {
-        format: Phaser.Tilemaps.Formats.TILED_JSON,
-        data: structuredClone(loaded.json),
-      });
-    }
-
-    const map = this.make.tilemap({ key: file });
-    const tilesets = info.tilesetImages
-      .map((ts) => map.addTilesetImage(ts.name, ts.path))
-      .filter((ts): ts is Phaser.Tilemaps.Tileset => ts !== null);
-    for (const [name, depth] of DRAWN_LAYERS) {
-      if (map.getLayerIndex(name) === null) continue;
-      map.createLayer(name, tilesets)?.setDepth(depth);
-    }
     this.blocked = blockedWithWarps(info, info.warps, (x, y) => isBlocked(info, x, y));
 
     const spawn = findSpawn(info) ?? { x: 0, y: 0 };
@@ -227,9 +202,6 @@ export class OverworldScene extends Phaser.Scene {
     this.safeSteps = resetSafeSteps();
 
     const cam = this.cameras.main;
-    cam.setBackgroundColor(0x000000);
-    const b = cameraBounds(map.widthInPixels, map.heightInPixels);
-    cam.setBounds(b.x, b.y, b.width, b.height);
     cam.startFollow(this.player.sprite, true, 1, 1, -TILE_SIZE / 2, -TILE_SIZE / 2);
     const messages = this.target.messages ?? [];
     const showMessages = () => {

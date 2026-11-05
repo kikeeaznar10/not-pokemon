@@ -1,7 +1,8 @@
-/** The nine content files and the zod schema that validates each one. */
+/** The content files (nine from the plan, plus `intro.json` since M11) and the zod schema of each. */
 import { attacksFileSchema } from './attacks';
 import { carFileSchema } from './car';
 import { flexymonFileSchema } from './flexymon';
+import { introFileSchema } from './intro';
 import { itemsFileSchema } from './items';
 import { npcsFileSchema } from './npcs';
 import { secretNamesFileSchema } from './secret-names';
@@ -20,6 +21,7 @@ export const FILE_SCHEMAS = {
   'start.json': startFileSchema,
   'secret-names.json': secretNamesFileSchema,
   'car.json': carFileSchema,
+  'intro.json': introFileSchema,
 } as const;
 
 /** Name of one content file. */
@@ -32,6 +34,7 @@ export * from './attacks';
 export * from './car';
 export * from './common';
 export * from './flexymon';
+export * from './intro';
 export * from './items';
 export * from './npcs';
 export * from './secret-names';

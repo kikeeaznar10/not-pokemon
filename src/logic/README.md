@@ -22,6 +22,8 @@ caller's job (e.g. `parseSave` returns `warnings[]`). Tunable numbers: `constant
 | `npc-state.ts` | `ready` / `cooldown`, sight line with blockers, approach path, cooldown end (Manhattan > 6 or other map), reset all. |
 | `save.ts` | `GameState`, zod `saveSchema`, `serializeSave`, `parseSave` (validate + migrate; never throws). |
 | `names.ts` | Name normalisation for secret names (M1). |
+| `name-entry.ts` | Name entry (M11): `typeChar` (letters and spaces only, max `NAME_MAX_LENGTH` 10, no leading / double space), `deleteChar`, `canConfirm` (needs a letter), `finalName` (trimmed), `nameGrid(letters)` (letter cells, space, Borrar, OK). |
+| `intro.ts` | New-game intro (M11): `fillIntroText` (`{name}`, `{starter}`), `findSecretName` (case / accent / space-insensitive, via `normalizeName`), `applySecretName` (items into the bag, capped per item), `traceIntro` (every tile both actors walk on, for the boot checks). |
 | `dialogue.ts` | Dialogue box rules (M5): word wrap, strings → pages (a string too long for one box continues on the next), typing at `TEXT_CPS` (M10: `typeTick(…, cps)` takes the text speed option's rate), voice every `VOICE_EVERY_CHARS` characters (1st, 4th, 7th…), A = reveal / next. |
 | `npc-wander.ts` | NPC movement (M5): random wait in `stepEveryMs`, one random tile inside the wander rectangle, never onto a blocked tile; both tiles count as taken during a step; talking pauses the NPC and turns it to the player. M8: `engage` / `forceStep` / `faceTo` walk an enemy up to the player; outside its rectangle an NPC only steps towards it (`distanceToArea`). RNG order documented in the file. |
 | `new-game.ts` | New-game state from `start.json` (M6): starter alone at full HP, euros, slots, items, spawn, no NPC states. |

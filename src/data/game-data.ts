@@ -2,7 +2,7 @@
  * The validated, frozen content of the game, with lookup maps by id
  * (`data.flexymon.get('portatil')`). Built once at boot by the loader; read anywhere via {@link getGameData}.
  */
-import type { Attack, Car, Intro, Item, Npc, SecretName, Species, Start, Zone } from './schemas';
+import type { Attack, Car, Intro, Item, Npc, SecretName, Sounds, Species, Start, Zone } from './schemas';
 import type { MapInfo } from './tiled';
 
 /** A zone's map: what the rules need (`info`, frozen) and the raw Tiled JSON (for Phaser to draw). */
@@ -26,6 +26,8 @@ export interface GameData {
   readonly car: Readonly<Car>;
   /** Title image and new-game intro script (M11, `intro.json`). */
   readonly intro: Readonly<Intro>;
+  /** Interface sounds by kind (M15, `sounds.json`). */
+  readonly sounds: Readonly<Sounds>;
   /** Zone id → its loaded map (M4). Empty when only the JSON content was validated (unit tests). */
   readonly maps: ReadonlyMap<string, LoadedMap>;
 }
@@ -42,6 +44,7 @@ export interface RawGameData {
   secretNames: SecretName[];
   car: Car;
   intro: Intro;
+  sounds: Sounds;
 }
 
 /** Recursively freeze plain objects and arrays. */
@@ -82,6 +85,7 @@ export function buildGameData(raw: RawGameData): GameData {
     secretNames: frozen.secretNames,
     car: frozen.car,
     intro: frozen.intro,
+    sounds: frozen.sounds,
     maps: frozenMap<LoadedMap>([]),
   });
 }

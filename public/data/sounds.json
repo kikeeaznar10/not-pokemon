@@ -1,0 +1,7 @@
+{
+  "cursor": "assets/audio/sfx/ui_cursor.ogg",
+  "confirm": "assets/audio/sfx/ui_confirm.ogg",
+  "cancel": "assets/audio/sfx/ui_cancel.ogg",
+  "error": "assets/audio/sfx/ui_error.ogg",
+  "money": "assets/audio/sfx/ui_money.ogg"
+}

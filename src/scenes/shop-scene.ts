@@ -16,11 +16,14 @@
  *   shop: it asks for an auto-save (`save:request` `shop`), emits `overlay:closed` and stops; the
  *   overworld resumes.
  * - The scene computes no price or limit: rows, limits and totals come from `src/logic/shop.ts`.
+ * - Sounds (M15): menus and the Sí / No box play their own; the picker plays `cursor` / `confirm` / `cancel`; a
+ *   refusal ("No tienes suficiente dinero.") plays `error`; a done purchase or sale plays `money`.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { events } from '../core/events';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { log } from '../core/log';
 import { gameState, setGameState } from '../core/session';
 import { getGameData } from '../data/game-data';
@@ -224,7 +227,10 @@ export class ShopScene extends Phaser.Scene {
   private pick(row: ShopRow): void {
     const mode = this.mode ?? 'buy';
     const err = rowError(mode, row, gameState().euros);
-    if (err) return this.say(t(`shop.${err}`), () => this.openList(mode, this.listCursor));
+    if (err) {
+      uiSound('error');
+      return this.say(t(`shop.${err}`), () => this.openList(mode, this.listCursor));
+    }
     this.row = row;
     this.quantity = 1;
     this.ui = 'quantity';
@@ -248,10 +254,17 @@ export class ShopScene extends Phaser.Scene {
     else if (input.justPressed('down')) delta = -1;
     else if (input.justPressed('right')) delta = QTY_BIG_STEP;
     else if (input.justPressed('left')) delta = -QTY_BIG_STEP;
-    else if (input.justPressed('a')) return this.confirm(row);
-    else if (input.justPressed('b')) return this.openList(this.mode ?? 'buy', this.listCursor);
+    else if (input.justPressed('a')) {
+      uiSound('confirm');
+      return this.confirm(row);
+    } else if (input.justPressed('b')) {
+      uiSound('cancel');
+      return this.openList(this.mode ?? 'buy', this.listCursor);
+    }
     if (delta !== 0) {
-      this.quantity = stepQuantity(this.quantity, delta, row.limit);
+      const next = stepQuantity(this.quantity, delta, row.limit);
+      if (next !== this.quantity) uiSound('cursor');
+      this.quantity = next;
       this.drawQuantity();
     }
   }
@@ -290,9 +303,11 @@ export class ShopScene extends Phaser.Scene {
         result.reason === 'not_enough_items' || result.reason === 'bad_quantity'
           ? 'not_for_sale'
           : result.reason;
+      uiSound('error');
       return this.say(t(`shop.${key}`), () => this.openList(mode, this.listCursor));
     }
     setGameState({ ...gs, euros: result.euros, items: result.items });
+    uiSound('money');
     log(`Shop: ${mode} ${this.quantity} ${row.id} for ${total}`);
     const text =
       mode === 'buy' ? t('shop.bought') : t('shop.sold', { n: this.quantity, item: row.name, total });

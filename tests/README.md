@@ -76,6 +76,11 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.fullscreenRequested()` | M12 | True once the first tap asked for fullscreen. |
 | `window.__E2E__.carTrip()` | M13 | The Audi trip while the Car scene runs: `{ to ('murcia' / 'valencia'), elapsedMs, skippable (a button would skip it), finished (ended, fading out), skipped, flipped (car faces left) }`, else `null`. The `finished` state lasts only one 200 ms fade, so check the outcome with `lastCarTrip()`. |
 | `window.__E2E__.lastCarTrip()` | M13 | The last trip that ended this page load (kept after the Car scene stopped): the `carTrip()` fields at the moment it ended (`finished: true`, `skipped`, `elapsedMs`), else `null`. |
+| `window.__E2E__.uiSounds()` | M15 | Interface sounds played since the page loaded, oldest first (`cursor` / `confirm` / `cancel` / `error` / `money`; the last 100). |
+| `window.__E2E__.lastUiSound()` | M15 | `{ kind, volume }` of the last interface sound (volume = the effects option, 0–1), else `null`. |
+| `window.__E2E__.audio()` | M15 | `{ unlockRequested (the first gesture asked to unlock), locked (Phaser's sound manager), contextState (Web Audio context, or `null`) }`. |
+| `window.__E2E__.debugReload()` | M15 | The debug menu's last "Recargar datos": `{ state: 'idle' / 'loading' / 'ok' / 'error', errors (formatted lines) }`; `null` when debugging is off. |
+| `window.__E2E__.atlasSprites()` | M15 | How many sprites Preload took from the sprite atlas (`0` without one). |
 | `window.__E2E__.minimap()` | M12 | The minimap in the overworld: `{ zone, shown (player's choice), visible (drawn), available (outdoors with an image), frame { x, y, width, height, scale } (base pixels), mapSize, tile, dot { x, y } (base pixels), dotOn (blink) }`, else `null`. |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then call `quickStart()` until it returns true
@@ -123,3 +128,8 @@ Add new helpers to the `E2EHooks` interface in `src/main.ts` and to this table.
 so NPC battles end the same way every time without seeds: Portátil wins in one blow unless it misses, and the boss's
 Ratón always wins. Since M8, `m5-dialogue.spec.ts`'s wander watch serves the shipped enemies as talkers (an enemy leaves
 its rectangle to challenge the player).
+
+`tests/e2e/m15-polish.spec.ts` (M15) checks the audio unlock and the interface sounds through `uiSounds()` (it waits
+for the expected sounds with `expect.poll`, since a key is handled on a later frame under load), and the debug menu
+(`?debug=1`): it serves `items.json` through `page.route`, changes it between two "Recargar datos" and finally serves
+broken JSON. Since M15 the E2E build (`npm run build`) includes the sprite atlas, so every spec runs with it.

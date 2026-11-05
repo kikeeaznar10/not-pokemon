@@ -1,4 +1,4 @@
-/** The content files (nine from the plan, plus `intro.json` since M11) and the zod schema of each. */
+/** The content files (nine from the plan, plus `intro.json` since M11 and `sounds.json` since M15) and the zod schema of each. */
 import { attacksFileSchema } from './attacks';
 import { carFileSchema } from './car';
 import { flexymonFileSchema } from './flexymon';
@@ -7,6 +7,7 @@ import { itemsFileSchema } from './items';
 import { npcsFileSchema } from './npcs';
 import { secretNamesFileSchema } from './secret-names';
 import { shopsFileSchema } from './shops';
+import { soundsFileSchema } from './sounds';
 import { startFileSchema } from './start';
 import { zonesFileSchema } from './zones';
 
@@ -22,6 +23,7 @@ export const FILE_SCHEMAS = {
   'secret-names.json': secretNamesFileSchema,
   'car.json': carFileSchema,
   'intro.json': introFileSchema,
+  'sounds.json': soundsFileSchema,
 } as const;
 
 /** Name of one content file. */
@@ -39,5 +41,6 @@ export * from './items';
 export * from './npcs';
 export * from './secret-names';
 export * from './shops';
+export * from './sounds';
 export * from './start';
 export * from './zones';

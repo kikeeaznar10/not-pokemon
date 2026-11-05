@@ -121,3 +121,30 @@ export const CAR_TRIP_MS = 5000;
 
 /** Car (M13): any button skips the trip once it has run this long (ms). */
 export const CAR_SKIP_AFTER_MS = 1000;
+
+/** Debug menu (M15): euros added by "Dar {n} €". */
+export const DEBUG_GIVE_EUROS = 1000;
+
+/** Debug menu (M15): how many of an item "Dar: {item}" adds per press (capped by `ITEM_COUNT_MAX`). */
+export const DEBUG_GIVE_ITEMS = 1;
+
+/**
+ * Accessibility (M15, plan task 4): flashing effects stay UNDER this many flashes per second. Checked for every
+ * flash and blink constant by `tests/logic/accessibility.test.ts` (`src/logic/accessibility.ts`).
+ */
+export const MAX_FLASHES_PER_SECOND = 3;
+
+/** Battle transition (M6): white screen flashes during `BATTLE_FLASH_MS` (M15: 2, was 3 — 5 per second). */
+export const BATTLE_FLASHES = 2;
+
+/** Dialogue box (M5): the "more" arrow blinks with this half-period (ms). */
+export const DIALOG_ARROW_BLINK_MS = 400;
+
+/** Battle (M6): a hit shakes the target sprite this many times, each `HIT_SHAKE_MS` there and back. */
+export const HIT_SHAKES = 3;
+
+/** Battle (M6): one hit shake, there and back (ms). */
+export const HIT_SHAKE_MS = 120;
+
+/** Battle (M15): a hit dims the target sprite ONCE, for this long (ms; it used to blink 3 times in 360 ms). */
+export const HIT_DIM_MS = 360;

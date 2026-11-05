@@ -212,4 +212,14 @@ describe('schemas: one broken fixture per rule', () => {
       'intro.json › steps[4].lines › needs at least one line',
     ]);
   });
+
+  it('sounds (M15): every interface sound is required, a sound path, no unknown kinds', () => {
+    expect(errorsAfter((f) => delete f['sounds.json'].money)[0]).toMatch(/^sounds\.json › money › /);
+    expect(errorsAfter((f) => (f['sounds.json'].cursor = 'assets/audio/sfx/tick.wav'))).toEqual([
+      'sounds.json › cursor › must be a path like assets/….ogg',
+    ]);
+    expect(errorsAfter((f) => (f['sounds.json'].beep = 'assets/audio/sfx/ui_cursor.ogg'))[0]).toMatch(
+      /^sounds\.json › /,
+    );
+  });
 });

@@ -27,7 +27,7 @@
  *   asks for an auto-save (`save:request` `battle`, M10), emits `battle:ended` and stops; the overworld
  *   wakes up on the same tile. Attack sounds play at the effects volume option (M10).
  * - Enemy NPCs (M8): started with `npcId`, a win runs `winAgainstNpc` (euros `+= rng.int(min, max)`,
- *   the NPC goes to `cooldown`) and shows "¡Has ganado {n} €!" (`battle.reward`) before leaving.
+ *   the NPC goes to `cooldown`) and shows "¡Has ganado {n} €!" (`battle.reward`, with the M15 `money` sound) before leaving.
  * - Losing (M8, wild or NPC): `loseBattle` applies the Losing rule to the game state (euros halved, team
  *   and storage fully healed, every NPC `ready`, player at `start.json › respawn`); the overworld then
  *   restarts at the respawn point.
@@ -39,6 +39,8 @@ import { events } from '../core/events';
 import { log } from '../core/log';
 import { rng } from '../core/rng';
 import { sfxVolume } from '../core/options';
+import { uiSound } from '../core/ui-sound';
+import { HIT_DIM_MS, HIT_SHAKES, HIT_SHAKE_MS } from '../logic/constants';
 import { gameState, setGameState } from '../core/session';
 import { getGameData } from '../data/game-data';
 import { t } from '../i18n';
@@ -134,7 +136,6 @@ const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   color: '#202028',
 };
 const SHOW_MS = 250;
-const HIT_MS = 60;
 const FAINT_MS = 300;
 const END_FADE_MS = 300;
 
@@ -281,7 +282,11 @@ export class BattleScene extends Phaser.Scene {
       case 'hit': {
         const sprite = this.sides[step.who].sprite;
         const x = HOME[step.who].x;
-        return this.tweenTo(sprite, { x: x + 6, alpha: 0.3 }, HIT_MS, 2, true).then(() => {
+        // M15: the sprite shakes HIT_SHAKES times but dims only once (flashes stay under 3 per second).
+        return Promise.all([
+          this.tweenTo(sprite, { x: x + 6 }, HIT_SHAKE_MS / 2, HIT_SHAKES - 1, true),
+          this.tweenTo(sprite, { alpha: 0.3 }, HIT_DIM_MS / 2, 0, true),
+        ]).then(() => {
           sprite.setPosition(x, HOME[step.who].y).setAlpha(1);
         });
       }
@@ -502,6 +507,7 @@ export class BattleScene extends Phaser.Scene {
       setGameState(won.state);
       log(`Battle: beat ${npc.id}, reward ${won.reward}`);
       this.ui = 'anim';
+      uiSound('money');
       this.dialog.open([t('battle.reward', { n: won.reward })], { onClose: () => this.leave(result) });
     } else if (result === 'win' && this.kind === 'wild' && canCatch()) this.offerCatch();
     else this.leave(result);

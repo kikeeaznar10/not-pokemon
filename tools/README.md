@@ -14,7 +14,9 @@ dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-ru
   to the right, on a transparent background.
 - Audio: an `.ogg` or `.mp3` path creates both `<name>.ogg` and `<name>.mp3`, a 0.2 s 880 Hz beep made with
   `ffmpeg` (libvorbis / libmp3lame); a name containing `engine` (M13, `car.json › sound`) gets a 1 s 90 Hz hum instead,
-  so it loops well during the car trip. If `ffmpeg` is not on the PATH, it copies the silent files in
+  so it loops well during the car trip. The interface sounds of `sounds.json` (M15: `ui_cursor`, `ui_confirm`,
+  `ui_cancel`, `ui_error`, `ui_money`) get short tones of their own pitch and length (`audioSource()`), so they can be
+  told apart. If `ffmpeg` is not on the PATH, it copies the silent files in
   `tools/fallback/` instead and says how many audio files are silent.
 - Minimaps (M12): every outdoor zone in either `zones.json` gets `assets/ui/minimap_<zone>.png`, drawn from its `.tmj`
   (`parseTiledMap` → `minimapCells`): 3 px per tile (`MINIMAP_TILE_PX`), solid tiles dark blue, `encounter` tiles
@@ -62,3 +64,12 @@ floor, `_` doormat (an interior's door, on its bottom row). Drawn over the map's
 | `encounters` | `[{ name, x, y, width, height, group, mode }]`: encounter rectangles (`group` must be in `zones.json`). |
 
 The tool checks the layout (equal row widths, known characters) and that doors and the car stand on `D` / `Aa`.
+
+## `npm run atlas` (`make-atlas.ts`, M15)
+
+Packs every content sprite (PNG paths under `assets/sprites/` in either content folder, at most 128 × 128) into one
+texture atlas: `public/assets/atlas/sprites.png` + `sprites.json` (Phaser JSON hash, each frame named by its asset
+path, 1 px padding, shelf packing 1024 px wide). Always rewritten; a build artifact ignored by git. `npm run build`
+runs it first, so production and E2E builds load one sprite image instead of ~70 (about 0.5 s less to the title on
+4G). Without it (`npm run dev` before any build) sprites load as separate files. `--dry-run` only prints the count.
+Run `npm run placeholders` first: missing files are skipped with a warning.

@@ -8,11 +8,13 @@
  *   last team member ("No puedes dejar tu equipo vacío.") and when the team is full ("Tu equipo está
  *   lleno."). Every move is written to the game state at once.
  * - B closes the box: emits `overlay:closed` and stops; the overworld resumes.
+ * - Sounds (M15): `cursor` on a move, `confirm` when a flexymon moves, `error` with a refusal, `cancel` on B.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { events } from '../core/events';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { log } from '../core/log';
 import { gameState, setGameState } from '../core/session';
 import { getGameData } from '../data/game-data';
@@ -97,11 +99,14 @@ export class StorageScene extends Phaser.Scene {
     }
     const party = gameState();
     const count = party[this.column].length;
-    if (input.justPressed('up')) this.moveCursor(this.cursor - 1);
-    else if (input.justPressed('down')) this.moveCursor(this.cursor + 1);
-    else if (input.justPressed('left') || input.justPressed('right')) {
+    if (input.justPressed('up') || input.justPressed('down')) {
+      const to = clampCursor(this.cursor + (input.justPressed('up') ? -1 : 1), count);
+      if (to !== this.cursor) uiSound('cursor');
+      this.moveCursor(to);
+    } else if (input.justPressed('left') || input.justPressed('right')) {
       const next = input.justPressed('left') ? 'team' : 'storage';
       if (next !== this.column) {
+        uiSound('cursor');
         this.column = next;
         this.moveCursor(this.cursor);
       }
@@ -124,10 +129,12 @@ export class StorageScene extends Phaser.Scene {
     if (!result.ok) {
       const key = result.reason === 'last_member' ? 'storage.last_member' : 'storage.team_full';
       if (result.reason === 'not_found') return;
+      uiSound('error');
       this.dialog.open([t(key)], { onClose: () => this.render() });
       return;
     }
     const { team, storage } = result.party;
+    uiSound('confirm');
     log(`Storage: moved from ${this.column} (${team.length} in team, ${storage.length} stored)`);
     setGameState({ ...gs, team, storage });
     this.moveCursor(this.cursor);
@@ -191,6 +198,7 @@ export class StorageScene extends Phaser.Scene {
 
   /** Leave: tell the overworld and stop. */
   private close(): void {
+    uiSound('cancel');
     this.open = false;
     log('Storage: close');
     events.emit('overlay:closed', { scene: STORAGE_SCENE });

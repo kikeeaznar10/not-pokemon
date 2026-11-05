@@ -22,8 +22,9 @@ describe('collectAssets', () => {
     expect(images).toContain('assets/sprites/items/lata.png');
     expect(images).toContain('assets/sprites/npcs/becario.png');
     // 3 cries + 6 attack sounds + 2 voices + 2 music (test, interior) + M11's jingle (the coworker reuses a voice)
-    // + M13's engine.
-    expect(sounds).toHaveLength(15);
+    // + M13's engine + M15's 5 interface sounds.
+    expect(sounds).toHaveLength(20);
+    expect(sounds.map((s) => s.key)).toContain('assets/audio/sfx/ui_money.ogg');
     expect(sounds.map((s) => s.key)).toContain('assets/audio/sfx/car_engine.ogg');
     expect(sounds.map((s) => s.key)).toContain('assets/audio/sfx/jingle_starter.ogg');
     expect(sounds).toContainEqual({

@@ -56,6 +56,9 @@ async function tap(page: Page, id: string, dir?: 'up' | 'down' | 'left' | 'right
   const c = await centre(page, id);
   const off = { up: [0, -52], down: [0, 52], left: [-52, 0], right: [52, 0] } as const;
   const [dx, dy] = dir ? off[dir] : [0, 0];
+  // M15: wait two frames first, as the keyboard press() helpers do since M7 — a menu or box ignores input on the
+  // frame it opens, and under load a tap could land in exactly that frame.
+  await frames(page, 2);
   await page.touchscreen.tap(c.x + dx, c.y + dy);
   await frames(page, 2);
 }
@@ -413,6 +416,8 @@ function expectedDot(m: NonNullable<ReturnType<E2EHooks['minimap']>>): { x: numb
 async function walk(page: Page, key: string, expected: Partial<Tile>): Promise<void> {
   await page.keyboard.press(key);
   await expect.poll(() => hook(page, (e) => e.playerTile())).toMatchObject({ ...expected, moving: false });
+  // M15: the minimap follows the player in the overworld's next update, so let a frame pass before reading it.
+  await frames(page, 2);
 }
 
 test('minimap: the dot matches the player, M toggles it, hidden indoors, Mapa in the Start menu', async ({

@@ -20,6 +20,7 @@ import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { input } from '../core/input';
 import { getOptions, sfxVolume } from '../core/options';
 import { textCps } from '../logic/options';
+import { DIALOG_ARROW_BLINK_MS } from '../logic/constants';
 import {
   dialoguePages,
   isTyped,
@@ -39,8 +40,6 @@ const PAD_X = 12;
 const PAD_Y = 10;
 const FONT_PX = 14;
 const LINE_SPACING = 6;
-/** Arrow blink half-period (ms). */
-const BLINK_MS = 400;
 const COLOR_FILL = 0xf8f8f0;
 const COLOR_BORDER = 0x202028;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
@@ -164,7 +163,9 @@ export class DialogBox {
     this.text.setText(visibleText(this.typing));
     this.blinkMs += dtMs;
     const more = this.page + 1 < this.pages.length;
-    this.arrow.setVisible(more && isTyped(this.typing) && Math.floor(this.blinkMs / BLINK_MS) % 2 === 0);
+    this.arrow.setVisible(
+      more && isTyped(this.typing) && Math.floor(this.blinkMs / DIALOG_ARROW_BLINK_MS) % 2 === 0,
+    );
   }
 
   /** The current box (for tests and the debug overlay), or `null` when closed. */

@@ -1,7 +1,7 @@
 # data — game content JSON
 
 The nine files from docs/PLAN.md › Config specification, plus `intro.json` (M11, the title image and the
-new-game intro script). Validated at boot by the zod schemas in
+new-game intro script) and `sounds.json` (M15, the interface sounds). How to add content: `docs/CONTENT.md`. Validated at boot by the zod schemas in
 `src/data/schemas/` (one per file) plus cross-reference checks; any error shows the red ErrorScene as
 `file › JSON path › message`. After adding asset paths, run `npm run placeholders`.
 
@@ -36,6 +36,10 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
   {starter}!", then the secret name's items and message). Boot checks: the coworker's tile and every tile walked
   onto are walkable, and no walk enters the other actor's tile. Control starts where the script leaves the player
   (the shipped script: two tiles up from the spawn, (15, 8) on `test`); walk the coworker out of view at the end.
+
+- `sounds.json` (M15): the interface sounds, all required: `cursor` (a menu cursor moved), `confirm` (an option
+  chosen), `cancel` (B backed out), `error` (a refused action) and `money` (a purchase, a sale, an enemy's reward).
+  Each is a sound path like the others (`assets/audio/sfx/ui_*.ogg`, MP3 fallback). The test world has the same file.
 
 Current content (M14, the real world): 12 flexymon, 24 attacks, 8 items, 25 NPCs (15 enemies, 6 shopkeepers, the
 office healer and storage, 2 client talkers), 18 zones (8 outdoor: `alboraya`, `huerta_norte`, `valencia`, `playa`,

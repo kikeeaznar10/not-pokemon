@@ -10,10 +10,13 @@
  *   Enter keep their meaning. Text mode is switched off when the scene ends.
  * - OK with no letter shows "Escribe al menos una letra." and stays. Otherwise the IntroScene starts with the
  *   trimmed name.
+ * - Sounds (M15): `cursor` on a move, `confirm` for a letter / Borrar / a valid OK, `cancel` on B, `error` for OK
+ *   with no letter.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { log } from '../core/log';
 import { t } from '../i18n';
 import { NAME_MAX_LENGTH } from '../logic/constants';
@@ -132,12 +135,14 @@ export class NameScene extends Phaser.Scene {
       else this.setName(typeChar(this.name_, ch));
     }
     const count = this.cells.length;
+    const before = this.cursor;
     if (input.justPressed('up')) this.cursor = this.move(0, -1);
     else if (input.justPressed('down')) this.cursor = this.move(0, 1);
     else if (input.justPressed('left')) this.cursor = this.move(-1, 0);
     else if (input.justPressed('right')) this.cursor = this.move(1, 0);
     else if (input.justPressed('a')) this.press(this.cursor);
     else if (input.justPressed('b')) {
+      uiSound('cancel');
       if (this.name_ === '') {
         this.leaving = true;
         this.scene.start(TITLE_SCENE);
@@ -146,6 +151,7 @@ export class NameScene extends Phaser.Scene {
       this.setName(deleteChar(this.name_));
     } else if (input.justPressed('start')) this.confirm();
     this.cursor = Math.min(Math.max(0, this.cursor), count - 1);
+    if (this.cursor !== before) uiSound('cursor');
     if (!this.leaving) this.redraw();
   }
 
@@ -181,6 +187,7 @@ export class NameScene extends Phaser.Scene {
   private press(i: number): void {
     const cell = this.cells[i];
     if (!cell || this.leaving) return;
+    if (cell.kind !== 'ok') uiSound('confirm');
     if (cell.kind === 'char') this.setName(typeChar(this.name_, cell.char));
     else if (cell.kind === 'delete') this.setName(deleteChar(this.name_));
     else this.confirm();
@@ -193,9 +200,11 @@ export class NameScene extends Phaser.Scene {
 
   private confirm(): void {
     if (!canConfirm(this.name_)) {
+      uiSound('error');
       this.messageText.setText(t('name.empty'));
       return;
     }
+    uiSound('confirm');
     this.leaving = true;
     const name = finalName(this.name_);
     log(`Name: "${name}"`);

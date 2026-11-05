@@ -13,7 +13,9 @@ import { debugFlags } from './core/debug-flags';
 import { rng } from './core/rng';
 import { gameState, setGameState } from './core/session';
 import { Autosave } from './core/autosave';
-import { getOptions, loadOptions, setOptions } from './core/options';
+import { getOptions, loadOptions, setOptions, sfxVolume } from './core/options';
+import { setUiSoundPlayer, uiSoundsPlayed, type UiSoundKind } from './core/ui-sound';
+import { unlockAudioOnFirstInput } from './core/audio-unlock';
 import { saveStore } from './core/save-store';
 import { volumeGain, type Options } from './logic/options';
 import type { GameState } from './logic/save';
@@ -23,7 +25,7 @@ import type { BattleKind } from './logic/battle';
 import { createInstance, type FlexymonInstance } from './logic/instance';
 import { BATTLE_SCENE, type BattleScene, type BattleView } from './scenes/battle-scene';
 import { CAR_SCENE, lastCarTrip, type CarScene, type CarTripView } from './scenes/car-scene';
-import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
+import { DEBUG_SCENE, type DebugScene, type ReloadStatus } from './scenes/debug-scene';
 import { ERROR_SCENE, type ErrorScene } from './scenes/error-scene';
 import { OVERWORLD_SCENE, type NpcView, type OverworldScene } from './scenes/overworld-scene';
 import type { NpcStates } from './logic/npc-state';
@@ -106,6 +108,24 @@ events.on('zone:entered', ({ zone }) => {
 // Options (M10): read from `flexymon.options`; the music volume follows the option.
 music.setGain(volumeGain(loadOptions().music));
 events.on('options:changed', (o) => music.setGain(volumeGain(o.music)));
+
+// Audio (M15): unlock on the first key press, click or touch (browsers block sound before a gesture); interface
+// sounds (`sounds.json`) play at the effects volume, like every other sound effect.
+let audioUnlockRequested = false;
+unlockAudioOnFirstInput(window, () => {
+  audioUnlockRequested = true;
+  const sm = game.sound as Phaser.Sound.BaseSoundManager & { unlock?: () => void; context?: AudioContext };
+  sm.unlock?.();
+  sm.context?.resume().catch(() => undefined);
+});
+let lastUiSound: { kind: UiSoundKind; volume: number } | null = null;
+setUiSoundPlayer((kind) => {
+  if (!hasGameData()) return;
+  const key = getGameData().sounds[kind];
+  const volume = sfxVolume();
+  lastUiSound = { kind, volume };
+  if (game.cache.audio.exists(key)) game.sound.play(key, { volume });
+});
 
 // Saving (M10): auto-save at every save point and when the page is hidden or closed.
 const autosave = new Autosave({ store: saveStore, getState: gameState, setState: setGameState });
@@ -259,6 +279,16 @@ export interface E2EHooks {
   carTrip(): CarTripView | null;
   /** The last Audi trip that ended (M13), kept after the Car scene stopped: same fields, `finished: true`; else `null`. */
   lastCarTrip(): CarTripView | null;
+  /** Interface sounds played since the page loaded (M15), oldest first (at most the last 100). */
+  uiSounds(): UiSoundKind[];
+  /** The last interface sound played and the effects volume (0–1) it was played at (M15), or `null`. */
+  lastUiSound(): { kind: UiSoundKind; volume: number } | null;
+  /** Audio unlock (M15): whether the first gesture asked for it, and whether Phaser's sound manager is still locked. */
+  audio(): { unlockRequested: boolean; locked: boolean; contextState: string | null };
+  /** Sprites Preload took from the sprite atlas (M15; `0` without an atlas, e.g. in `npm run dev`). */
+  atlasSprites(): number;
+  /** The debug menu's last "Recargar datos" (M15): `idle` / `loading` / `ok` / `error` and the errors; `null` without debug. */
+  debugReload(): ReloadStatus | null;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -389,6 +419,21 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     fullscreenRequested: () => fullscreenRequested,
     minimap: () => overworld()?.minimapView() ?? null,
     lastCarTrip: () => lastCarTrip(),
+    uiSounds: () => uiSoundsPlayed(),
+    atlasSprites: () => preload().fromAtlas.length,
+    debugReload: () =>
+      game.scene.isActive(DEBUG_SCENE)
+        ? structuredClone((game.scene.getScene(DEBUG_SCENE) as DebugScene).reload)
+        : null,
+    lastUiSound: () => (lastUiSound ? { ...lastUiSound } : null),
+    audio: () => {
+      const sm = game.sound as Phaser.Sound.BaseSoundManager & { context?: AudioContext };
+      return {
+        unlockRequested: audioUnlockRequested,
+        locked: sm.locked,
+        contextState: sm.context?.state ?? null,
+      };
+    },
     carTrip: () =>
       game.scene.isActive(CAR_SCENE) ? (game.scene.getScene(CAR_SCENE) as CarScene).view() : null,
     debugLines: () => {

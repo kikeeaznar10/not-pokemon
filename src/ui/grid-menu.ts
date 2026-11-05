@@ -12,10 +12,14 @@
  *   cursor, and small arrows on the right edge show that rows are hidden above / below.
  * - The owner calls {@link GridMenu.update} every frame while {@link GridMenu.isOpen}; the frame it
  *   opens it ignores input, so the press that opened it does not also choose.
+ * - Sounds (M15, `src/core/ui-sound.ts`): `cursor` on a move, `confirm` on A, `error` on A over a disabled option,
+ *   `cancel` on B.
+ * - A disabled option is greyed AND struck through (M15), so it is not told apart by colour alone.
  * Texts come from the caller (i18n or content), never from this file.
  */
 import Phaser from 'phaser';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { moveGridCursor } from './cursor';
 
 const DEPTH = 102;
@@ -27,6 +31,8 @@ const COLOR_FILL = 0xf8f8f0;
 const COLOR_BORDER = 0x202028;
 const COLOR_TEXT = '#202028';
 const COLOR_DISABLED = '#9898a0';
+/** Line through a disabled label (M15). */
+const COLOR_STRIKE = 0x606068;
 const TEXT_STYLE: Phaser.Types.GameObjects.Text.TextStyle = {
   fontFamily: 'monospace',
   fontSize: '14px',
@@ -157,7 +163,16 @@ export class GridMenu {
         );
         lx += ICON_W;
       }
-      parts.push(this.scene.add.text(lx, cy, o.label, { ...TEXT_STYLE, color }));
+      const label = this.scene.add.text(lx, cy, o.label, { ...TEXT_STYLE, color });
+      parts.push(label);
+      // M15: strike disabled labels through, so "not available" does not rely on colour alone.
+      if (!o.enabled) {
+        parts.push(
+          this.scene.add
+            .rectangle(lx - 1, cy + Math.round(label.height / 2), label.width + 2, 1, COLOR_STRIKE)
+            .setOrigin(0, 0.5),
+        );
+      }
       if (o.right) {
         parts.push(
           this.scene.add.text(cx + this.cellW - 4, cy, o.right, { ...TEXT_STYLE, color }).setOrigin(1, 0),
@@ -196,13 +211,20 @@ export class GridMenu {
     else if (input.justPressed('left')) next = moveGridCursor(this.cursor, -1, 0, this.cols, count);
     else if (input.justPressed('right')) next = moveGridCursor(this.cursor, 1, 0, this.cols, count);
     else if (input.justPressed('a')) {
-      if (this.options[this.cursor]?.enabled) this.finish(this.cursor);
+      if (this.options[this.cursor]?.enabled) {
+        uiSound('confirm');
+        this.finish(this.cursor);
+      } else uiSound('error');
       return;
     } else if (input.justPressed('b')) {
-      if (opts.cancelable !== false) this.finish(null);
+      if (opts.cancelable !== false) {
+        uiSound('cancel');
+        this.finish(null);
+      }
       return;
     }
     if (next !== this.cursor) {
+      uiSound('cursor');
       this.cursor = next;
       const first = this.scrolledFirstRow(this.firstRow);
       if (first !== this.firstRow) {

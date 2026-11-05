@@ -8,11 +8,13 @@
  *   underneath.
  * - The owner calls {@link ChoiceBox.update} every frame while {@link ChoiceBox.isOpen}; the frame it
  *   opens it ignores input (so the press that opened it does not also choose).
+ * - Sounds (M15, `src/core/ui-sound.ts`): `cursor` on a move, `confirm` on A, `cancel` on B.
  * Option texts come from the caller (i18n keys or content), never from this file.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { DIALOG_HEIGHT } from './dialog-box';
 import { moveCursor } from './cursor';
 
@@ -101,10 +103,17 @@ export class ChoiceBox {
       this.skipInput = false;
       return;
     }
+    const before = this.cursor;
     if (input.justPressed('up')) this.cursor = moveCursor(this.cursor, -1, this.options.length);
     else if (input.justPressed('down')) this.cursor = moveCursor(this.cursor, 1, this.options.length);
-    else if (input.justPressed('a')) return this.finish(this.cursor);
-    else if (input.justPressed('b') && this.opts.cancelable !== false) return this.finish(null);
+    else if (input.justPressed('a')) {
+      uiSound('confirm');
+      return this.finish(this.cursor);
+    } else if (input.justPressed('b') && this.opts.cancelable !== false) {
+      uiSound('cancel');
+      return this.finish(null);
+    }
+    if (this.cursor !== before) uiSound('cursor');
     this.placeCursor();
   }
 

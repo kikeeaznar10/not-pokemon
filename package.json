@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsx tools/make-atlas.ts && tsc --noEmit && vite build",
     "preview": "vite preview",
     "start": "npm install && npm run build && vite preview",
     "lint": "eslint . && prettier --check .",
@@ -15,7 +15,8 @@
     "coverage": "vitest run --coverage",
     "placeholders": "tsx tools/make-placeholders.ts",
     "test-map": "tsx tools/make-test-map.ts",
-    "world": "tsx tools/make-world.ts"
+    "world": "tsx tools/make-world.ts",
+    "atlas": "tsx tools/make-atlas.ts"
   },
   "dependencies": {
     "phaser": "4.2.1",

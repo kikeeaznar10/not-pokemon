@@ -157,5 +157,13 @@
   "mobile.rotate_hint": "Flexymon se juega en horizontal.",
   "car.ask": "¿Subir al Audi?",
   "car.yes": "Sí",
-  "car.no": "No"
+  "car.no": "No",
+  "debug.give_title": "Dar",
+  "debug.give_euros": "Dar {n} €",
+  "debug.give_item": "Dar: {name}",
+  "debug.data_title": "Datos",
+  "debug.reload": "Recargar datos",
+  "debug.reload_loading": "Recargando datos…",
+  "debug.reload_ok": "Datos recargados.",
+  "debug.reload_failed": "Error al recargar ({n}); se mantienen los datos anteriores."
 }

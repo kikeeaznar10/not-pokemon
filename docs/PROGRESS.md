@@ -20,7 +20,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M12 — Mobile controls and minimap
 - [x] M13 — The Audi to Murcia
 - [x] M14 — Build the world
-- [ ] M15 — Audio, polish and deployment
+- [x] M15 — Audio, polish and deployment
 
 ## Milestone notes
 
@@ -441,6 +441,47 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   take `tools/README.md` › `npm run world` (legend and `world.json` fields) and `public/maps/README.md`. The
   real-device check of M12 is still open.
 
+### M15
+
+- Built: audio unlock on the first key / click / touch (`src/core/audio-unlock.ts`); interface sounds from a new 11th
+  data file `sounds.json` (`cursor`, `confirm`, `cancel`, `error`, `money`; schema `src/data/schemas/sounds.ts`, played
+  by `src/core/ui-sound.ts` at the effects volume) in every menu, choice box, the title, name, shop, storage, Start
+  menu and enemy rewards; region music and volume options were already in place (M4 / M10). Debug menu: "Dar 1000 €",
+  "Dar: {item}" per item, "Recargar datos" (reloads and validates every JSON and map without a page reload; on error
+  the old data stays and the errors show), and the menu now scrolls (the real world's list was taller than the
+  screen) with a panel that grows with the text. Accessibility: the battle transition flashes 2 times in 600 ms (was
+  3, i.e. 5 per second), a hit dims the sprite once (was 3 blinks in 360 ms), every blink is unit-tested under 3 per
+  second (`src/logic/accessibility.ts`); greyed menu options are also struck through (not colour alone); the text
+  speed option already worked (M10). Performance: `npm run build` now packs the 68 content sprites into one atlas
+  (`npm run atlas`, `tools/make-atlas.ts`; Preload copies each frame back into a texture under its own path).
+  Deployment steps: `docs/deploy.md`; content guide: `docs/CONTENT.md`.
+- Measured (Chromium throttling, Pixel 7 landscape, gzip): title in 3.1 s on fast 4G before the atlas → 2.6 s after
+  (requests 157 → about 90; slow 4G 7.4 → 5.9 s); 60 FPS walking the real world, also with the CPU slowed 4×.
+  Emulated only: no real phone was used (as in M12).
+- **Not done: the deployment itself and the "coworker with only the URL" check.** The host and password question is
+  still open (below), and publishing would put real company and place names online, which is another open
+  question. `docs/deploy.md` has the exact steps for Netlify, Cloudflare Pages, GitHub Pages and a company server;
+  `base: './'` already serves the build from any sub-path, so no config change is needed.
+- Files outside a list (M15 lists none besides deploy.md / CONTENT.md): `public/data/sounds.json` +
+  `public/test-world/data/sounds.json` + 10 placeholder sounds, `src/data/{schemas/sounds,schemas/index,loader,
+  game-data,assets,atlas}.ts`, `src/core/{ui-sound,audio-unlock,events}.ts`, `src/logic/{accessibility,debug-tools,
+  constants}.ts`, `src/ui/{grid-menu,choice-box,dialog-box}.ts`, the Title, Name, Menu, Shop, Storage, Battle,
+  Overworld, Boot, Preload and Debug scenes, `src/main.ts` (hooks `uiSounds`, `lastUiSound`, `audio`, `debugReload`,
+  `atlasSprites`), `es.json`, `tools/make-{atlas,placeholders}.ts`, `package.json` (`atlas`, `build`), `.gitignore`
+  (`public/assets/atlas/`), `CLAUDE.md` (commands), READMEs. Tests changed on purpose: `assets.test.ts` counts the 5
+  interface sounds; `m12-mobile.spec.ts`'s `tap()` now waits two frames before tapping (a tap could land on the
+  frame a menu opens, which ignores input — the known M13 / M14 flake, the same fix M7 gave the keyboard helpers)
+  and its `walk()` lets a frame pass before the minimap is read (the dot follows in the next update). Both failed
+  2 / 10 on `main` too; after the fix the M12 spec passed 35 / 35 on `iphone` and 48 / 48 on all profiles. No
+  check was weakened.
+- Verified with Playwright on all four profiles (`tests/e2e/m15-polish.spec.ts`, 48 / 48 when repeated 3× with 4
+  workers): the first key unlocks audio (Phaser no longer locked), the title plays `confirm`; Start menu moves /
+  choices / B play `cursor` / `confirm` / `cancel` at the effects volume (0.4, then 0.5 after raising it); the shop
+  plays `error` for the Regleta and `money` for a purchase; the debug menu gives euros and items, reloads a changed
+  `items.json` (new name shown, bag kept, map rebuilt on the same tile) and keeps the old data on broken JSON. Plus
+  the full suite and screenshots (struck-through *Huir*, the scrolled debug menu, a plain production build with no
+  hooks booting to the title and name screens on desktop and a phone profile).
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -452,6 +493,23 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M15 (safe assumptions in brackets)
+
+- [ ] Which host, and a password? (The plan's question, still open.) [Nothing deployed; `docs/deploy.md` covers four
+  options, with how each can be password-protected or limited to the company.]
+- [ ] Where do the interface sound paths live? The plan lists no file for them. [A new `sounds.json`, so they are
+  content like every other sound; every kind is required.]
+- [ ] Which actions make which sound? [Menus / choice boxes: move → cursor, A → confirm, B → cancel, A on a greyed
+  option → error; refusal messages → error; purchases, sales and enemy rewards → money. Dialogue boxes stay silent
+  apart from the NPC voices.]
+- [ ] "Under 3 flashes per second" — which effects count? [Every blink and flash: the battle transition (now 2 in
+  600 ms), the hit (one dim per hit), the title hint, the dialogue arrow and the minimap dot (all ≤ 1.7 per second).
+  The car scene's camera shake is movement, not a flash.]
+- [ ] "Texture atlas if load time exceeds 3 seconds on 4G": measured 3.1 s on emulated fast 4G, so the atlas was
+  added. It is built at `npm run build` and not committed; `npm run dev` without a build loads separate files.
+- [ ] The debug "Recargar datos" reloads JSON and maps only; a sprite or sound replaced under the same path needs a
+  page reload (Phaser keeps the old one). The plan only asks for JSON.
 
 ### Raised in M14 (safe assumptions in brackets)
 

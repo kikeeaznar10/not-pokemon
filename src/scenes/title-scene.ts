@@ -11,12 +11,15 @@
  * - *Nueva partida* with a save asks for confirmation first (Sí / No, the cursor starts on No); with no save it
  *   goes straight on. A new game continues in the NameScene, then the IntroScene. The old save is only
  *   overwritten when the new game enters its first map (auto-save).
+ * - Sounds (M15): opening the menu (Start, A or a tap) and choosing with Start play `confirm`; the menu and the Sí /
+ *   No box play their own.
  * - {@link TitleScene.quickStart} (E2E hooks only) does what Start did before M11: continue a valid save,
  *   or start a new game with the default name at `start.json › spawn`, skipping the name and the intro.
  */
 import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { log } from '../core/log';
 import { saveStore, type LoadOutcome } from '../core/save-store';
 import { gameState, resetGameState, setGameState } from '../core/session';
@@ -113,7 +116,9 @@ export class TitleScene extends Phaser.Scene {
     }
     this.menuItems = this.outcome.status === 'loaded' ? ['continue', 'new'] : ['new'];
     this.input.on('pointerdown', () => {
-      if (this.ui === 'press') this.openMenu();
+      if (this.ui !== 'press') return;
+      uiSound('confirm');
+      this.openMenu();
     });
     log(`Title: save ${this.outcome.status}`);
   }
@@ -122,13 +127,17 @@ export class TitleScene extends Phaser.Scene {
     if (this.ui === 'press') {
       this.blinkMs = (this.blinkMs + delta) % (2 * TITLE_BLINK_MS);
       this.hint.setVisible(this.blinkMs < TITLE_BLINK_MS);
-      if (input.justPressed('start') || input.justPressed('a')) this.openMenu();
+      if (input.justPressed('start') || input.justPressed('a')) {
+        uiSound('confirm');
+        this.openMenu();
+      }
       return;
     }
     if (this.ui === 'menu') {
       if (input.justPressed('start') && this.menu.isOpen) {
         // Start chooses like A (the cursor's option).
         const cursor = this.menu.state()?.cursor ?? 0;
+        uiSound('confirm');
         this.menu.close();
         this.onMenu(cursor);
         return;

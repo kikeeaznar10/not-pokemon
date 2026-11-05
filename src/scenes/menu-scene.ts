@@ -18,6 +18,8 @@
  *   indoor`) it only says there is no map inside.
  * - Opciones: *Música*, *Efectos* (0–10) and *Texto* (lenta / normal / rápida). Up/Down choose, Left/Right
  *   change the value at once (saved in `flexymon.options`, applied live), A on *Volver* or B goes back.
+ * Sounds (M15): menus play their own; Start closing the menu plays `cancel`, the options page `cursor` on a move or
+ * a changed value (after the change, so a new effects volume is heard), refused bag items `error`.
  * Every rule (rows, enabled options, stats, messages) comes from `src/logic/menu.ts` and
  * `src/logic/options.ts`; this scene only draws and reads input.
  */
@@ -25,6 +27,7 @@ import Phaser from 'phaser';
 import { GAME_HEIGHT, GAME_WIDTH } from '../config/game';
 import { events } from '../core/events';
 import { input } from '../core/input';
+import { uiSound } from '../core/ui-sound';
 import { log } from '../core/log';
 import { getOptions, setOptions } from '../core/options';
 import { gameState, setGameState } from '../core/session';
@@ -143,8 +146,10 @@ export class MenuScene extends Phaser.Scene {
     }
     if (this.dialog.isOpen) this.dialog.update(delta);
     else if (this.ui === 'options') this.updateOptions();
-    else if (this.ui === 'main' && input.justPressed('start')) this.close();
-    else if (this.menu.isOpen) this.menu.update();
+    else if (this.ui === 'main' && input.justPressed('start')) {
+      uiSound('cancel');
+      this.close();
+    } else if (this.menu.isOpen) this.menu.update();
   }
 
   /** Remove the current sub-screen drawing (detail page, options page). */
@@ -376,6 +381,7 @@ export class MenuScene extends Phaser.Scene {
     const result = useFieldItem(gameState(), data, row.itemId, targetUid);
     this.descPanel.setVisible(false);
     if (!result.ok) {
+      uiSound('error');
       return this.say([fieldErrorMessage(result.reason, t)], () => this.openBag(this.bagCursor));
     }
     setGameState(result.state);
@@ -398,6 +404,7 @@ export class MenuScene extends Phaser.Scene {
   /** Up/Down choose a row, Left/Right change it, A on Volver or B goes back. */
   private updateOptions(): void {
     const rows = OPTION_KEYS.length + 1;
+    const before = this.optionCursor;
     if (input.justPressed('up')) this.optionCursor = Math.max(0, this.optionCursor - 1);
     else if (input.justPressed('down')) this.optionCursor = Math.min(rows - 1, this.optionCursor + 1);
     else if (input.justPressed('left') || input.justPressed('right')) {
@@ -406,10 +413,14 @@ export class MenuScene extends Phaser.Scene {
         const delta = input.justPressed('left') ? -1 : 1;
         setOptions(stepOption(getOptions(), key, delta));
         log(`Menu: option ${key} = ${String(getOptions()[key])}`);
+        // Played after the change, so a new effects volume is heard at once.
+        uiSound('cursor');
       }
     } else if (input.justPressed('b') || (input.justPressed('a') && this.optionCursor === rows - 1)) {
+      uiSound(input.justPressed('b') ? 'cancel' : 'confirm');
       return this.openMain(3);
     } else return;
+    if (this.optionCursor !== before) uiSound('cursor');
     this.renderOptions();
   }
 

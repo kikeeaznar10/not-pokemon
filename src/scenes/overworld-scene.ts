@@ -15,7 +15,8 @@
  *   facing an `action` warp, locks input, fades out (`WARP_FADE_MS`), restarts this scene on the
  *   target, fades in and unlocks. Safe steps are reset on every map entry.
  * - Debug teleport (M4): `debug:teleport` moves the player to a zone's `default` spawn the same way;
- *   while `debug:menu` is open the player does not move.
+ *   while `debug:menu` is open the player does not move. `debug:reloaded` (M15) rebuilds the current map from the
+ *   reloaded data where the player stands.
  * - NPCs (M5): every `npcs.json` entry whose `map` is this zone appears on its spawn tile and wanders
  *   (`src/world/npc.ts`, rules in `src/logic/npc-wander.ts`). NPCs never step onto solid tiles, warp
  *   tiles, the player or another NPC; the player can never step onto an NPC. While a step is in progress
@@ -79,7 +80,7 @@ import { findSpawn, isBlocked, type MapInfo } from '../data/tiled';
 import { t } from '../i18n';
 import type { BattleKind } from '../logic/battle';
 import { carArrival, carUnlocked, type CarDestination } from '../logic/car';
-import { BATTLE_FLASH_MS, NPC_ALERT_MS, WARP_FADE_MS } from '../logic/constants';
+import { BATTLE_FLASHES, BATTLE_FLASH_MS, NPC_ALERT_MS, WARP_FADE_MS } from '../logic/constants';
 import {
   findSpotter,
   isEnemy,
@@ -149,9 +150,6 @@ export interface NpcView {
   state: NpcState | null;
   alert: boolean;
 }
-
-/** Number of white flashes in the battle transition. */
-const BATTLE_FLASHES = 3;
 
 /** Longest frame time fed to movement (ms), so a stalled tab does not teleport the player. */
 const MAX_FRAME_MS = 250;
@@ -236,6 +234,7 @@ export class OverworldScene extends Phaser.Scene {
 
     const offs = [
       events.on('debug:teleport', ({ map: zoneId }) => this.teleport(zoneId)),
+      events.on('debug:reloaded', () => this.rebuildHere()),
       events.on('debug:battle', ({ speciesId }) => {
         this.startBattle({ speciesId });
       }),
@@ -703,6 +702,17 @@ export class OverworldScene extends Phaser.Scene {
     if (!loaded || !this.player || !this.sys.isActive()) return;
     const spawn = findSpawn(loaded.info as MapInfo) ?? { x: 0, y: 0 };
     this.warpTo({ map: zoneId, x: spawn.x, y: spawn.y, facing: 'down' });
+  }
+
+  /**
+   * After "Recargar datos" (M15): rebuild the map from the new data at the player's position in the game state
+   * (which the reload already checked: an unknown map became the respawn point). Only while this scene runs.
+   */
+  private rebuildHere(): void {
+    if (!this.player || !this.sys.isActive()) return;
+    const { map, x, y, facing } = gameState().player;
+    if (!getGameData().maps.has(map)) return;
+    this.warpTo({ map, x, y, facing });
   }
 
   /** The minimap as data (M12, for the E2E hooks), or `null` before the map is built. */

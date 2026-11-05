@@ -39,6 +39,11 @@ export interface GameEvents {
   'options:changed': Options;
   /** Debug command (M10): delete the save and reload the page. */
   'debug:delete_save': void;
+  /**
+   * Debug command (M15): the content was reloaded ("Recargar datos") and the game state checked against it; the
+   * overworld rebuilds the current map where the player stands.
+   */
+  'debug:reloaded': void;
   /** The CarScene (M13) finished the trip (played out or skipped); the overworld moves to the arrival point. */
   'car:ended': { to: 'murcia' | 'valencia' };
 }

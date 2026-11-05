@@ -12,7 +12,9 @@
  *   Anything in `sprites/car/` (M13, `car.json › sprite`) is a 96×40 white car seen from the side, nose right.
  * - Audio: an `.ogg` or `.mp3` path produces BOTH `<name>.ogg` and `<name>.mp3` (0.2 s beep made with
  *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`). A name containing
- *   `engine` (M13, the car) gets a 1 s low 90 Hz hum instead, so it can loop during the trip.
+ *   `engine` (M13, the car) gets a 1 s low 90 Hz hum instead, so it can loop during the trip. The interface
+ *   sounds `ui_cursor`, `ui_confirm`, `ui_cancel`, `ui_error`, `ui_money` (M15, `sounds.json`) get short tones of
+ *   their own pitch and length ({@link audioSource}).
  * - Minimaps (M12): every outdoor zone in `zones.json` (`indoor: false`) gets `assets/ui/minimap_<zone>.png`, a
  *   scaled-down render of its map's collision data (`MINIMAP_TILE_PX` pixels per tile: solid dark, encounter
  *   tiles green, the rest sand). Like everything else it is never overwritten: after editing a map, delete its
@@ -352,6 +354,31 @@ export function makePng(label: string, size: number): Buffer {
   return PNG.sync.write(png);
 }
 
+/**
+ * Short tones for the interface sounds (M15, `sounds.json`): a file named `ui_<kind>` gets its own pitch and
+ * length so cursor, confirm, cancel, error and money can be told apart before real sounds exist.
+ */
+const UI_TONES: Record<string, { hz: number; seconds: number }> = {
+  ui_cursor: { hz: 1320, seconds: 0.04 },
+  ui_confirm: { hz: 990, seconds: 0.09 },
+  ui_cancel: { hz: 520, seconds: 0.09 },
+  ui_error: { hz: 160, seconds: 0.25 },
+  ui_money: { hz: 1760, seconds: 0.15 },
+};
+
+/**
+ * The ffmpeg `lavfi` source for a placeholder sound file: a 1 s 90 Hz hum for names with `engine` (M13), a short
+ * tone per interface sound (`ui_cursor`, `ui_confirm`, `ui_cancel`, `ui_error`, `ui_money`; M15), else a 0.2 s
+ * 880 Hz beep.
+ */
+export function audioSource(file: string): string {
+  const name = basename(file).replace(/\.(ogg|mp3)$/, '');
+  if (/engine/.test(name)) return 'sine=frequency=90:duration=1';
+  const tone = UI_TONES[name];
+  if (tone) return `sine=frequency=${tone.hz}:duration=${tone.seconds}`;
+  return 'sine=frequency=880:duration=0.2';
+}
+
 let ffmpegAvailable: boolean | undefined;
 
 /** Write a 0.2 s beep with ffmpeg; on any failure copy the silent fallback. Returns how it was made. */
@@ -363,19 +390,7 @@ function writeAudio(file: string, ext: (typeof AUDIO_EXTS)[number]): 'beep' | 's
     const codec = ext === '.ogg' ? ['-c:a', 'libvorbis'] : ['-c:a', 'libmp3lame', '-b:a', '32k'];
     const res = spawnSync(
       'ffmpeg',
-      [
-        '-loglevel',
-        'error',
-        '-n',
-        '-f',
-        'lavfi',
-        '-i',
-        /engine/.test(basename(file)) ? 'sine=frequency=90:duration=1' : 'sine=frequency=880:duration=0.2',
-        '-ac',
-        '1',
-        ...codec,
-        file,
-      ],
+      ['-loglevel', 'error', '-n', '-f', 'lavfi', '-i', audioSource(file), '-ac', '1', ...codec, file],
       { stdio: 'ignore' },
     );
     if (res.status === 0 && existsSync(file)) return 'beep';

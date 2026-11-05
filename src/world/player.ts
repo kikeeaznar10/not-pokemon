@@ -62,6 +62,13 @@ export class Player {
     this.draw();
   }
 
+  /** Turn to `facing` (M8: face an enemy that walked up). Ignored while a step is in progress. */
+  face(facing: Facing): void {
+    if (this.move.step) return;
+    this.move = createMoveState(this.move.x, this.move.y, facing);
+    this.draw();
+  }
+
   private draw(): void {
     const pos = renderPosition(this.move);
     this.sprite.setPosition(Math.round(pos.x * TILE_SIZE), Math.round(pos.y * TILE_SIZE));

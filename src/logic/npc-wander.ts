@@ -11,6 +11,10 @@
  *   ({@link occupiedTiles}), and so does the player, so the two can never end up on the same tile.
  * - Talking pauses the NPC ({@link startTalk}): a step in progress finishes, then it turns to face the
  *   player and stays still until {@link endTalk}, which starts a fresh wait.
+ * - Enemy approach (M8): {@link engage} pauses the NPC without turning it, and {@link forceStep} walks it
+ *   one tile (the scene checks the tile is free), so it can leave its rectangle to reach the player.
+ * - An NPC outside its rectangle (after such an approach) only steps in directions that bring it closer
+ *   to the rectangle, so it wanders back in by itself.
  *
  * RNG call order (for seeded tests): one `int` per wait, then one `pick` per step attempt that has at
  * least one possible direction.
@@ -78,13 +82,25 @@ export function occupiedTiles(s: NpcMove): Point[] {
   return s.step ? [{ x: s.x, y: s.y }, { ...s.step.to }] : [{ x: s.x, y: s.y }];
 }
 
-/** Directions the NPC could step in now: target inside the area and not blocked. */
+/** Manhattan distance from a tile to the nearest tile of the wander rectangle (0 inside). */
+export function distanceToArea(area: WanderArea, x: number, y: number): number {
+  const dx = x < area.x ? area.x - x : x >= area.x + area.width ? x - (area.x + area.width - 1) : 0;
+  const dy = y < area.y ? area.y - y : y >= area.y + area.height ? y - (area.y + area.height - 1) : 0;
+  return dx + dy;
+}
+
+/**
+ * Directions the NPC could step in now: target not blocked and inside the area. Outside the area (M8,
+ * after walking up to the player) only directions that bring it closer to the area count.
+ */
 export function wanderChoices(s: Pick<NpcMove, 'x' | 'y'>, area: WanderArea, blocked: BlockedFn): Facing[] {
+  const now = distanceToArea(area, s.x, s.y);
   return DIRS.filter((dir) => {
     const d = FACING_DELTA[dir];
     const x = s.x + d.x;
     const y = s.y + d.y;
-    return inWanderArea(area, x, y) && !blocked(x, y);
+    const ok = now === 0 ? inWanderArea(area, x, y) : distanceToArea(area, x, y) < now;
+    return ok && !blocked(x, y);
   });
 }
 
@@ -138,6 +154,31 @@ export function startTalk(s: NpcMove, playerFacing: Facing): NpcMove {
   const face = oppositeFacing(playerFacing);
   if (s.step) return { ...s, talking: true, turnTo: face };
   return { ...s, talking: true, facing: face, turnTo: null };
+}
+
+/**
+ * Enemy approach (M8): stop wandering without turning (a step in progress finishes first). Ended by
+ * {@link endTalk}, like a conversation.
+ */
+export function engage(s: NpcMove): NpcMove {
+  return { ...s, talking: true, turnTo: null };
+}
+
+/**
+ * Start a scripted step onto the adjacent tile `to` (M8: walking up to the player), facing it. Only for a
+ * standing NPC; the caller checks the tile is free. Returns the state unchanged while a step is running.
+ */
+export function forceStep(s: NpcMove, to: Point): NpcMove {
+  if (s.step) return s;
+  const dir = DIRS.find((f) => s.x + FACING_DELTA[f].x === to.x && s.y + FACING_DELTA[f].y === to.y);
+  if (!dir) throw new Error(`forceStep: (${to.x}, ${to.y}) is not next to (${s.x}, ${s.y})`);
+  const from = { x: s.x, y: s.y };
+  return { ...s, facing: dir, turnTo: null, step: { from, to: { ...to }, elapsed: 0 } };
+}
+
+/** Turn a standing NPC to `facing` (M8: an approaching enemy faces the player). */
+export function faceTo(s: NpcMove, facing: Facing): NpcMove {
+  return s.step ? { ...s, turnTo: facing } : { ...s, facing, turnTo: null };
 }
 
 /** The conversation ended: the NPC waits a fresh random time before wandering again. */

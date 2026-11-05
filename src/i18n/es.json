@@ -56,5 +56,10 @@
   "catch.maxed": "{name} ya está al máximo",
   "debug.options_title": "Opciones",
   "debug.encounters_on": "Encuentros: sí",
-  "debug.encounters_off": "Encuentros: no"
+  "debug.encounters_off": "Encuentros: no",
+  "battle.reward": "¡Has ganado {n} €!",
+  "lose.woke_up": "Te has despertado en la oficina...",
+  "npc.alert": "!",
+  "debug.euros": "Euros: {n}",
+  "debug.npcs_ready": "NPC: todos listos"
 }

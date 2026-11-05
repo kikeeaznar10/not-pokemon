@@ -21,8 +21,12 @@
  *   `takeFlexymon` (`src/logic/merge.ts`: added to the team, to storage when the team is full, or merged)
  *   and shows the matching message (`catchMessages`) before the battle ends.
  * - End: the team (HP) and bag are written back to the game state, the screen fades out, the scene
- *   emits `battle:ended` and stops; the overworld wakes up on the same tile. After a loss the team is
- *   fully healed (placeholder until M8 runs the Losing rule).
+ *   emits `battle:ended` and stops; the overworld wakes up on the same tile.
+ * - Enemy NPCs (M8): started with `npcId`, a win runs `winAgainstNpc` (euros `+= rng.int(min, max)`,
+ *   the NPC goes to `cooldown`) and shows "¡Has ganado {n} €!" (`battle.reward`) before leaving.
+ * - Losing (M8, wild or NPC): `loseBattle` applies the Losing rule to the game state (euros halved, team
+ *   and storage fully healed, every NPC `ready`, player at `start.json › respawn`); the overworld then
+ *   restarts at the respawn point.
  * - While the debug menu (`debug:menu`) is open, the battle ignores input.
  */
 import Phaser from 'phaser';
@@ -53,9 +57,9 @@ import {
   type ViewStep,
 } from '../logic/battle-view';
 import { canCatch, takeFlexymon } from '../logic/merge';
+import { isEnemy, loseBattle, winAgainstNpc } from '../logic/enemy-npc';
 import { ChoiceBox } from '../ui/choice-box';
 import { maxHp, type FlexymonInstance } from '../logic/instance';
-import { healParty } from '../logic/team';
 import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
 import { GridMenu, type GridMenuState } from '../ui/grid-menu';
 import { HpBar } from '../ui/hp-bar';
@@ -70,6 +74,8 @@ export interface BattleSceneData {
   opponent: FlexymonInstance[];
   /** Re-seed the shared RNG before the battle starts (tests, debug). */
   seed?: number;
+  /** The enemy NPC fought (M8): a win pays its reward and puts it in `cooldown`. */
+  npcId?: string;
 }
 
 /** What the battle screen is doing. `catch`: the Llevármelo / Dejarlo choice after a wild win (M7). */
@@ -132,6 +138,7 @@ interface SideDisplay {
 export class BattleScene extends Phaser.Scene {
   private battle!: BattleState;
   private kind: BattleKind = 'wild';
+  private npcId: string | undefined;
   private sides!: Record<Side, SideDisplay>;
   private dialog!: DialogBox;
   private menu!: GridMenu;
@@ -153,6 +160,7 @@ export class BattleScene extends Phaser.Scene {
     this.alive = true;
     this.debugMenuOpen = false;
     this.kind = data.kind;
+    this.npcId = data.npcId;
     if (data.seed !== undefined) rng.seed(data.seed);
     const gs = gameState();
     this.battle = createBattle(gs.team, data.opponent, data.kind, gs.items);
@@ -402,17 +410,25 @@ export class BattleScene extends Phaser.Scene {
     this.dialog.open([t('battle.item_soon')], { onClose: () => this.openMain(1) });
   }
 
-  /** Write the team and bag back; after a wild win offer the catch, then leave. */
+  /**
+   * Write the team and bag back; a loss applies the Losing rule; a win against an enemy NPC pays its
+   * reward; after a wild win offer the catch; then leave.
+   */
   private finish(result: BattleResult): void {
     this.ui = 'end';
-    const gs = gameState();
     const data = getGameData();
-    let party = { team: this.battle.player.team, storage: gs.storage, teamSlots: gs.teamSlots };
-    // Placeholder until M8's Losing rule: a lost battle leaves the team fully healed.
-    if (result === 'lose') party = healParty(party, data.flexymon);
-    setGameState({ ...gs, team: party.team, storage: party.storage, items: { ...this.battle.items } });
+    let gs = { ...gameState(), team: this.battle.player.team, items: { ...this.battle.items } };
+    if (result === 'lose') gs = loseBattle(gs, data);
+    setGameState(gs);
     log(`Battle: ended (${result})`);
-    if (result === 'win' && this.kind === 'wild' && canCatch()) this.offerCatch();
+    const npc = this.npcId === undefined ? undefined : data.npcs.get(this.npcId);
+    if (result === 'win' && npc && isEnemy(npc)) {
+      const won = winAgainstNpc(gs, npc, rng);
+      setGameState(won.state);
+      log(`Battle: beat ${npc.id}, reward ${won.reward}`);
+      this.ui = 'anim';
+      this.dialog.open([t('battle.reward', { n: won.reward })], { onClose: () => this.leave(result) });
+    } else if (result === 'win' && this.kind === 'wild' && canCatch()) this.offerCatch();
     else this.leave(result);
   }
 

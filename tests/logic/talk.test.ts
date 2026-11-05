@@ -14,6 +14,11 @@ describe('talkLines', () => {
   it('storage shows the box placeholder last', () => {
     expect(talkLines({ type: 'storage', dialogue }, t)).toEqual([...dialogue, '<npc.storage_placeholder>']);
   });
+  it('an enemy in cooldown only says its defeatDialogue (M8)', () => {
+    const enemy = { type: 'enemy' as const, dialogue, defeatDialogue: ['Vale, vale...'] };
+    expect(talkLines(enemy, t, 'cooldown')).toEqual(['Vale, vale...']);
+    expect(talkLines(enemy, t, 'ready')).toEqual(dialogue);
+  });
   it('returns a copy', () => {
     const lines = talkLines({ type: 'talker', dialogue }, t);
     lines.push('x');

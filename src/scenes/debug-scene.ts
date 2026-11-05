@@ -3,7 +3,7 @@
  * the URL. Preload launches it once (it is last in the scene list, so it draws on top of every scene).
  *
  * F2 (`debug` action) cycles: hidden → info → teleport menu → hidden.
- * - Info (M3): map id, player tile x/y (same numbers as Tiled's status bar), FPS.
+ * - Info (M3): map id, player tile x/y (same numbers as Tiled's status bar), FPS; euros (M8).
  * - Teleport menu (M4): every zone in `zones.json`; up/down choose, A teleports to that zone's `default`
  *   spawn (event `debug:teleport`), B closes the menu. While the menu is open it emits
  *   `debug:menu { open: true }` and the overworld ignores movement.
@@ -11,13 +11,17 @@
  *   A starts a wild battle against a fresh one (event `debug:battle`).
  * - Options (M7): "Encuentros: sí/no" toggles wild encounters (`debugFlags.encounters`); A flips it and
  *   the menu stays open so the new value shows.
+ * - Euros (M8): the info lines also show the player's euros ("Euros: {n}").
+ * - Options (M8): "NPC: todos listos" sets every enemy NPC to `ready` (`resetAllNpcs`); the menu stays open.
  * Later milestones add more commands here (items…).
  */
 import Phaser from 'phaser';
 import { debugFlags } from '../core/debug-flags';
 import { events } from '../core/events';
 import { input } from '../core/input';
-import { getGameData } from '../data/game-data';
+import { gameState, setGameState } from '../core/session';
+import { getGameData, hasGameData } from '../data/game-data';
+import { resetAllNpcs } from '../logic/npc-state';
 import { t } from '../i18n';
 
 /** Scene key of {@link DebugScene}. */
@@ -99,6 +103,14 @@ export class DebugScene extends Phaser.Scene {
           debugFlags.encounters = !debugFlags.encounters;
         },
       },
+      {
+        label: t('debug.npcs_ready'),
+        group: 'option' as const,
+        run: () => {
+          const gs = gameState();
+          setGameState({ ...gs, npcs: resetAllNpcs(gs.npcs) });
+        },
+      },
     ];
   }
 
@@ -108,6 +120,7 @@ export class DebugScene extends Phaser.Scene {
       t('debug.map', { map: this.where.map }),
       t('debug.tile', { x: this.where.x, y: this.where.y }),
       t('debug.fps', { fps: Math.round(this.game.loop.actualFps) }),
+      ...(hasGameData() ? [t('debug.euros', { n: gameState().euros })] : []),
     ];
     if (this.mode !== 'menu') return info;
     const out = [...info];

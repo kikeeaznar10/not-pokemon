@@ -17,7 +17,8 @@ import { createInstance, type FlexymonInstance } from './logic/instance';
 import { BATTLE_SCENE, type BattleScene, type BattleView } from './scenes/battle-scene';
 import { DEBUG_SCENE, type DebugScene } from './scenes/debug-scene';
 import { ERROR_SCENE, type ErrorScene } from './scenes/error-scene';
-import { OVERWORLD_SCENE, type OverworldScene } from './scenes/overworld-scene';
+import { OVERWORLD_SCENE, type NpcView, type OverworldScene } from './scenes/overworld-scene';
+import type { NpcStates } from './logic/npc-state';
 import { PRELOAD_SCENE, type PreloadScene } from './scenes/preload-scene';
 import type { ChoiceState } from './ui/choice-box';
 import type { DialogState } from './ui/dialog-box';
@@ -78,8 +79,12 @@ export interface E2EHooks {
   currentMusic(): string | null;
   /** True while the overworld ignores movement (warp fade, debug menu, dialogue or choice box). */
   overworldLocked(): boolean;
-  /** NPCs on the current map: id, tile (the step's start while moving), facing, moving, talking. `[]` outside the overworld. */
-  npcs(): { id: string; x: number; y: number; facing: Facing; moving: boolean; talking: boolean }[];
+  /**
+   * NPCs on the current map: id, tile (the step's start while moving), facing, moving, talking; from M8
+   * also `state` (`ready`/`cooldown` for enemies, `null` otherwise) and `alert` ("!" bubble showing).
+   * `[]` outside the overworld.
+   */
+  npcs(): NpcView[];
   /** The open dialogue box (page, visible text, full text, typed, more, voicePlays), or `null`. */
   dialogue(): DialogState | null;
   /** Open a ChoiceBox in the overworld with these options (test helper). */
@@ -108,6 +113,12 @@ export interface E2EHooks {
   encountersEnabled(): boolean;
   /** Switch wild encounters on or off (same as the debug menu's option, M7). */
   setEncounters(on: boolean): void;
+  /** The player's euros in the game state (M8). */
+  euros(): number;
+  /** Set the player's euros (M8). */
+  setEuros(n: number): void;
+  /** Enemy NPC states in the game state (M8): id → `ready` / `cooldown` (missing = `ready`). */
+  npcStates(): NpcStates;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -183,6 +194,9 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     setEncounters: (on) => {
       debugFlags.encounters = on;
     },
+    euros: () => gameState().euros,
+    setEuros: (n) => setGameState({ ...gameState(), euros: n }),
+    npcStates: () => ({ ...gameState().npcs }),
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

@@ -5,7 +5,11 @@ import { createMoveState, updateMovement, type MoveState } from '../../src/logic
 import {
   arrivalTile,
   createNpcMove,
+  distanceToArea,
   endTalk,
+  engage,
+  faceTo,
+  forceStep,
   inWanderArea,
   nextWait,
   occupiedTiles,
@@ -156,5 +160,45 @@ describe('player and NPC never share a tile', () => {
       const taken = occupiedTiles(npc);
       for (const p of playerTiles(player)) expect(taken.some((q) => q.x === p.x && q.y === p.y)).toBe(false);
     }
+  });
+});
+
+describe('enemy approach (M8)', () => {
+  it('engage pauses wandering without turning; endTalk resumes', () => {
+    const s = engage(createNpcMove(3, 4, 'left', area, scriptedRng({ int: [100] })));
+    expect(s).toMatchObject({ talking: true, facing: 'left', turnTo: null });
+    const r = updateNpcMove(s, area, 1000, open, scriptedRng({}));
+    expect(r.events).toEqual([]);
+    expect(r.state.step).toBeNull();
+    expect(endTalk(s, area, scriptedRng({ int: [150] }))).toMatchObject({ talking: false, waitMs: 150 });
+  });
+
+  it('forceStep walks one adjacent tile (even out of the rectangle), facing it', () => {
+    const s = engage(createNpcMove(2, 4, 'down', area, scriptedRng({ int: [100] })));
+    const stepping = forceStep(s, { x: 1, y: 4 });
+    expect(stepping).toMatchObject({
+      facing: 'left',
+      step: { from: { x: 2, y: 4 }, to: { x: 1, y: 4 }, elapsed: 0 },
+    });
+    expect(forceStep(stepping, { x: 0, y: 4 })).toBe(stepping); // busy: unchanged
+    const done = updateNpcMove(stepping, area, WALK_MS, open, scriptedRng({ int: [100] }));
+    expect(done.state).toMatchObject({ x: 1, y: 4, step: null, talking: true });
+    expect(() => forceStep(s, { x: 4, y: 4 })).toThrow(/not next to/);
+  });
+
+  it('faceTo turns at once when standing, after the step otherwise', () => {
+    const s = createNpcMove(3, 4, 'left', null, scriptedRng({}));
+    expect(faceTo(s, 'up')).toMatchObject({ facing: 'up', turnTo: null });
+    const stepping = forceStep(s, { x: 3, y: 5 });
+    expect(faceTo(stepping, 'up')).toMatchObject({ facing: 'down', turnTo: 'up' });
+  });
+
+  it('outside its rectangle an NPC only steps back towards it', () => {
+    expect(distanceToArea(area, 3, 4)).toBe(0);
+    expect(distanceToArea(area, 0, 4)).toBe(2);
+    expect(distanceToArea(area, 7, 7)).toBe(4); // dx 2 (past x 5) + dy 2 (past y 5)
+    expect(wanderChoices({ x: 0, y: 4 }, area, open)).toEqual(['right']);
+    expect(wanderChoices({ x: 7, y: 7 }, area, open)).toEqual(['up', 'left']);
+    expect(wanderChoices({ x: 7, y: 7 }, area, (x) => x === 6)).toEqual(['up']);
   });
 });

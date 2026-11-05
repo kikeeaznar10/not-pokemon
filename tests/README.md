@@ -25,7 +25,7 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.debugMode()` | M4 | `'hidden'`, `'info'` or `'menu'` (teleport list); `null` when debugging is disabled. |
 | `window.__E2E__.currentMusic()` | M4 | Sound key of the zone music playing or fading in (e.g. `assets/audio/music/test.ogg`), or `null`. |
 | `window.__E2E__.overworldLocked()` | M4 | True while the overworld ignores movement (warp fade, debug menu; from M5 also an open dialogue or choice box). |
-| `window.__E2E__.npcs()` | M5 | NPCs on the current map: `{ id, x, y, facing, moving, talking }` (tile = the step's start while moving); `[]` outside the overworld. |
+| `window.__E2E__.npcs()` | M5 | NPCs on the current map: `{ id, x, y, facing, moving, talking, state, alert }` (tile = the step's start while moving; M8: `state` `ready`/`cooldown` for enemies, `null` otherwise; `alert` = the "!" bubble shows); `[]` outside the overworld. |
 | `window.__E2E__.dialogue()` | M5 | The open dialogue box: `{ page, pages, text (visible), full, typed, more, voicePlays }`, or `null`. |
 | `window.__E2E__.openChoice(options)` | M5 | Opens a ChoiceBox in the overworld (test helper; real uses come in M7/M9). |
 | `window.__E2E__.choice()` / `choiceResult()` | M5 | Open choice box `{ options, cursor }` or `null`; the last result (index, `null` = cancelled with B, `undefined` = none yet). |
@@ -35,6 +35,8 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.party()` | M7 | `{ team, storage, teamSlots }` from the game state (copies). |
 | `window.__E2E__.safeSteps()` | M7 | Steps left without encounter rolls (3 after every map entry and battle); `null` outside the overworld. |
 | `window.__E2E__.encountersEnabled()` / `setEncounters(on)` | M7 | Read / set the debug flag that switches wild encounters off (same as the F2 menu's "Encuentros" option). |
+| `window.__E2E__.euros()` / `setEuros(n)` | M8 | Read / set the player's euros in the game state. |
+| `window.__E2E__.npcStates()` | M8 | Enemy NPC states from the game state: `{ id: 'ready' \| 'cooldown' }` (an NPC never beaten is missing = `ready`). |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
 Keys pressed with Playwright are seen on the next game frame: poll for the expected state
@@ -51,3 +53,8 @@ for the plan's 2-minute check.
 back). Loss and forced-switch tests try seeds 1–10 until the case happens, since the opponent's attack is random.
 
 Add new helpers to the `E2EHooks` interface in `src/main.ts` and to this table.
+
+`tests/e2e/m8-enemies.spec.ts` injects enemy NPCs (`npcs.json`) and boosted stats (`flexymon.json`) with `page.route`,
+so NPC battles end the same way every time without seeds: Portátil wins in one blow unless it misses, and the boss's
+Ratón always wins. Since M8, `m5-dialogue.spec.ts`'s wander watch serves the shipped enemies as talkers (an enemy leaves
+its rectangle to challenge the player).

@@ -13,7 +13,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M5 — Dialogue and talking NPCs
 - [x] M6 — Battle scene
 - [x] M7 — Wild encounters, catching and merging
-- [ ] M8 — Enemy NPCs
+- [x] M8 — Enemy NPCs
 - [ ] M9 — Items, team, storage, shops and healing
 - [ ] M10 — Start menu and saving
 - [ ] M11 — Title screen, intro and secret names
@@ -213,6 +213,31 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   rises; a new species joins a team with a free slot; with a full team it goes to storage with its message;
   Dejarlo changes nothing; the debug option stops encounters. For M8: NPC battles skip the catch (`kind` `npc`).
 
+### M8
+
+- Built: pure `src/logic/enemy-npc.ts` (`findSpotter`, `npcTeam`, `winAgainstNpc`, `loseBattle`, `placedEnemies` /
+  `refreshCooldowns`), approach helpers in `npc-wander.ts` (`engage`, `forceStep`, `faceTo`; outside its rectangle an
+  NPC only steps back towards it), `talk.ts` (cooldown enemy → `defeatDialogue`). Overworld: sight check after every
+  player step and every NPC step while the player stands; spotted → halt, lock, "!" bubble 600 ms (`NPC_ALERT_MS`,
+  text `npc.alert`), walk up (path tiles reserved), both face each other, `dialogue`, `npc` battle against a fresh
+  team; A facing a `ready` enemy starts the same sequence. Battle: win with `npcId` → "¡Has ganado {n} €!", euros,
+  `cooldown`; then the NPC says `defeatDialogue` in the overworld. Any loss (wild too) → Losing rule, restart at
+  `start.json › respawn` with "Te has despertado en la oficina...". Debug: "Euros: {n}" in the F2 info, menu option
+  "NPC: todos listos". Hooks `euros`, `setEuros`, `npcStates`; `npcs()` gained `state` and `alert`.
+- Files outside a list (M8 has none in the plan): `npc-wander.ts`, `talk.ts`, `constants.ts`, `world/npc.ts`,
+  `world/player.ts` (`face`), `battle-scene.ts`, `debug-scene.ts`, `main.ts`, `es.json`, READMEs. Tests changed on
+  purpose: `m6-battle.spec.ts`'s loss test now checks the Losing rule (respawn (15, 11), half the euros, message)
+  instead of M6's "same tile" placeholder; `m7-encounters.spec.ts` presses ArrowUp twice in the debug menu (the new
+  option is now last); `m5-dialogue.spec.ts`'s wander watch serves the shipped becario as a talker, since an enemy
+  now walks out of its rectangle to challenge the randomly walking player. No check was weakened.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m8-enemies.spec.ts`, injected enemies and
+  boosted stats): 5 tiles away no trigger, 4 tiles triggers ("!", walk to the adjacent tile, dialogue, NPC battle);
+  behind the wall no trigger; win pays 80–140 € and shows the reward; next to it A gives only `defeatDialogue`;
+  7 tiles away → `ready`, back into sight triggers again; a loss respawns at (15, 11) with half the euros, healed
+  team, message, and the beaten NPC fights again (started by talking to it); debug euros line and NPC reset.
+- For M9/M10: the game state's `npcs` and `euros` are live (session); M10 just saves them. `loseBattle` heals
+  through `healParty`; M9's healer can reuse it.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -225,6 +250,20 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
 
+### Raised in M8 (safe assumptions in brackets)
+
+- [ ] Where are the reward message and `defeatDialogue` shown? ["¡Has ganado {n} €!" on the battle screen after
+  "¡Has ganado el combate!"; `defeatDialogue` in the overworld once it has faded back in.]
+- [ ] Does the player turn to face an enemy that walked up? [Yes.] Does talking to a `ready` enemy also show the
+  "!"? [Yes, the "same sequence", without the walk.]
+- [ ] Where does an enemy stand after the battle? [Where it walked to. A wanderer outside its rectangle only steps
+  towards the rectangle until it is back inside; a `wander: null` enemy stays there until the map is reloaded.]
+- [ ] When is the sight checked? [After every completed player step and every NPC step while the player stands
+  still; not on map entry and not when the player only turns.] If a step both enters a sight line and rolls a wild
+  encounter? [The enemy wins; no encounter roll.]
+- [ ] Does the Losing rule apply to wild battles too? [Yes: the rule only says "all team members are fainted".]
+- [ ] The "!" bubble's look. [White box with a red "!" (`npc.alert` in `es.json`) above the NPC, until real art.]
+
 ### Raised in M7 (safe assumptions in brackets)
 
 - [ ] Where does the catch choice appear? [On the battle screen after the win message, before fading out.] Does B
@@ -236,7 +275,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 
 ### Raised in M6 (safe assumptions in brackets)
 
-- [ ] What happens after a loss before M8's Losing rule exists? [Back on the same tile, team fully healed.]
+- [x] What happens after a loss before M8's Losing rule exists? **Resolved in M8:** the Losing rule runs.
 - [ ] Is there game state before M10 saves? [`src/core/session.ts` holds it in memory; a reload starts a new game.]
 - [ ] What does B do in the battle's main menu? [Nothing.] Can the forced replacement after a faint be cancelled? [No.]
 - [ ] Battle message wording (appear, uses, stat up/down, win/lose…) is not in the plan. [Written in `es.json`
@@ -252,7 +291,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] What happens to a dialogue string too long for one box? [It continues on extra boxes; no text is cut.]
 - [ ] May wandering NPCs stand on warp tiles (doors, edges)? [No, they could block a door.]
 - [ ] Does B advance dialogue? [No, only A, as the plan says; B cancels a ChoiceBox.]
-- [ ] Talking to an enemy NPC before M8. [It says its `dialogue`; no sight check or battle yet.]
+- [x] Talking to an enemy NPC before M8. **Resolved in M8:** a `ready` enemy starts its battle, a `cooldown` one
+  says its `defeatDialogue`.
 
 ### Raised in M4 (safe assumptions in brackets)
 

@@ -1,7 +1,7 @@
 // M6 "Done when": a debug battle Portátil vs Ratón can be won, lost and fled; HP bars match the numbers
 // (the scene only plays logic events); B never gets the player stuck in a menu. Plus: the debug menu
 // starts a battle, Huir is greyed out against NPCs, switching (voluntary and forced), Objeto = "Pronto",
-// and the player returns to the same tile with the team's HP kept.
+// and the player returns to the same tile with the team's HP kept (after a loss: the M8 Losing rule).
 // Battles start through `__E2E__.startBattle(seed, species, kind)`; the team is set with `setTeam`.
 import { test, expect, type Page } from '@playwright/test';
 
@@ -184,7 +184,7 @@ test('a debug battle Portátil vs Ratón can be won; HP bars match; same tile an
   expect(errors).toEqual([]);
 });
 
-test('a battle can be lost: back on the same tile (team healed until M8)', async ({ page }) => {
+test('a battle can be lost: the Losing rule wakes the player at the office (M8)', async ({ page }) => {
   // Plays up to 10 whole battles (messages type out at 30 characters per second).
   test.setTimeout(120_000);
   const errors = await enterOverworld(page);
@@ -205,9 +205,17 @@ test('a battle can be lost: back on the same tile (team healed until M8)', async
       }
       break;
     }
-    await standing(page, { map: 'test', x: 15, y: 10 });
+    if (!lost) await standing(page, { map: 'test', x: 15, y: 10 });
   }
   expect(lost).toBe(true);
+  // M8's Losing rule: respawn point (start.json › respawn), the message, euros halved, team healed.
+  await expect
+    .poll(async () => (await hook<{ full: string } | null>(page, 'dialogue'))?.full)
+    .toBe('Te has despertado en la oficina...');
+  expect(await tile(page)).toMatchObject({ map: 'test', x: 15, y: 11, facing: 'down' });
+  await press(page, 'z');
+  await standing(page, { map: 'test', x: 15, y: 11 });
+  expect(await hook<number>(page, 'euros')).toBe(100);
   expect((await team(page))[0]!.currentHp).toBe(40);
   expect(errors).toEqual([]);
 });

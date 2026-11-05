@@ -6,6 +6,9 @@
  * Sprites: the image at the NPC's `sprite` path. If it is a 64 × 128 sheet (2 columns stand/stride ×
  * 4 rows down/left/right/up, the player's layout) the NPC shows its facing and walk frames; any other
  * size (e.g. the 32 × 32 placeholders) is drawn as a single still image.
+ *
+ * Enemy NPCs (M8): {@link NpcActor.showAlert} draws the "!" bubble (text `npc.alert`) above the NPC;
+ * {@link NpcActor.engage}, {@link NpcActor.stepTo} and {@link NpcActor.face} walk it up to the player.
  */
 import Phaser from 'phaser';
 import { TILE_SIZE } from '../config/game';
@@ -16,6 +19,9 @@ import {
   arrivalTile,
   createNpcMove,
   endTalk,
+  engage,
+  faceTo,
+  forceStep,
   occupiedTiles,
   startTalk,
   updateNpcMove,
@@ -23,6 +29,11 @@ import {
 } from '../logic/npc-wander';
 import type { Point } from '../logic/npc-state';
 import { playerFrame } from './player';
+
+/** "!" bubble: size and offset above the NPC's tile (base pixels). */
+const ALERT_W = 14;
+const ALERT_H = 18;
+const ALERT_DEPTH = 4;
 
 /** Frame names added to a sheet texture (`npc0` … `npc7`, same order as the player sheet). */
 const frameName = (i: number): string => `npc${i}`;
@@ -51,9 +62,24 @@ export class NpcActor {
   readonly sprite: Phaser.GameObjects.Image;
   private move: NpcMove;
   private readonly sheet: boolean;
+  private readonly alert: Phaser.GameObjects.Container;
 
-  constructor(scene: Phaser.Scene, npc: Readonly<Npc>, rng: Rng) {
+  /** `alertText` is the bubble's text (`t('npc.alert')`). */
+  constructor(scene: Phaser.Scene, npc: Readonly<Npc>, rng: Rng, alertText = '!') {
     this.npc = npc;
+    const bubble = scene.add
+      .rectangle(0, 0, ALERT_W, ALERT_H, 0xffffff)
+      .setOrigin(0)
+      .setStrokeStyle(2, 0x202028);
+    const mark = scene.add
+      .text(ALERT_W / 2, ALERT_H / 2, alertText, {
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        fontStyle: 'bold',
+        color: '#d02020',
+      })
+      .setOrigin(0.5);
+    this.alert = scene.add.container(0, 0, [bubble, mark]).setDepth(ALERT_DEPTH).setVisible(false);
     this.move = createNpcMove(npc.spawn.x, npc.spawn.y, npc.facing, npc.wander, rng);
     this.sheet = prepareSheet(scene, npc.sprite);
     this.sprite = scene.add.image(0, 0, npc.sprite).setOrigin(0).setDepth(2);
@@ -90,6 +116,34 @@ export class NpcActor {
     this.draw();
   }
 
+  /** Enemy approach (M8): stop wandering without turning. Ended by {@link finishTalk}. */
+  engage(): void {
+    this.move = engage(this.move);
+  }
+
+  /** Walk one tile onto the adjacent tile `to` (the caller checks it is free). */
+  stepTo(to: Point): void {
+    this.move = forceStep(this.move, to);
+    this.draw();
+  }
+
+  /** Face `facing` (after the current step, if any). */
+  face(facing: Npc['facing']): void {
+    this.move = faceTo(this.move, facing);
+    this.draw();
+  }
+
+  /** Show or hide the "!" bubble above the NPC. */
+  showAlert(on: boolean): void {
+    this.alert.setVisible(on);
+    this.draw();
+  }
+
+  /** True while the "!" bubble shows. */
+  get alerting(): boolean {
+    return this.alert.visible;
+  }
+
   /** Conversation over: wander again after a fresh wait. */
   finishTalk(rng: Rng): void {
     this.move = endTalk(this.move, this.npc.wander, rng);
@@ -98,6 +152,7 @@ export class NpcActor {
   private draw(): void {
     const pos = renderPosition(this.move);
     this.sprite.setPosition(Math.round(pos.x * TILE_SIZE), Math.round(pos.y * TILE_SIZE));
+    this.alert.setPosition(this.sprite.x + (TILE_SIZE - ALERT_W) / 2, this.sprite.y - ALERT_H - 2);
     if (this.sheet) this.sprite.setFrame(frameName(playerFrame(this.move.facing, walkFrame(this.move))));
   }
 }

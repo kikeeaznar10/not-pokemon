@@ -3,7 +3,8 @@
 // dialogue box types, A reveals then advances, the arrow/`more` flag, the voice, healer/storage
 // placeholders and the ChoiceBox.
 // Extra NPCs are injected by intercepting `data/npcs.json` (no code or shipped data changes).
-// The shipped becario wanders in the same rectangle, so three wanderers share it with the player.
+// The shipped becario wanders in the same rectangle, so three wanderers share it with the player. Since M8
+// an enemy walks out of its rectangle to challenge the player, so this test serves it as a talker.
 // The wander watch lasts M5_WATCH_MS (default 20 s; run once with 120000 for the plan's 2 minutes).
 import { test, expect, type Page } from '@playwright/test';
 
@@ -57,11 +58,22 @@ const npc = (over: Record<string, unknown>) => ({
   ...over,
 });
 
-/** Serve npcs.json with `extra` appended and, optionally, a different new-game spawn. */
-async function patchData(page: Page, extra: object[], spawn?: object): Promise<void> {
+/**
+ * Serve npcs.json with `extra` appended and, optionally, a different new-game spawn. With `talkersOnly`,
+ * shipped enemies become talkers (M8: they would otherwise walk out of their rectangle to battle).
+ */
+async function patchData(page: Page, extra: object[], spawn?: object, talkersOnly = false): Promise<void> {
   await page.route('**/data/npcs.json', async (route) => {
     const res = await route.fetch();
-    const list = (await res.json()) as object[];
+    let list = (await res.json()) as Record<string, unknown>[];
+    if (talkersOnly) {
+      list = list.map((n) => {
+        if (n.type !== 'enemy') return n;
+        const talker: Record<string, unknown> = { ...n, type: 'talker' };
+        for (const k of ['sight', 'team', 'reward', 'defeatDialogue']) delete talker[k];
+        return talker;
+      });
+    }
     await route.fulfill({ response: res, body: JSON.stringify([...list, ...extra]) });
   });
   if (spawn) {
@@ -243,6 +255,7 @@ test('wandering NPCs stay in their rectangle and never share a tile with the pla
       npc({ id: 'w2', map: 'test_east', spawn: { x: 12, y: 15 }, wander: fast, dialogue: ['¡Ay!'] }),
     ],
     { map: 'test_east', x: 10, y: 12, facing: 'down' },
+    true,
   );
   const errors = await enterOverworld(page, { map: 'test_east', x: 10, y: 12 });
 

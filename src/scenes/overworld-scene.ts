@@ -33,6 +33,20 @@
  *   in zones.json; on success the player stops on that tile and a wild battle starts. Safe steps:
  *   `SAFE_STEPS` after every map entry and battle. The debug menu can switch encounters off
  *   (`src/core/debug-flags.ts`).
+ * - Enemy NPCs (M8): after every completed player step, and every NPC step while the player stands
+ *   still, the `ready` enemies on the map look for the player (`findSpotter`, `src/logic/enemy-npc.ts`:
+ *   straight line in front, at most `sight` tiles, no solid tile or NPC between). A spotted player halts
+ *   on that tile; input stays locked while the NPC shows a "!" bubble for `NPC_ALERT_MS`, walks up to the
+ *   adjacent tile (the tiles on its way are reserved, so no wanderer steps in), both turn to face each
+ *   other, the NPC says its `dialogue`, and an `npc` battle against a fresh copy of its `team` starts.
+ *   While one NPC walks up, no other NPC looks. Pressing A facing a `ready` enemy starts the same
+ *   sequence (without the walk); a `cooldown` enemy only says its `defeatDialogue`. After a win (the
+ *   BattleScene already paid the reward and set `cooldown`) the NPC says its `defeatDialogue`, then
+ *   wanders again (back into its rectangle, see `npc-wander.ts`). Cooldowns are refreshed
+ *   (`refreshCooldowns`) on map entry and after every player or NPC step.
+ * - Losing (M8): the BattleScene applies the Losing rule to the game state; on `battle:ended` with
+ *   `lose` this scene restarts at the respawn point (`start.json › respawn`), fades in and shows
+ *   `lose.woke_up` ("Te has despertado en la oficina...").
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
  *   the player and after every step.
  */
@@ -43,15 +57,26 @@ import { input } from '../core/input';
 import { log } from '../core/log';
 import { rng } from '../core/rng';
 import { getGameData } from '../data/game-data';
+import { gameState, setGameState } from '../core/session';
 import type { Facing, Zone } from '../data/schemas';
 import { findSpawn, isBlocked, type MapInfo } from '../data/tiled';
 import { t } from '../i18n';
 import type { BattleKind } from '../logic/battle';
-import { BATTLE_FLASH_MS, WARP_FADE_MS } from '../logic/constants';
+import { BATTLE_FLASH_MS, NPC_ALERT_MS, WARP_FADE_MS } from '../logic/constants';
+import {
+  findSpotter,
+  isEnemy,
+  npcTeam,
+  placedEnemies,
+  refreshCooldowns,
+  type Lookout,
+} from '../logic/enemy-npc';
+import type { FlexymonInstance } from '../logic/instance';
+import { oppositeFacing } from '../logic/npc-wander';
 import { createInstance } from '../logic/instance';
 import { checkStep, resetSafeSteps } from '../logic/encounter';
 import { debugFlags } from '../core/debug-flags';
-import { FACING_DELTA } from '../logic/npc-state';
+import { FACING_DELTA, npcState, type NpcState, type Point } from '../logic/npc-state';
 import { talkLines } from '../logic/talk';
 import { blockedWithWarps, insideWarp, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
 import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
@@ -71,6 +96,8 @@ export interface OverworldData {
   y?: number;
   facing?: Facing;
   fadeIn?: boolean;
+  /** Dialogue strings shown once the scene has faded in (M8: the "woke up" message after a loss). */
+  messages?: string[];
 }
 
 /** What {@link OverworldScene.startBattle} needs: the opponent species, the kind and an optional seed. */
@@ -78,6 +105,26 @@ export interface BattleRequest {
   speciesId: string;
   kind?: BattleKind;
   seed?: number;
+}
+
+/** An enemy NPC sequence in progress (M8): "!" bubble → walk up → dialogue → battle → defeat dialogue. */
+interface Engagement {
+  npc: NpcActor;
+  /** Tiles still to walk (reserved: other NPCs may not step onto them). */
+  path: Point[];
+  phase: 'alert' | 'walk' | 'talk' | 'battle' | 'defeat';
+}
+
+/** One NPC as the E2E hooks see it. `state` is `null` for NPCs that are not enemies. */
+export interface NpcView {
+  id: string;
+  x: number;
+  y: number;
+  facing: Facing;
+  moving: boolean;
+  talking: boolean;
+  state: NpcState | null;
+  alert: boolean;
 }
 
 /** Number of white flashes in the battle transition. */
@@ -109,6 +156,8 @@ export class OverworldScene extends Phaser.Scene {
   /** True during a warp fade: the player cannot move. */
   private locked = false;
   private debugMenuOpen = false;
+  /** Enemy NPC sequence in progress (M8), or `null`. */
+  private engagement: Engagement | null = null;
   /** Steps left without encounter rolls (`SAFE_STEPS` after every map entry and battle). */
   safeSteps = 0;
 
@@ -123,6 +172,7 @@ export class OverworldScene extends Phaser.Scene {
     this.dialog = null;
     this.choice = null;
     this.locked = false;
+    this.engagement = null;
     const zone = getGameData().zones.get(data.map);
     if (!zone) throw new Error(`Overworld: unknown zone "${data.map}"`);
     this.zone = zone;
@@ -155,7 +205,9 @@ export class OverworldScene extends Phaser.Scene {
     const x = this.target.x ?? spawn.x;
     const y = this.target.y ?? spawn.y;
     this.player = new Player(this, x, y, this.target.facing ?? 'down');
-    this.npcs = npcsOnMap(getGameData().npcs.values(), this.zone.id).map((n) => new NpcActor(this, n, rng));
+    this.npcs = npcsOnMap(getGameData().npcs.values(), this.zone.id).map(
+      (n) => new NpcActor(this, n, rng, t('npc.alert')),
+    );
     this.dialog = new DialogBox(this);
     this.choice = new ChoiceBox(this);
     this.safeSteps = resetSafeSteps();
@@ -165,20 +217,26 @@ export class OverworldScene extends Phaser.Scene {
     const b = cameraBounds(map.widthInPixels, map.heightInPixels);
     cam.setBounds(b.x, b.y, b.width, b.height);
     cam.startFollow(this.player.sprite, true, 1, 1, -TILE_SIZE / 2, -TILE_SIZE / 2);
+    const messages = this.target.messages ?? [];
+    const showMessages = () => {
+      if (messages.length) this.dialog?.open(messages);
+    };
     if (this.target.fadeIn) {
       this.locked = true;
       cam.fadeIn(WARP_FADE_MS, 0, 0, 0);
       cam.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
         this.locked = false;
+        showMessages();
       });
-    }
+    } else showMessages();
+    this.updateCooldowns(x, y);
 
     const offs = [
       events.on('debug:teleport', ({ map: zoneId }) => this.teleport(zoneId)),
       events.on('debug:battle', ({ speciesId }) => {
         this.startBattle({ speciesId });
       }),
-      events.on('battle:ended', () => this.returnFromBattle()),
+      events.on('battle:ended', ({ result }) => this.returnFromBattle(result)),
       events.on('debug:menu', ({ open }) => {
         this.debugMenuOpen = open;
       }),
@@ -197,9 +255,14 @@ export class OverworldScene extends Phaser.Scene {
     const talking = this.isTalking();
     if (this.dialog?.isOpen) this.dialog.update(dt);
     else if (this.choice?.isOpen) this.choice.update();
-    for (const npc of this.npcs) npc.update(dt, (nx, ny) => this.blockedForNpc(npc, nx, ny), rng);
+    let npcStepped = false;
+    for (const npc of this.npcs) {
+      const evs = npc.update(dt, (nx, ny) => this.blockedForNpc(npc, nx, ny), rng);
+      if (evs.some((e) => e.type === 'step_end')) npcStepped = true;
+    }
+    this.updateEngagement();
 
-    const frozen = this.locked || this.debugMenuOpen || talking;
+    const frozen = this.locked || this.debugMenuOpen || talking || this.engagement !== null;
     const dir = frozen ? null : input.direction();
     const fresh = dir !== null && input.justPressed(dir);
     const moves = player.update(dir, dt, (px, py) => this.blockedForPlayer(px, py), fresh);
@@ -212,7 +275,15 @@ export class OverworldScene extends Phaser.Scene {
         return;
       }
       const end = moves.find((m) => m.type === 'step_end'); // At most one per frame.
-      if (end?.type === 'step_end' && this.encounterStep(end.x, end.y)) return;
+      if (end?.type === 'step_end') {
+        this.updateCooldowns(end.x, end.y);
+        if (this.lookForPlayer(end)) return;
+        if (this.encounterStep(end.x, end.y)) return;
+      }
+    } else if (npcStepped && !frozen && !player.state.step) {
+      const s = player.state;
+      this.updateCooldowns(s.x, s.y);
+      if (this.lookForPlayer(s)) return;
     }
     if (!frozen && input.justPressed('a') && !player.state.step) {
       const s = player.state;
@@ -238,23 +309,119 @@ export class OverworldScene extends Phaser.Scene {
     const player = this.player;
     const species = getGameData().flexymon.get(req.speciesId);
     if (!player || !species || this.isLocked() || player.state.step || !this.sys.isActive()) return false;
-    this.locked = true;
-    const data: BattleSceneData = {
+    this.launchBattle({
       kind: req.kind ?? 'wild',
       opponent: [createInstance(species, rng)],
       ...(req.seed !== undefined ? { seed: req.seed } : {}),
-    };
+    });
+    return true;
+  }
+
+  /** Lock input, flash `BATTLE_FLASH_MS`, then launch the BattleScene with `data` and sleep. */
+  private launchBattle(data: BattleSceneData): void {
+    this.locked = true;
     const cam = this.cameras.main;
     const each = BATTLE_FLASH_MS / BATTLE_FLASHES;
     for (let i = 0; i < BATTLE_FLASHES; i++) {
       this.time.delayedCall(i * each, () => cam.flash(each, 255, 255, 255, true));
     }
     this.time.delayedCall(BATTLE_FLASH_MS, () => {
-      log(`Overworld: battle vs ${req.speciesId}`);
+      log(`Overworld: ${data.kind} battle vs ${data.opponent.map((o) => o.speciesId).join(', ')}`);
       this.scene.launch(BATTLE_SCENE, data);
       this.scene.sleep();
     });
+  }
+
+  /**
+   * Enemy NPCs (M8): if a `ready` enemy on this map sees the player standing on `at`, halt the player
+   * there and start its sequence. Returns true if one did. Nobody looks while a sequence runs.
+   */
+  private lookForPlayer(at: Point): boolean {
+    if (this.engagement || this.locked || !this.player) return false;
+    const lookouts: Lookout[] = this.npcs.flatMap((n) =>
+      isEnemy(n.npc)
+        ? [
+            {
+              id: n.npc.id,
+              x: n.state.x,
+              y: n.state.y,
+              facing: n.state.facing,
+              sight: n.npc.sight,
+              free: !n.state.step && !n.state.talking,
+            },
+          ]
+        : [],
+    );
+    const seen = findSpotter(
+      lookouts,
+      gameState().npcs,
+      at,
+      (x, y) => isBlocked(this.info, x, y) || this.npcs.some((n) => n.occupies(x, y)),
+    );
+    const actor = seen && this.npcs.find((n) => n.npc.id === seen.id);
+    if (!seen || !actor) return false;
+    this.player.halt(at.x, at.y);
+    this.emitMoved();
+    log(`Overworld: spotted by ${seen.id} at distance ${seen.distance}`);
+    actor.engage();
+    this.engage(actor, seen.path);
     return true;
+  }
+
+  /** Start an enemy sequence with `actor` (already paused): "!" bubble for `NPC_ALERT_MS`, then walk `path`. */
+  private engage(actor: NpcActor, path: Point[]): void {
+    const engagement: Engagement = { npc: actor, path: [...path], phase: 'alert' };
+    this.engagement = engagement;
+    actor.showAlert(true);
+    this.time.delayedCall(NPC_ALERT_MS, () => {
+      actor.showAlert(false);
+      if (this.engagement === engagement) engagement.phase = 'walk';
+    });
+  }
+
+  /**
+   * Each frame of the `walk` phase: step the NPC along its path (waiting while the next tile is taken);
+   * once adjacent, both face each other and the NPC says its `dialogue`, then the battle starts.
+   */
+  private updateEngagement(): void {
+    const e = this.engagement;
+    const player = this.player;
+    if (!e || e.phase !== 'walk' || !player || e.npc.state.step) return;
+    const next = e.path[0];
+    if (next) {
+      if (this.blockedForNpc(e.npc, next.x, next.y)) return;
+      e.path.shift();
+      e.npc.stepTo(next);
+      return;
+    }
+    const p = player.state;
+    const n = e.npc.state;
+    const toPlayer: Facing = p.x > n.x ? 'right' : p.x < n.x ? 'left' : p.y > n.y ? 'down' : 'up';
+    e.npc.face(toPlayer);
+    player.face(oppositeFacing(toPlayer));
+    e.phase = 'talk';
+    this.dialog?.open(e.npc.npc.dialogue, {
+      voice: e.npc.npc.voice,
+      onClose: () => this.startNpcBattle(e),
+    });
+  }
+
+  /** The enemy finished talking: battle against a fresh copy of its team. */
+  private startNpcBattle(e: Engagement): void {
+    const npc = e.npc.npc;
+    if (!isEnemy(npc)) return;
+    e.phase = 'battle';
+    const opponent: FlexymonInstance[] = npcTeam(npc, getGameData().flexymon, rng);
+    this.launchBattle({ kind: 'npc', opponent, npcId: npc.id });
+  }
+
+  /** Return `cooldown` enemies to `ready` when the player (on tile x, y) is far enough or elsewhere. */
+  private updateCooldowns(x: number, y: number): void {
+    const gs = gameState();
+    const positions = new Map(this.npcs.map((n) => [n.npc.id, { x: n.state.x, y: n.state.y }]));
+    const enemies = placedEnemies(getGameData().npcs.values(), this.zone.id, positions);
+    const next = refreshCooldowns(gs.npcs, enemies, { map: this.zone.id, x, y });
+    if (next !== gs.npcs) setGameState({ ...gs, npcs: { ...next } });
   }
 
   /**
@@ -287,23 +454,56 @@ export class OverworldScene extends Phaser.Scene {
     return this.startBattle({ speciesId: result.speciesId });
   }
 
-  /** Wake up after a battle on the same tile: fade in, reset safe steps, unlock. */
-  private returnFromBattle(): void {
+  /**
+   * After a battle. Lost (M8): restart at the respawn point already in the game state, with the "woke up"
+   * message. Otherwise wake up on the same tile: fade in, reset safe steps, unlock; after beating an
+   * enemy NPC it first says its `defeatDialogue`.
+   */
+  private returnFromBattle(result: 'win' | 'lose' | 'fled'): void {
     if (!this.sys.isSleeping()) return;
     this.scene.wake();
+    if (result === 'lose') {
+      const p = gameState().player;
+      log(`Overworld: lost, waking up at ${p.map} ${p.x},${p.y}`);
+      this.scene.restart({
+        map: p.map,
+        x: p.x,
+        y: p.y,
+        facing: p.facing,
+        fadeIn: true,
+        messages: [t('lose.woke_up')],
+      } satisfies OverworldData);
+      return;
+    }
     this.safeSteps = resetSafeSteps();
     const cam = this.cameras.main;
     cam.resetFX();
     cam.fadeIn(WARP_FADE_MS, 0, 0, 0);
     cam.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
       this.locked = false;
+      const e = this.engagement;
+      if (!e) return;
+      const npc = e.npc.npc;
+      if (result !== 'win' || !isEnemy(npc)) {
+        e.npc.finishTalk(rng);
+        this.engagement = null;
+        return;
+      }
+      e.phase = 'defeat';
+      this.dialog?.open(npc.defeatDialogue, {
+        voice: npc.voice,
+        onClose: () => {
+          e.npc.finishTalk(rng);
+          this.engagement = null;
+        },
+      });
     });
     this.emitMoved();
   }
 
   /** Lock input, fade out, then restart on the target (which fades in and unlocks). */
   warpTo(target: WarpTarget): void {
-    if (this.locked) return;
+    if (this.locked || this.engagement) return;
     this.locked = true;
     const cam = this.cameras.main;
     cam.fadeOut(WARP_FADE_MS, 0, 0, 0);
@@ -313,13 +513,22 @@ export class OverworldScene extends Phaser.Scene {
     });
   }
 
-  /** Start a conversation with `npc`; the player is frozen until the last box closes. */
+  /**
+   * Start a conversation with `npc`; the player is frozen until the last box closes. A `ready` enemy
+   * starts its battle sequence instead (M8); a `cooldown` one says its `defeatDialogue`.
+   */
   private talkTo(npc: NpcActor): void {
     const player = this.player;
     if (!player || !this.dialog) return;
     npc.beginTalk(player.state.facing);
+    const state = npcState(gameState().npcs, npc.npc.id);
+    if (isEnemy(npc.npc) && state === 'ready') {
+      log(`Overworld: challenged ${npc.npc.id}`);
+      this.engage(npc, []);
+      return;
+    }
     log(`Overworld: talking to ${npc.npc.id}`);
-    this.dialog.open(talkLines(npc.npc, t), {
+    this.dialog.open(talkLines(npc.npc, t, state), {
       voice: npc.npc.voice,
       onClose: () => npc.finishTalk(rng),
     });
@@ -330,9 +539,14 @@ export class OverworldScene extends Phaser.Scene {
     return this.blocked(x, y) || this.npcs.some((n) => n.occupies(x, y));
   }
 
-  /** NPC blocking: solid tiles, map edges, warp tiles, the player's tiles and the other NPCs' tiles. */
+  /**
+   * NPC blocking: solid tiles, map edges, warp tiles, the player's tiles, the other NPCs' tiles and (M8)
+   * the tiles an approaching enemy still has to walk.
+   */
   private blockedForNpc(self: NpcActor, x: number, y: number): boolean {
     if (isBlocked(this.info, x, y)) return true;
+    const e = this.engagement;
+    if (e && e.npc !== self && e.path.some((p) => p.x === x && p.y === y)) return true;
     if (this.info.warps.some((w) => insideWarp(w, x, y))) return true;
     const p = this.player?.state;
     if (p && ((p.x === x && p.y === y) || (p.step && p.step.to.x === x && p.step.to.y === y))) return true;
@@ -345,10 +559,20 @@ export class OverworldScene extends Phaser.Scene {
   }
 
   /** The NPCs on this map with their tile and state (for hooks and tests). */
-  npcList(): { id: string; x: number; y: number; facing: Facing; moving: boolean; talking: boolean }[] {
+  npcList(): NpcView[] {
+    const states = gameState().npcs;
     return this.npcs.map((n) => {
       const s = n.state;
-      return { id: n.npc.id, x: s.x, y: s.y, facing: s.facing, moving: s.step !== null, talking: s.talking };
+      return {
+        id: n.npc.id,
+        x: s.x,
+        y: s.y,
+        facing: s.facing,
+        moving: s.step !== null,
+        talking: s.talking,
+        state: isEnemy(n.npc) ? npcState(states, n.npc.id) : null,
+        alert: n.alerting,
+      };
     });
   }
 
@@ -395,9 +619,9 @@ export class OverworldScene extends Phaser.Scene {
     return { map: this.zone.id, x: s.x, y: s.y, facing: s.facing, moving: s.step !== null };
   }
 
-  /** True while the player cannot move: warp fade, debug menu, or a dialogue/choice box is open. */
+  /** True while the player cannot move: warp fade, debug menu, a dialogue/choice box, an enemy sequence. */
   isLocked(): boolean {
-    return this.locked || this.debugMenuOpen || this.isTalking();
+    return this.locked || this.debugMenuOpen || this.isTalking() || this.engagement !== null;
   }
 
   private emitMoved(): void {

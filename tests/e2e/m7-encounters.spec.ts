@@ -275,13 +275,14 @@ test('the debug menu switches encounters off', async ({ page }) => {
   await press(page, 'F2');
   await press(page, 'F2');
   await expect.poll(() => hook<string>(page, 'debugMode')).toBe('menu');
-  await press(page, 'ArrowUp'); // wraps to the last entry, the option
+  await press(page, 'ArrowUp'); // wraps to the last entry (M8's "NPC: todos listos")…
+  await press(page, 'ArrowUp'); // …the one above it is the encounters option
   await expect
-    .poll(async () => (await hook<string[]>(page, 'debugLines'))!.slice(-2))
-    .toEqual(['Opciones', '> Encuentros: sí']);
+    .poll(async () => (await hook<string[]>(page, 'debugLines'))!.slice(-3))
+    .toEqual(['Opciones', '> Encuentros: sí', '  NPC: todos listos']);
   await press(page, 'z');
   await expect.poll(() => hook<boolean>(page, 'encountersEnabled')).toBe(false);
-  expect((await hook<string[]>(page, 'debugLines'))!.at(-1)).toBe('> Encuentros: no');
+  expect((await hook<string[]>(page, 'debugLines'))!.at(-2)).toBe('> Encuentros: no');
   await press(page, 'F2'); // close
   await expect.poll(() => hook<string>(page, 'debugMode')).toBe('hidden');
   for (const key of ['ArrowRight', 'ArrowRight', 'ArrowRight', 'ArrowDown', 'ArrowDown', 'ArrowLeft']) {

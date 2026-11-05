@@ -72,3 +72,6 @@ export const HP_YELLOW_BELOW = 0.5;
 
 /** HP bar turns red below this fraction of max HP (M6). */
 export const HP_RED_BELOW = 0.2;
+
+/** Enemy NPC (M8): the "!" bubble shows this long before the NPC walks up to the player (ms). */
+export const NPC_ALERT_MS = 600;

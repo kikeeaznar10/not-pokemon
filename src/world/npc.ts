@@ -7,7 +7,8 @@
  * 4 rows down/left/right/up, the player's layout) the NPC shows its facing and walk frames; any other
  * size (e.g. the 32 × 32 placeholders) is drawn as a single still image.
  *
- * Enemy NPCs (M8): {@link NpcActor.showAlert} draws the "!" bubble (text `npc.alert`) above the NPC;
+ * Enemy NPCs (M8): {@link NpcActor.showAlert} draws the "!" bubble (text `npc.alert`) above the NPC
+ * (lowered over its head when that would be above the camera view);
  * {@link NpcActor.engage}, {@link NpcActor.stepTo} and {@link NpcActor.face} walk it up to the player.
  */
 import Phaser from 'phaser';
@@ -63,10 +64,12 @@ export class NpcActor {
   private move: NpcMove;
   private readonly sheet: boolean;
   private readonly alert: Phaser.GameObjects.Container;
+  private readonly scene: Phaser.Scene;
 
   /** `alertText` is the bubble's text (`t('npc.alert')`). */
   constructor(scene: Phaser.Scene, npc: Readonly<Npc>, rng: Rng, alertText = '!') {
     this.npc = npc;
+    this.scene = scene;
     const bubble = scene.add
       .rectangle(0, 0, ALERT_W, ALERT_H, 0xffffff)
       .setOrigin(0)
@@ -152,7 +155,12 @@ export class NpcActor {
   private draw(): void {
     const pos = renderPosition(this.move);
     this.sprite.setPosition(Math.round(pos.x * TILE_SIZE), Math.round(pos.y * TILE_SIZE));
-    this.alert.setPosition(this.sprite.x + (TILE_SIZE - ALERT_W) / 2, this.sprite.y - ALERT_H - 2);
+    // Above the head; never above the top of the view (an enemy 4 tiles up sits on the top screen row).
+    const top = this.scene.cameras.main.worldView.y + 2;
+    this.alert.setPosition(
+      this.sprite.x + (TILE_SIZE - ALERT_W) / 2,
+      Math.max(this.sprite.y - ALERT_H - 2, top),
+    );
     if (this.sheet) this.sprite.setFrame(frameName(playerFrame(this.move.facing, walkFrame(this.move))));
   }
 }

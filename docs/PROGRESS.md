@@ -263,7 +263,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   still; not on map entry and not when the player only turns.] If a step both enters a sight line and rolls a wild
   encounter? [The enemy wins; no encounter roll.]
 - [ ] Does the Losing rule apply to wild battles too? [Yes: the rule only says "all team members are fainted".]
-- [ ] The "!" bubble's look. [White box with a red "!" (`npc.alert` in `es.json`) above the NPC, until real art.]
+- [ ] The "!" bubble's look. [White box with a red "!" (`npc.alert` in `es.json`) above the NPC, until real art. An
+  enemy 4 tiles above the player sits on the top screen row, so the bubble is lowered over its head there.]
 
 ### Raised in M7 (safe assumptions in brackets)
 

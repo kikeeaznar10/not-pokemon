@@ -55,6 +55,11 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.nameEntry()` | M11 | The name screen: `{ name, cursor, cell (label under the cursor), cells (labels), message, rects (cell rectangles in base pixels) }`, else `null`. |
 | `window.__E2E__.intro()` | M11 | The intro: `{ step, type, name, player, coworker ({ x, y, facing }), dialogue, handedOver, secretMessage, jinglePlays }`, else `null`. |
 | `window.__E2E__.playerName()` | M11 | The player's name in the game state. |
+| `window.__E2E__.touchControls()` | M12 | The touch overlay: `{ shown, controls [{ id ('dpad'/'a'/'b'/'start'/'map'), x, y, width, height }] (CSS pixels), pressed (ids held; the D-pad as 'dpad:<dir>') }`; `{ shown: false, controls: [], pressed: [] }` on non-touch devices. |
+| `window.__E2E__.inputDown()` | M12 | Actions the Input service holds down now (keys and touch alike). |
+| `window.__E2E__.rotateScreen()` | M12 | `{ shown ("Gira el móvil" on screen), paused (game loop), touch (touch device) }`. |
+| `window.__E2E__.fullscreenRequested()` | M12 | True once the first tap asked for fullscreen. |
+| `window.__E2E__.minimap()` | M12 | The minimap in the overworld: `{ zone, shown (player's choice), visible (drawn), available (outdoors with an image), frame { x, y, width, height, scale } (base pixels), mapSize, tile, dot { x, y } (base pixels), dotOn (blink) }`, else `null`. |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then call `quickStart()` until it returns true
 (`page.waitForFunction(() => window.__E2E__.quickStart())`; M11 — the title needs a frame to start). To test the
@@ -74,6 +79,14 @@ before the next (two presses in one frame count once). After a warp, also wait f
 no code change" is tested without touching the shipped data). Its wander watch lasts `M5_WATCH_MS` ms (default
 20000); run it once with `M5_WATCH_MS=120000 npx playwright test tests/e2e/m5-dialogue.spec.ts --project=desktop -g wandering`
 for the plan's 2-minute check.
+
+**Portrait phones (M12).** On a touch device in portrait the game shows "Gira el móvil" and pauses. The `android`
+and `iphone` profiles are portrait, so `playwright.config.ts` starts them with `localStorage['flexymon.e2e.allowPortrait']
+= '1'`, an E2E-only switch (`src/main.ts`, ignored in production builds) that turns the guard off so the older specs
+still drive the game there. `tests/e2e/m12-mobile.spec.ts` removes it (`addInitScript`) to test the guard, and turns
+the phones to landscape (`setViewportSize`) for its touch tests. Touch taps use `page.touchscreen.tap` (real touch
+events, Chromium and WebKit); holds, slides and multi-touch dispatch `PointerEvent`s of type `touch` on the controls,
+since Playwright's touchscreen can only tap.
 
 `tests/e2e/m6-battle.spec.ts` drives battles with `advance()` (presses A through messages until a menu or the overworld is
 back). Loss and forced-switch tests try seeds 1–10 until the case happens, since the opponent's attack is random.

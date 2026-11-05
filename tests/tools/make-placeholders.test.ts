@@ -2,7 +2,10 @@ import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 import {
   collectAssetPaths,
+  MINIMAP_COLOURS,
+  makeMinimapPng,
   makePng,
+  readMinimapTargets,
   makeTitlePng,
   pngSize,
   TITLE_IMAGE,
@@ -53,5 +56,29 @@ describe('make-placeholders', () => {
     const png = PNG.sync.read(makeTitlePng());
     expect([png.width, png.height]).toEqual([512, 288]);
     for (let i = 3; i < png.data.length; i += 4 * 997) expect(png.data[i]).toBe(255);
+  });
+
+  it('draws a minimap from the collision data, one square per tile (M12)', () => {
+    const map = {
+      width: 3,
+      height: 2,
+      solid: [true, false, false, false, false, true],
+      encounter: [false, true, false, false, false, false],
+    };
+    const png = PNG.sync.read(makeMinimapPng(map, 2));
+    expect([png.width, png.height]).toEqual([6, 4]);
+    const at = (x: number, y: number) => [...png.data.subarray((y * 6 + x) * 4, (y * 6 + x) * 4 + 3)];
+    expect(at(0, 0)).toEqual(MINIMAP_COLOURS.solid);
+    expect(at(1, 1)).toEqual(MINIMAP_COLOURS.solid);
+    expect(at(2, 0)).toEqual(MINIMAP_COLOURS.encounter);
+    expect(at(4, 0)).toEqual(MINIMAP_COLOURS.open);
+    expect(at(5, 3)).toEqual(MINIMAP_COLOURS.solid);
+  });
+
+  it('makes a minimap for every outdoor zone only (M12)', () => {
+    expect(readMinimapTargets()).toEqual([
+      { assetPath: 'assets/ui/minimap_test.png', mapFile: 'maps/test.tmj' },
+      { assetPath: 'assets/ui/minimap_test_east.png', mapFile: 'maps/test_east.tmj' },
+    ]);
   });
 });

@@ -99,7 +99,9 @@
   "menu.map": "Mapa",
   "menu.options": "Opciones",
   "menu.close": "Cerrar",
-  "menu.map_soon": "El mapa todavía no está listo.",
+  "menu.map_on": "Minimapa activado.",
+  "menu.map_off": "Minimapa desactivado.",
+  "menu.map_indoor": "Aquí dentro no hay mapa.",
   "menu.team_title": "Equipo (A: ver · B: volver)",
   "menu.move_title": "¿A qué puesto llevas a {name}? (B: cancelar)",
   "menu.hp": "PS {hp}/{max}",
@@ -146,5 +148,11 @@
   "name.ok": "OK",
   "name.hint": "Escribe o elige letras · START: OK",
   "name.empty": "Escribe al menos una letra.",
-  "intro.received": "¡Recibes a {starter}!"
+  "intro.received": "¡Recibes a {starter}!",
+  "touch.a": "A",
+  "touch.b": "B",
+  "touch.start": "START",
+  "touch.map": "MAPA",
+  "mobile.rotate": "Gira el móvil",
+  "mobile.rotate_hint": "Flexymon se juega en horizontal."
 }

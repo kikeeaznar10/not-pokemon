@@ -11,6 +11,10 @@
  *   with windows and a door, a path), so the title screen has something to show until real art exists.
  * - Audio: an `.ogg` or `.mp3` path produces BOTH `<name>.ogg` and `<name>.mp3` (0.2 s beep made with
  *   `ffmpeg` if it is on the PATH; otherwise a copy of the silent files in `tools/fallback/`).
+ * - Minimaps (M12): every outdoor zone in `zones.json` (`indoor: false`) gets `assets/ui/minimap_<zone>.png`, a
+ *   scaled-down render of its map's collision data (`MINIMAP_TILE_PX` pixels per tile: solid dark, encounter
+ *   tiles green, the rest sand). Like everything else it is never overwritten: after editing a map, delete its
+ *   minimap and run the tool again.
  *
  * Flags: `--dry-run` lists what would be created without writing anything.
  */
@@ -19,6 +23,9 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFi
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
+import { parseTiledMap } from '../src/data/tiled';
+import { MINIMAP_TILE_PX } from '../src/logic/constants';
+import { minimapCells, minimapPath, type MinimapCell } from '../src/logic/minimap';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = join(ROOT, 'public');
@@ -152,6 +159,52 @@ export function makeTitlePng(width: number = TITLE_SIZE.width, height: number = 
   // Path to the door.
   rect(dx - 6, ground, dw + 12, height - ground, [208, 192, 152]);
   return PNG.sync.write(png);
+}
+
+/** Minimap colours (M12) per cell kind. */
+export const MINIMAP_COLOURS: Readonly<Record<MinimapCell, [number, number, number]>> = {
+  solid: [56, 64, 88],
+  encounter: [88, 168, 72],
+  open: [216, 204, 168],
+};
+
+/**
+ * Build a minimap placeholder (M12): each of the map's cells as a `tilePx` square in its {@link MINIMAP_COLOURS}
+ * colour (cells from `minimapCells`), so the image is `width × tilePx` by `height × tilePx` pixels.
+ */
+export function makeMinimapPng(
+  map: { width: number; height: number; solid: boolean[]; encounter: boolean[] },
+  tilePx: number = MINIMAP_TILE_PX,
+): Buffer {
+  const width = map.width * tilePx;
+  const height = map.height * tilePx;
+  const png = new PNG({ width, height });
+  const cells = minimapCells(map);
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const cell = cells[Math.floor(y / tilePx) * map.width + Math.floor(x / tilePx)] ?? 'solid';
+      const rgb = MINIMAP_COLOURS[cell];
+      const i = (y * width + x) * 4;
+      png.data[i] = rgb[0];
+      png.data[i + 1] = rgb[1];
+      png.data[i + 2] = rgb[2];
+      png.data[i + 3] = 255;
+    }
+  return PNG.sync.write(png);
+}
+
+/** A minimap the tool should make (M12): its asset path and the map file it is drawn from (both under `public/`). */
+export interface MinimapTarget {
+  assetPath: string;
+  mapFile: string;
+}
+
+/** Read `zones.json` and list the minimap of every outdoor zone (indoor zones have none). */
+export function readMinimapTargets(dataDir: string = DATA_DIR): MinimapTarget[] {
+  const file = join(dataDir, 'zones.json');
+  if (!existsSync(file)) return [];
+  const zones = JSON.parse(readFileSync(file, 'utf8')) as { id: string; file: string; indoor: boolean }[];
+  return zones.filter((z) => !z.indoor).map((z) => ({ assetPath: minimapPath(z.id), mapFile: z.file }));
 }
 
 /** Stable RGB colour derived from a string. */
@@ -313,6 +366,20 @@ function main(): void {
         if (writeAudio(file, audioExt) === 'silent') silent++;
       }
     }
+  }
+
+  // Minimaps (M12): drawn from the maps, not listed in the JSON.
+  for (const target of readMinimapTargets()) {
+    const file = join(PUBLIC_DIR, target.assetPath);
+    if (existsSync(file)) continue;
+    created.push(target.assetPath);
+    if (dryRun) continue;
+    const info = parseTiledMap(
+      JSON.parse(readFileSync(join(PUBLIC_DIR, target.mapFile), 'utf8')),
+      target.mapFile,
+    );
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, makeMinimapPng(info));
   }
 
   const out = process.stdout;

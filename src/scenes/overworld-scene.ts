@@ -54,6 +54,9 @@
  *   `lose.woke_up` ("Te has despertado en la oficina...").
  * - Start menu (M10): Start while the player stands still and nothing else is open launches the MenuScene
  *   over this scene, which pauses (game time stops: NPCs freeze) until `overlay:closed`.
+ * - Minimap (M12): outdoors, the zone's minimap (`src/ui/minimap.ts`) shows in the top-left corner with a
+ *   blinking dot on the player's tile. M (or the touch *Mapa* button) toggles it whenever this scene runs, except
+ *   while the debug menu is open; the choice is kept across maps.
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
  *   the player, after every step and (M10) after every turn on the spot; on entry it then asks for an auto-save (`save:request` `map`, M10).
  */
@@ -89,6 +92,7 @@ import { healParty } from '../logic/team';
 import { blockedWithWarps, insideWarp, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
 import { ChoiceBox, type ChoiceState } from '../ui/choice-box';
 import { DialogBox, type DialogState } from '../ui/dialog-box';
+import { Minimap, toggleMinimap, type MinimapView } from '../ui/minimap';
 import { drawZoneMap } from '../world/zone-map';
 import { NpcActor, npcsOnMap } from '../world/npc';
 import { BATTLE_SCENE, type BattleSceneData } from './battle-scene';
@@ -155,6 +159,8 @@ export class OverworldScene extends Phaser.Scene {
   private npcs: NpcActor[] = [];
   private dialog: DialogBox | null = null;
   private choice: ChoiceBox | null = null;
+  /** The zone's minimap (M12; draws nothing indoors). */
+  private minimap: Minimap | null = null;
   /** Result of the last {@link openChoice} (`undefined` = none chosen yet). For the E2E hooks. */
   private lastChoice: number | null | undefined = undefined;
   /** True during a warp fade: the player cannot move. */
@@ -177,6 +183,7 @@ export class OverworldScene extends Phaser.Scene {
     this.npcs = [];
     this.dialog = null;
     this.choice = null;
+    this.minimap = null;
     this.locked = false;
     this.engagement = null;
     this.overlay = null;
@@ -199,6 +206,8 @@ export class OverworldScene extends Phaser.Scene {
     );
     this.dialog = new DialogBox(this);
     this.choice = new ChoiceBox(this);
+    this.minimap = new Minimap(this, this.zone, info);
+    this.minimap.update(0, x, y);
     this.safeSteps = resetSafeSteps();
 
     const cam = this.cameras.main;
@@ -239,6 +248,8 @@ export class OverworldScene extends Phaser.Scene {
     const player = this.player;
     if (!player) return;
     const dt = Math.min(delta, MAX_FRAME_MS);
+    if (input.justPressed('map') && !this.debugMenuOpen) toggleMinimap();
+    this.minimap?.update(dt, player.state.x, player.state.y);
     const talking = this.isTalking();
     if (this.dialog?.isOpen) this.dialog.update(dt);
     else if (this.choice?.isOpen) this.choice.update();
@@ -638,6 +649,11 @@ export class OverworldScene extends Phaser.Scene {
     if (!loaded || !this.player || !this.sys.isActive()) return;
     const spawn = findSpawn(loaded.info as MapInfo) ?? { x: 0, y: 0 };
     this.warpTo({ map: zoneId, x: spawn.x, y: spawn.y, facing: 'down' });
+  }
+
+  /** The minimap as data (M12, for the E2E hooks), or `null` before the map is built. */
+  minimapView(): MinimapView | null {
+    return this.minimap?.view() ?? null;
   }
 
   /** The player's tile and facing (for hooks and the debug overlay), or `null` before the map is built. */

@@ -13,7 +13,9 @@
  *   bottom. Items usable outside battle can be chosen (others are greyed): heal / revive items ask for a
  *   team member (greyed when it would do nothing), the Regleta is used at once; `useFieldItem` does the
  *   rest and the result is shown in the dialogue box. An empty bag says so.
- * - Mapa: a placeholder message until the minimap arrives (M12).
+ * - Mapa (M12): outdoors it toggles the minimap (`src/ui/minimap.ts`, same as M) and says "Minimapa activado." /
+ *   "Minimapa desactivado."; the change shows at once in the paused overworld underneath. Indoors (`zones.json ›
+ *   indoor`) it only says there is no map inside.
  * - Opciones: *Música*, *Efectos* (0–10) and *Texto* (lenta / normal / rápida). Up/Down choose, Left/Right
  *   change the value at once (saved in `flexymon.options`, applied live), A on *Volver* or B goes back.
  * Every rule (rows, enabled options, stats, messages) comes from `src/logic/menu.ts` and
@@ -44,6 +46,7 @@ import { OPTION_KEYS, stepOption, type OptionKey, type Options } from '../logic/
 import { reorderTeam } from '../logic/team';
 import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
 import { GridMenu, type GridMenuState } from '../ui/grid-menu';
+import { toggleMinimap } from '../ui/minimap';
 
 /** Scene key of {@link MenuScene}. */
 export const MENU_SCENE = 'Menu';
@@ -180,12 +183,19 @@ export class MenuScene extends Phaser.Scene {
           const entry = i === null ? 'close' : START_MENU[i];
           if (entry === 'team') this.openTeam(0, 'team');
           else if (entry === 'bag') this.openBag(0);
-          else if (entry === 'map') this.say([t('menu.map_soon')], () => this.openMain(2));
+          else if (entry === 'map') this.say([this.mapMessage()], () => this.openMain(2));
           else if (entry === 'options') this.openOptions();
           else this.close();
         },
       },
     );
+  }
+
+  /** *Mapa* (M12): toggle the minimap outdoors and return what to say about it. */
+  private mapMessage(): string {
+    const zone = getGameData().zones.get(gameState().player.map);
+    if (!zone || zone.indoor) return t('menu.map_indoor');
+    return toggleMinimap() ? t('menu.map_on') : t('menu.map_off');
   }
 
   /** The team list. In `move` mode A puts the member being moved at the chosen position. */

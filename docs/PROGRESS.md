@@ -17,7 +17,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M9 — Items, team, storage, shops and healing
 - [x] M10 — Start menu and saving
 - [x] M11 — Title screen, intro and secret names
-- [ ] M12 — Mobile controls and minimap
+- [x] M12 — Mobile controls and minimap
 - [ ] M13 — The Audi to Murcia
 - [ ] M14 — Build the world
 - [ ] M15 — Audio, polish and deployment
@@ -331,6 +331,33 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   `input.press/release`, which text mode does not affect. For M14: replace the intro script and coworker for the real
   office (`intro.json`), and keep the coworker's final walk out of view.
 
+### M12
+
+- Built: `ui/touch-controls.ts` (HTML overlay on `(pointer: coarse)` devices: D-pad bottom left, A / B bottom right,
+  Start / Mapa top right, semi-transparent, every target ≥ 48 CSS px; multi-touch by pointer id; sliding the thumb
+  changes direction; feeds `input.press/release`, so text mode is unaffected), `ui/rotate-screen.ts` ("Gira el móvil"
+  in portrait while `main.ts` pauses the game loop and sound; first tap asks for fullscreen + landscape lock),
+  `ui/minimap.ts` + pure `logic/minimap.ts` (zone image top left, blinking dot on the player's tile, M / Mapa toggle,
+  hidden indoors), the Start menu's *Mapa* now toggles it. `npm run placeholders` draws `assets/ui/minimap_<zone>.png`
+  for every outdoor zone from its collision data (3 px per tile). Hooks `touchControls`, `inputDown`, `rotateScreen`,
+  `fullscreenRequested`, `minimap`.
+- Files outside a list (M12 has none): `index.html` (control / rotate-screen CSS), `main.ts`, `overworld-scene.ts`,
+  `menu-scene.ts`, `hud-scene.ts` (the "Guardando…" icon moved to the top centre: the touch Start / Mapa buttons hid
+  it), `data/assets.ts` (Preload loads the minimaps), `constants.ts`, `tools/make-placeholders.ts`, `es.json`
+  (`menu.map_soon` replaced by `menu.map_on/off/indoor`; `touch.*`, `mobile.*`), `playwright.config.ts`, READMEs.
+  Tests changed on purpose: `assets.test.ts` counts the two minimaps. The portrait phone profiles (`android`,
+  `iphone`) now start with the E2E-only switch `flexymon.e2e.allowPortrait` (localStorage, ignored outside E2E / dev
+  builds) so the older specs still run there; M12's spec removes it to test the guard. No check was weakened.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m12-mobile.spec.ts`): controls only on touch
+  profiles, ≥ 48 px, inside the screen; a whole session by touch alone (title, name with A / D-pad / B / Start, intro,
+  walking, Mapa, Start menu, a battle fled through the menu); hold, slide and multi-touch; 54 fast taps leave zoom 1,
+  no scroll and no selection, and every touch default is cancelled; portrait shows "Gira el móvil" and freezes the
+  game clock, landscape resumes it; the first tap asks for fullscreen; the minimap dot equals the player's tile through
+  steps and warps, blinks, M and Mapa toggle it, hidden indoors.
+- **Not done: task 5 (a real Android phone with Chrome and a real iPhone with Safari).** A cloud session has no
+  devices; only the emulated profiles above (WebKit stands in for Safari) were run. A human must try both phones and
+  write the results here (things emulation cannot show: real fullscreen, double-tap zoom on iOS, notch insets, feel).
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -342,6 +369,19 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M12 (safe assumptions in brackets)
+
+- [ ] Real-device testing (task 5) is still to do; see the M12 notes.
+- [ ] Does the portrait guard apply to desktops with a tall window? [No: only touch devices (`(pointer: coarse)`).]
+  What about a touch laptop? [Its primary pointer is usually fine, so no touch controls and no guard.]
+- [ ] Is the minimap on or off by default, and is the choice saved? [On; kept across maps for the page, not saved.]
+- [ ] What does the Start menu's *Mapa* do now? [Toggles the minimap with a message; indoors "Aquí dentro no hay
+  mapa."] Does M work indoors? [It flips the choice, but nothing shows until outdoors.]
+- [ ] Are the touch controls hidden on any screen (e.g. the name grid, where taps on cells also work)? [No, always
+  shown; on very wide phones the D-pad can cover the lower-left of the picture.]
+- [ ] Fullscreen on the first tap: only on touch devices (a desktop click does not go fullscreen).
+- [ ] Where do minimaps come from for M14's real maps? [Same tool; real art can replace them at any size.]
 
 ### Raised in M11 (safe assumptions in brackets)
 

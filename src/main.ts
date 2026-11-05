@@ -5,7 +5,7 @@
 import Phaser from 'phaser';
 import { createGameConfig } from './config/game';
 import { events } from './core/events';
-import { bindKeyboard, input } from './core/input';
+import { bindKeyboard, input, type Action } from './core/input';
 import { MusicPlayer, type Track } from './world/music';
 import { getGameData, hasGameData } from './data/game-data';
 import type { Facing } from './data/schemas';
@@ -36,6 +36,9 @@ import { NAME_SCENE, type NameScene, type NameView } from './scenes/name-scene';
 import { INTRO_SCENE, type IntroScene, type IntroView } from './scenes/intro-scene';
 import type { ChoiceState } from './ui/choice-box';
 import type { DialogState } from './ui/dialog-box';
+import type { MinimapView } from './ui/minimap';
+import { RotateScreen, requestFullscreenOnFirstTap } from './ui/rotate-screen';
+import { TouchControls, isTouchDevice, preventBrowserGestures, type TouchView } from './ui/touch-controls';
 
 const game = new Phaser.Game(createGameConfig('game'));
 
@@ -45,6 +48,51 @@ game.events.on(Phaser.Core.Events.PRE_STEP, () => input.beginFrame());
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) input.releaseAll();
 });
+
+// Mobile (M12): on touch devices, on-screen controls feed the Input service, browser gestures are blocked,
+// the first tap asks for fullscreen, and portrait shows "Gira el móvil" and pauses the game (loop and sound).
+const touchDevice = isTouchDevice(window);
+let touchControls: TouchControls | null = null;
+let rotateScreen: RotateScreen | null = null;
+let fullscreenRequested = false;
+let pausedForPortrait = false;
+if (touchDevice) {
+  touchControls = new TouchControls(document, input);
+  touchControls.mount(document.body);
+  preventBrowserGestures(document);
+  requestFullscreenOnFirstTap(document, window, () => {
+    fullscreenRequested = true;
+  });
+  if (!portraitAllowedForTests()) {
+    rotateScreen = new RotateScreen(document, window, (portrait) => {
+      input.releaseAll();
+      touchControls?.reset();
+      if (portrait && !game.isPaused) {
+        game.pause();
+        game.sound.pauseAll();
+        pausedForPortrait = true;
+      } else if (!portrait && pausedForPortrait) {
+        pausedForPortrait = false;
+        game.resume();
+        game.sound.resumeAll();
+      }
+    });
+    rotateScreen.mount(document.body);
+  }
+}
+
+/**
+ * E2E builds only: `localStorage['flexymon.e2e.allowPortrait'] === '1'` turns the portrait guard off, so the
+ * older browser tests can still drive the game on the portrait phone profiles (`playwright.config.ts`).
+ */
+function portraitAllowedForTests(): boolean {
+  if (!(import.meta.env.DEV || import.meta.env.VITE_E2E === '1')) return false;
+  try {
+    return window.localStorage.getItem('flexymon.e2e.allowPortrait') === '1';
+  } catch {
+    return false;
+  }
+}
 
 // Zone music (M4): crossfades run on the game loop, so they survive Overworld restarts on warps.
 const music = new MusicPlayer((key) => game.sound.add(key, { loop: true }) as unknown as Track);
@@ -196,6 +244,16 @@ export interface E2EHooks {
   intro(): IntroView | null;
   /** The player's name in the game state (M11). */
   playerName(): string;
+  /** The touch overlay (M12): shown, each control's box in CSS pixels, controls held; `shown: false` on desktop. */
+  touchControls(): TouchView;
+  /** Actions the Input service holds down right now (M12: keys and touch alike). */
+  inputDown(): Action[];
+  /** The portrait guard (M12): `shown` ("Gira el móvil" on screen), `paused` (the game loop), `touch` (touch device). */
+  rotateScreen(): { shown: boolean; paused: boolean; touch: boolean };
+  /** True once the first tap asked for fullscreen (M12). */
+  fullscreenRequested(): boolean;
+  /** The minimap in the overworld (M12): shown / visible, frame, dot, tile…; `null` outside the overworld. */
+  minimap(): MinimapView | null;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -317,6 +375,14 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
     intro: () =>
       game.scene.isActive(INTRO_SCENE) ? (game.scene.getScene(INTRO_SCENE) as IntroScene).view() : null,
     playerName: () => gameState().player.name,
+    touchControls: () => touchControls?.view() ?? { shown: false, controls: [], pressed: [] },
+    inputDown: () =>
+      (['up', 'down', 'left', 'right', 'a', 'b', 'start', 'map', 'debug'] as const).filter((a) =>
+        input.isDown(a),
+      ),
+    rotateScreen: () => ({ shown: rotateScreen?.shown ?? false, paused: game.isPaused, touch: touchDevice }),
+    fullscreenRequested: () => fullscreenRequested,
+    minimap: () => overworld()?.minimapView() ?? null,
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;
       const scene = game.scene.getScene(DEBUG_SCENE) as DebugScene;

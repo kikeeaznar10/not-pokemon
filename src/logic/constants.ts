@@ -97,3 +97,21 @@ export const NAME_MAX_LENGTH = 10;
 
 /** Title (M11): "Pulsa START" blinks with this half-period (ms). */
 export const TITLE_BLINK_MS = 500;
+
+/** Minimap (M12): the placeholder tool draws each map tile as a square of this many image pixels. */
+export const MINIMAP_TILE_PX = 3;
+
+/** Minimap (M12): widest it is drawn on screen (base pixels); a bigger image is scaled down, never up. */
+export const MINIMAP_MAX_W = 128;
+
+/** Minimap (M12): tallest it is drawn on screen (base pixels); a bigger image is scaled down, never up. */
+export const MINIMAP_MAX_H = 96;
+
+/** Minimap (M12): distance from the top-left corner of the screen (base pixels). */
+export const MINIMAP_MARGIN = 4;
+
+/** Minimap (M12): the player's dot blinks with this half-period (ms). */
+export const MINIMAP_BLINK_MS = 300;
+
+/** Touch D-pad (M12): a touch closer to the pad's centre than this fraction of its half-width presses nothing. */
+export const DPAD_DEAD_ZONE = 0.2;

@@ -10,6 +10,14 @@ const chromiumWebGL = {
   },
 };
 
+// M12: on a portrait phone the game shows "Gira el móvil" and pauses. The tests written before M12 drive the game
+// on the portrait profiles (android, iphone), so those profiles start with this E2E-only switch on, which turns
+// the portrait guard off (src/main.ts). tests/e2e/m12-mobile.spec.ts removes it to test the guard itself.
+const allowPortrait = {
+  cookies: [],
+  origins: [{ origin: BASE_URL, localStorage: [{ name: 'flexymon.e2e.allowPortrait', value: '1' }] }],
+};
+
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
@@ -33,7 +41,7 @@ export default defineConfig({
     },
     {
       name: 'android',
-      use: { ...devices['Pixel 7'], ...chromiumWebGL },
+      use: { ...devices['Pixel 7'], ...chromiumWebGL, storageState: allowPortrait },
     },
     {
       name: 'android-landscape',
@@ -42,7 +50,7 @@ export default defineConfig({
     {
       // WebKit is the closest headless stand-in for iOS Safari.
       name: 'iphone',
-      use: { ...devices['iPhone 14'] },
+      use: { ...devices['iPhone 14'], storageState: allowPortrait },
     },
   ],
 

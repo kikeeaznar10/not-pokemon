@@ -9,8 +9,12 @@ describe('collectAssets', () => {
     if (!result.ok) throw new Error('fixture invalid');
     const { images, sounds } = collectAssets(result.data);
     // 3 flexymon × 3 sprites + 6 items + 5 NPCs (M9 added the healer, storage and shopkeeper)
-    // + M11's title image and intro coworker.
-    expect(images).toHaveLength(22);
+    // + M11's title image and intro coworker + M12's minimaps of the two outdoor zones (test, test_east; the
+    // indoor test_house has none).
+    expect(images).toHaveLength(24);
+    expect(images).toContain('assets/ui/minimap_test.png');
+    expect(images).toContain('assets/ui/minimap_test_east.png');
+    expect(images).not.toContain('assets/ui/minimap_test_house.png');
     expect(images).toContain('assets/ui/title.png');
     expect(images).toContain('assets/sprites/npcs/companera.png');
     expect(images).toContain('assets/sprites/flexymon/portatil_icon.png');

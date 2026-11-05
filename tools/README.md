@@ -13,6 +13,10 @@ dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-ru
 - Audio: an `.ogg` or `.mp3` path creates both `<name>.ogg` and `<name>.mp3`, a 0.2 s 880 Hz beep made with
   `ffmpeg` (libvorbis / libmp3lame). If `ffmpeg` is not on the PATH, it copies the silent files in
   `tools/fallback/` instead and says how many audio files are silent.
+- Minimaps (M12): every outdoor zone in `zones.json` gets `assets/ui/minimap_<zone>.png`, drawn from its `.tmj`
+  (`parseTiledMap` → `minimapCells`): 3 px per tile (`MINIMAP_TILE_PX`), solid tiles dark blue, `encounter` tiles
+  green, the rest sand. These paths are not in the JSON (they follow the zone id), so `--dry-run` lists them too.
+  Not overwritten either: delete a minimap after editing its map to redraw it.
 
 ## `npm run test-map` (`make-test-map.ts`)
 

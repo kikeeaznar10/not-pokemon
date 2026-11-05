@@ -3,6 +3,7 @@
  * Each asset is loaded with its JSON path as the Phaser key (e.g. `assets/sprites/items/cafe.png`).
  */
 import type { GameData } from './game-data';
+import { minimapPath } from '../logic/minimap';
 
 /** A sound to load: the key (path as written in the JSON) and the OGG/MP3 URLs to try, in order. */
 export interface SoundAsset {
@@ -16,7 +17,10 @@ export interface AssetList {
   sounds: SoundAsset[];
 }
 
-/** Collect sprites (flexymon, items, NPCs, M11 title + coworker) and sounds (cries, attacks, voices, zone music, M11 jingle). */
+/**
+ * Collect sprites (flexymon, items, NPCs, M11 title + coworker, M12 the minimap of every outdoor zone) and sounds
+ * (cries, attacks, voices, zone music, M11 jingle).
+ */
 export function collectAssets(data: GameData): AssetList {
   const images = new Set<string>();
   const sounds = new Set<string>();
@@ -30,7 +34,11 @@ export function collectAssets(data: GameData): AssetList {
     sounds.add(npc.voice);
   }
   for (const a of data.attacks.values()) sounds.add(a.sound);
-  for (const z of data.zones.values()) sounds.add(z.music);
+  for (const z of data.zones.values()) {
+    sounds.add(z.music);
+    // M12: outdoor zones have a pre-drawn minimap (`npm run placeholders` draws it from the map).
+    if (!z.indoor) images.add(minimapPath(z.id));
+  }
   // M11: the title image, the intro coworker and the handover jingle.
   images.add(data.intro.titleImage).add(data.intro.coworker.sprite);
   sounds.add(data.intro.coworker.voice).add(data.intro.jingle);

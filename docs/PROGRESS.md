@@ -296,6 +296,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   broken copy kept; the menu pauses the overworld (the becario does not move for 3.5 s); detail stats; reorder;
   closing saves and shows "Guardando…"; Café +20 PS, Regleta 3 slots; options persist after reload; rápida types
   faster than lenta; map and battle saves; "Borrar partida" reloads into a new game.
+- Known flaky (not changed): `m6-battle.spec.ts` "a battle can be lost" failed once on desktop in a full run (an
+  extra A in the battle intro opened the attack menu, like the M7 note); it passed 24 / 24 when repeated.
 - For M11: `saveStore.load(getGameData())` tells the Title whether *Continuar* exists (`loaded`); a new game is
   `resetGameState()` + `gameState()`. Move the load from Preload to the Title. Sound effects pass
   `{ volume: sfxVolume() }`.

@@ -95,9 +95,10 @@ async function advance(page: Page, uis: string[]): Promise<{ messages: string[];
     const v = await battle(page);
     if (v) last = v;
     if (!v) {
-      if (uis.includes('over') && (await tile(page)) && !(await hook<boolean>(page, 'overworldLocked'))) {
-        return { messages, last };
-      }
+      // Back in the overworld: free to move, or (M8, after a loss) showing the "woke up" message.
+      const back =
+        !(await hook<boolean>(page, 'overworldLocked')) || (await hook<unknown>(page, 'dialogue')) !== null;
+      if (uis.includes('over') && (await tile(page)) && back) return { messages, last };
     } else if (uis.includes(v.ui) && v.menu) {
       return { messages, last };
     } else if (v.ui === 'catch' && v.menu) {
@@ -213,7 +214,8 @@ test('a battle can be lost: the Losing rule wakes the player at the office (M8)'
     .poll(async () => (await hook<{ full: string } | null>(page, 'dialogue'))?.full)
     .toBe('Te has despertado en la oficina...');
   expect(await tile(page)).toMatchObject({ map: 'test', x: 15, y: 11, facing: 'down' });
-  await press(page, 'z');
+  // A reveals the rest of the typing text, then closes the box.
+  while (await hook<unknown>(page, 'dialogue')) await press(page, 'z');
   await standing(page, { map: 'test', x: 15, y: 11 });
   expect(await hook<number>(page, 'euros')).toBe(100);
   expect((await team(page))[0]!.currentHp).toBe(40);

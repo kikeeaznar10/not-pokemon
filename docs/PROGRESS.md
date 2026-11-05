@@ -227,7 +227,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - Files outside a list (M8 has none in the plan): `npc-wander.ts`, `talk.ts`, `constants.ts`, `world/npc.ts`,
   `world/player.ts` (`face`), `battle-scene.ts`, `debug-scene.ts`, `main.ts`, `es.json`, READMEs. Tests changed on
   purpose: `m6-battle.spec.ts`'s loss test now checks the Losing rule (respawn (15, 11), half the euros, message)
-  instead of M6's "same tile" placeholder; `m7-encounters.spec.ts` presses ArrowUp twice in the debug menu (the new
+  instead of M6's "same tile" placeholder (its `advance()` also accepts the overworld showing that message), and
+  `m5-dialogue.spec.ts` expects the two new `npcs()` fields; `m7-encounters.spec.ts` presses ArrowUp twice in the debug menu (the new
   option is now last); `m5-dialogue.spec.ts`'s wander watch serves the shipped becario as a talker, since an enemy
   now walks out of its rectangle to challenge the randomly walking player. No check was weakened.
 - Verified with Playwright on all four profiles + screenshots (`tests/e2e/m8-enemies.spec.ts`, injected enemies and

@@ -121,7 +121,17 @@ test('a talker added to npcs.json appears, turns to the player and talks through
   ]);
   const errors = await enterOverworld(page, { map: 'test', x: 15, y: 10 });
   expect(await npcs(page)).toEqual([
-    { id: 'vecina_test', x: 17, y: 10, facing: 'down', moving: false, talking: false },
+    // `state` (null: not an enemy) and `alert` were added in M8.
+    {
+      id: 'vecina_test',
+      x: 17,
+      y: 10,
+      facing: 'down',
+      moving: false,
+      talking: false,
+      state: null,
+      alert: false,
+    },
   ]);
 
   // The NPC blocks the player: walking right stops at (16, 10).

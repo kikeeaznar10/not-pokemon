@@ -16,6 +16,10 @@
  *   menu from every sub-menu; in the main menu B does nothing. The forced switch after a faint cannot
  *   be cancelled (the player must pick someone; there is always someone alive in that phase).
  *   Objeto shows "Pronto" until M9.
+ * - Catching (M7): after a won wild battle (and `canCatch()`), "¿Te llevas a {name}?" shows in the
+ *   prompt panel with a ChoiceBox *Llevármelo* / *Dejarlo* (B = Dejarlo). Taking it runs
+ *   `takeFlexymon` (`src/logic/merge.ts`: added to the team, to storage when the team is full, or merged)
+ *   and shows the matching message (`catchMessages`) before the battle ends.
  * - End: the team (HP) and bag are written back to the game state, the screen fades out, the scene
  *   emits `battle:ended` and stops; the overworld wakes up on the same tile. After a loss the team is
  *   fully healed (placeholder until M8 runs the Losing rule).
@@ -40,7 +44,16 @@ import {
   type BattleState,
   type Side,
 } from '../logic/battle';
-import { attackMenu, mainMenu, teamMenu, viewSteps, type ViewStep } from '../logic/battle-view';
+import {
+  attackMenu,
+  catchMessages,
+  mainMenu,
+  teamMenu,
+  viewSteps,
+  type ViewStep,
+} from '../logic/battle-view';
+import { canCatch, takeFlexymon } from '../logic/merge';
+import { ChoiceBox } from '../ui/choice-box';
 import { maxHp, type FlexymonInstance } from '../logic/instance';
 import { healParty } from '../logic/team';
 import { DIALOG_HEIGHT, DialogBox } from '../ui/dialog-box';
@@ -59,8 +72,8 @@ export interface BattleSceneData {
   seed?: number;
 }
 
-/** What the battle screen is doing. */
-export type BattleUi = 'anim' | 'main' | 'attack' | 'team' | 'end';
+/** What the battle screen is doing. `catch`: the Llevármelo / Dejarlo choice after a wild win (M7). */
+export type BattleUi = 'anim' | 'main' | 'attack' | 'team' | 'catch' | 'end';
 
 /** One side as shown (for the E2E hooks). `hp`/`maxHp` are the logic numbers, `shownHp` the bar's. */
 export interface BattleSideView {
@@ -122,6 +135,7 @@ export class BattleScene extends Phaser.Scene {
   private sides!: Record<Side, SideDisplay>;
   private dialog!: DialogBox;
   private menu!: GridMenu;
+  private choice!: ChoiceBox;
   private prompt!: Phaser.GameObjects.Container;
   private promptText!: Phaser.GameObjects.Text;
   private info!: Phaser.GameObjects.Container;
@@ -158,6 +172,7 @@ export class BattleScene extends Phaser.Scene {
     this.info = this.panel(334, MENU_TOP, GAME_WIDTH - 334, DIALOG_HEIGHT, [this.infoText]).setVisible(false);
     this.dialog = new DialogBox(this);
     this.menu = new GridMenu(this);
+    this.choice = new ChoiceBox(this);
 
     const offs = [
       events.on('debug:menu', ({ open }) => {
@@ -177,6 +192,7 @@ export class BattleScene extends Phaser.Scene {
     if (this.debugMenuOpen) return;
     if (this.dialog.isOpen) this.dialog.update(delta);
     else if (this.menu.isOpen) this.menu.update();
+    else if (this.choice.isOpen) this.choice.update();
   }
 
   /** A framed panel at (`x`, `y`) holding `children`. */
@@ -386,7 +402,7 @@ export class BattleScene extends Phaser.Scene {
     this.dialog.open([t('battle.item_soon')], { onClose: () => this.openMain(1) });
   }
 
-  /** Write the team and bag back, fade out, announce the end and stop. */
+  /** Write the team and bag back; after a wild win offer the catch, then leave. */
   private finish(result: BattleResult): void {
     this.ui = 'end';
     const gs = gameState();
@@ -396,12 +412,57 @@ export class BattleScene extends Phaser.Scene {
     if (result === 'lose') party = healParty(party, data.flexymon);
     setGameState({ ...gs, team: party.team, storage: party.storage, items: { ...this.battle.items } });
     log(`Battle: ended (${result})`);
+    if (result === 'win' && this.kind === 'wild' && canCatch()) this.offerCatch();
+    else this.leave(result);
+  }
+
+  /** "¿Te llevas a {name}?" with Llevármelo / Dejarlo (B = Dejarlo) beside it. */
+  private offerCatch(): void {
+    const speciesId = this.battle.opponent.team[0]?.speciesId ?? '';
+    const species = getGameData().flexymon.get(speciesId);
+    if (!species) return this.leave('win');
+    this.ui = 'catch';
+    this.info.setVisible(false);
+    this.promptText.setText(t('catch.question', { name: species.name }));
+    this.prompt.setVisible(true);
+    this.choice.open([t('catch.take'), t('catch.leave')], {
+      x: 290,
+      y: MENU_TOP + 8,
+      onChoose: (i) => {
+        this.prompt.setVisible(false);
+        if (i !== 0) {
+          log(`Battle: left ${species.id}`);
+          return this.leave('win');
+        }
+        const gs = gameState();
+        const taken = takeFlexymon(
+          { team: gs.team, storage: gs.storage, teamSlots: gs.teamSlots },
+          species,
+          rng,
+        );
+        setGameState({ ...gs, team: taken.party.team, storage: taken.party.storage });
+        log(`Battle: took ${species.id} (${taken.outcome.type})`);
+        this.ui = 'anim';
+        this.dialog.open(catchMessages(taken.outcome, species.name, t), { onClose: () => this.leave('win') });
+      },
+    });
+  }
+
+  /** Fade out, announce the end and stop. */
+  private leave(result: BattleResult): void {
+    this.ui = 'end';
     const cam = this.cameras.main;
     cam.fadeOut(END_FADE_MS, 0, 0, 0);
     cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       events.emit('battle:ended', { result });
       this.scene.stop();
     });
+  }
+
+  /** The open catch choice in the menu format of the hooks, or `null`. */
+  private choiceMenu(): GridMenuState | null {
+    const c = this.choice.state();
+    return c ? { options: c.options.map((label) => ({ label, enabled: true })), cursor: c.cursor } : null;
   }
 
   /** The screen as plain data (for the E2E hooks). */
@@ -427,7 +488,7 @@ export class BattleScene extends Phaser.Scene {
       result: this.battle.result,
       round: this.battle.round,
       ui: this.ui,
-      menu: this.menu.state(),
+      menu: this.menu.state() ?? this.choiceMenu(),
       message: this.dialog.state()?.full ?? null,
       player: side('player'),
       opponent: side('opponent'),

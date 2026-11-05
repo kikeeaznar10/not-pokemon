@@ -9,9 +9,12 @@
  *   `debug:menu { open: true }` and the overworld ignores movement.
  * - Battle entries (M6): below the zones, one "Combate: {name}" line per flexymon in `flexymon.json`;
  *   A starts a wild battle against a fresh one (event `debug:battle`).
+ * - Options (M7): "Encuentros: sí/no" toggles wild encounters (`debugFlags.encounters`); A flips it and
+ *   the menu stays open so the new value shows.
  * Later milestones add more commands here (items…).
  */
 import Phaser from 'phaser';
+import { debugFlags } from '../core/debug-flags';
 import { events } from '../core/events';
 import { input } from '../core/input';
 import { getGameData } from '../data/game-data';
@@ -66,7 +69,7 @@ export class DebugScene extends Phaser.Scene {
       if (input.justPressed('b')) this.setMode('info');
       else if (input.justPressed('a')) {
         const entry = entries[this.cursor];
-        this.setMode('info');
+        if (entry?.group !== 'option') this.setMode('info');
         entry?.run();
       }
     }
@@ -75,8 +78,8 @@ export class DebugScene extends Phaser.Scene {
     this.panel.setSize(Math.max(120, this.text.width + 8), this.text.height + 6);
   }
 
-  /** The menu entries in order: one teleport per zone, then one battle per flexymon. */
-  private entries(): { label: string; group: 'teleport' | 'battle'; run: () => void }[] {
+  /** The menu entries in order: one teleport per zone, one battle per flexymon, then the options. */
+  private entries(): { label: string; group: 'teleport' | 'battle' | 'option'; run: () => void }[] {
     const data = getGameData();
     return [
       ...[...data.zones.keys()].map((map) => ({
@@ -89,10 +92,17 @@ export class DebugScene extends Phaser.Scene {
         group: 'battle' as const,
         run: () => events.emit('debug:battle', { speciesId: sp.id }),
       })),
+      {
+        label: t(debugFlags.encounters ? 'debug.encounters_on' : 'debug.encounters_off'),
+        group: 'option' as const,
+        run: () => {
+          debugFlags.encounters = !debugFlags.encounters;
+        },
+      },
     ];
   }
 
-  /** The overlay's text lines (info, plus the teleport and battle entries with a `>` cursor in menu mode). */
+  /** The overlay's text lines (info, plus the teleport, battle and option entries with a `>` cursor in menu mode). */
   lines(): string[] {
     const info = [
       t('debug.map', { map: this.where.map }),
@@ -105,6 +115,7 @@ export class DebugScene extends Phaser.Scene {
     list.forEach((e, i) => {
       if (i === 0) out.push(t('debug.teleport_title'));
       else if (e.group === 'battle' && list[i - 1]?.group !== 'battle') out.push(t('debug.battle_title'));
+      else if (e.group === 'option' && list[i - 1]?.group !== 'option') out.push(t('debug.options_title'));
       out.push(`${i === this.cursor ? '>' : ' '} ${e.label}`);
     });
     return out;

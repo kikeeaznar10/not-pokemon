@@ -9,6 +9,7 @@ import { bindKeyboard, input } from './core/input';
 import { MusicPlayer, type Track } from './world/music';
 import { getGameData, hasGameData } from './data/game-data';
 import type { Facing } from './data/schemas';
+import { debugFlags } from './core/debug-flags';
 import { rng } from './core/rng';
 import { gameState, setGameState } from './core/session';
 import type { BattleKind } from './logic/battle';
@@ -99,6 +100,14 @@ export interface E2EHooks {
   team(): FlexymonInstance[];
   /** Replace the team with fresh flexymon of these species (optionally with `currentHp` set). */
   setTeam(members: { speciesId: string; currentHp?: number }[]): void;
+  /** Team, storage box and team slots in the game state (M7). */
+  party(): { team: FlexymonInstance[]; storage: FlexymonInstance[]; teamSlots: number };
+  /** Steps left without encounter rolls in the overworld, or `null` outside it (M7). */
+  safeSteps(): number | null;
+  /** Whether wild encounters roll (debug flag, M7). */
+  encountersEnabled(): boolean;
+  /** Switch wild encounters on or off (same as the debug menu's option, M7). */
+  setEncounters(on: boolean): void;
 }
 
 if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
@@ -161,6 +170,18 @@ if (import.meta.env.DEV || import.meta.env.VITE_E2E === '1') {
         return m.currentHp === undefined ? inst : { ...inst, currentHp: m.currentHp };
       });
       setGameState({ ...gameState(), team });
+    },
+    party: () => {
+      const gs = gameState();
+      return structuredClone({ team: gs.team, storage: gs.storage, teamSlots: gs.teamSlots });
+    },
+    safeSteps: () =>
+      game.scene.isActive(OVERWORLD_SCENE) || game.scene.isSleeping(OVERWORLD_SCENE)
+        ? (game.scene.getScene(OVERWORLD_SCENE) as OverworldScene).safeSteps
+        : null,
+    encountersEnabled: () => debugFlags.encounters,
+    setEncounters: (on) => {
+      debugFlags.encounters = on;
     },
     debugLines: () => {
       if (!game.scene.isActive(DEBUG_SCENE)) return null;

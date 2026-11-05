@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TURN_TAP_MS, WALK_MS } from '../../src/logic/constants';
 import {
   createMoveState,
+  haltAt,
   renderPosition,
   updateMovement,
   walkFrame,
@@ -117,5 +118,14 @@ describe('grid movement', () => {
     s = updateMovement(s, null, 100, open).state;
     expect(renderPosition(s)).toEqual({ x: 3, y: 3 });
     expect(walkFrame(s)).toBe(0);
+  });
+});
+
+describe('haltAt (M7: stop for a wild encounter)', () => {
+  it('drops a step that started in the same frame and keeps the facing', () => {
+    // Holding right: the first step ends and the next one starts in the same update.
+    const s = run(createMoveState(0, 0, 'right'), 'right', Math.ceil(WALK_MS / 16) + 1).state;
+    expect(s.step).not.toBeNull();
+    expect(haltAt(s, 1, 0)).toEqual({ x: 1, y: 0, facing: 'right', step: null, hold: null });
   });
 });

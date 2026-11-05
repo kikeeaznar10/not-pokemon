@@ -10,6 +10,7 @@ import {
 } from '../../src/logic/battle';
 import {
   attackMenu,
+  catchMessages,
   hpColor,
   mainMenu,
   teamMenu,
@@ -240,5 +241,23 @@ describe('battle-view: hpColor', () => {
     expect(hpColor(7, 40)).toBe('red');
     expect(hpColor(0, 40)).toBe('red');
     expect(hpColor(0, 0)).toBe('red');
+  });
+});
+
+describe('battle-view: catching (M7)', () => {
+  it('words every outcome of taking a wild flexymon', () => {
+    expect(catchMessages({ type: 'added', to: 'team', uid: 'u' }, 'Ratón', t)).toEqual([
+      '¡Ratón se une a tu equipo!',
+    ]);
+    expect(catchMessages({ type: 'added', to: 'storage', uid: 'u' }, 'Ratón', t)).toEqual([
+      'Tu equipo está lleno. Ratón se ha enviado a la caja.',
+    ]);
+    expect(catchMessages({ type: 'merged', uid: 'u', stat: 'attack', amount: 1 }, 'Ratón', t)).toEqual([
+      '¡Ratón se ha fusionado! Ataque +1',
+    ]);
+    expect(catchMessages({ type: 'merged', uid: 'u', stat: 'hp', amount: 3 }, 'Ratón', t)).toEqual([
+      '¡Ratón se ha fusionado! PS +3',
+    ]);
+    expect(catchMessages({ type: 'maxed', uid: 'u' }, 'Ratón', t)).toEqual(['Ratón ya está al máximo']);
   });
 });

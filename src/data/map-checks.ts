@@ -5,6 +5,9 @@
  * - every named spawn point in a map's `spawns` layer is walkable;
  * - every warp points at an existing zone, and every tile it can land on there is walkable (for edge
  *   warps that keep the row/column, every tile of the rectangle is checked).
+ * - every encounter rectangle's `group` exists in its zone's `encounters` in zones.json (M7).
+ * {@link mapWarnings} lists the opposite case (a group in zones.json drawn on no rectangle): a warning,
+ * not an error, so content can be added to zones.json before the map is drawn.
  * "Walkable" = inside the map and not solid (`src/data/tiled.ts`). Errors use the usual
  * `file › path › message` format; warp errors name the map file and the warp, e.g.
  * `maps/test.tmj › warps.house_door › target (4, 7) on map "test_house" is not walkable`.
@@ -47,6 +50,15 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
       const problem = tileProblem(maps, zone.id, sp.x, sp.y);
       if (problem) errors.push({ file: zone.file, path: ['spawns', sp.name], message: problem });
     }
+    info.encounters.forEach((rect) => {
+      if (!Object.hasOwn(zone.encounters, rect.group)) {
+        errors.push({
+          file: zone.file,
+          path: ['encounters', rect.name],
+          message: `unknown encounter group "${rect.group}" (not in zones.json › ${zone.id}.encounters)`,
+        });
+      }
+    });
     for (const warp of info.warps) {
       const path = ['warps', warp.name];
       if (!data.zones.has(warp.toMap)) {
@@ -60,4 +72,27 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
     }
   }
   return errors;
+}
+
+/**
+ * Encounter groups in zones.json that no rectangle of the zone's map uses (M7). Logged as warnings at
+ * boot, e.g. `zones.json › test.encounters.playa › group not used by any rectangle in maps/test.tmj`.
+ */
+export function mapWarnings(data: GameData, maps: ReadonlyMap<string, MapInfo>): DataError[] {
+  const warnings: DataError[] = [];
+  for (const zone of data.zones.values()) {
+    const info = maps.get(zone.id);
+    if (!info) continue;
+    const used = new Set(info.encounters.map((r) => r.group));
+    for (const group of Object.keys(zone.encounters)) {
+      if (!used.has(group)) {
+        warnings.push({
+          file: 'zones.json',
+          path: [zone.id, 'encounters', group],
+          message: `group not used by any rectangle in ${zone.file}`,
+        });
+      }
+    }
+  }
+  return warnings;
 }

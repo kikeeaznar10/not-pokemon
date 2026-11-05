@@ -11,6 +11,7 @@ import type { Facing } from '../data/schemas';
 import type { Direction } from '../core/input';
 import {
   createMoveState,
+  haltAt,
   renderPosition,
   updateMovement,
   walkFrame,
@@ -53,6 +54,12 @@ export class Player {
     this.move = result.state;
     this.draw();
     return result.events;
+  }
+
+  /** Stand still on tile (x, y), dropping a step that just started (see `haltAt`). */
+  halt(x: number, y: number): void {
+    this.move = haltAt(this.move, x, y);
+    this.draw();
   }
 
   private draw(): void {

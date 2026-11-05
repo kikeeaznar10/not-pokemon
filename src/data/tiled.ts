@@ -10,11 +10,15 @@
  * - Object layer `warps` (M4): rectangles with `toMap` (string), `toX` / `toY` (int, optional = keep
  *   the player's column / row), `toFacing` (optional) and `trigger` (`step` or `action`); see
  *   `src/logic/warp.ts`. Rectangles may lie one tile outside the map (edge warps).
- * - Object layers `encounters` (M7) and `spawns`. Spawn points are point (or tile-sized)
+ * - Object layer `encounters` (M7): rectangles with the string properties `group` (a key of the zone's
+ *   `encounters` in zones.json) and `mode` (`tiles`: only tiles with `encounter = true`; `all`: every
+ *   tile, urban crowds); see `src/logic/encounter.ts`. The object name is only used in messages.
+ * - Object layer `spawns`. Spawn points are point (or tile-sized)
  *   objects in `spawns`; their tile is `floor(x / tilewidth)`, `floor(y / tileheight)`. The one named
  *   `default` is the zone's spawn (used by debug teleport and when no position is given).
  */
 import { z } from 'zod';
+import type { EncounterRect } from '../logic/encounter';
 import type { Warp } from '../logic/warp';
 import { facingSchema } from './schemas/common';
 
@@ -99,6 +103,8 @@ export interface MapInfo {
   spawns: SpawnPoint[];
   /** Warp rectangles in tiles, in layer order. */
   warps: Warp[];
+  /** Encounter rectangles in tiles, in layer order (the first match wins). */
+  encounters: (EncounterRect & { name: string })[];
   /** Tileset images, resolved relative to `public/` (e.g. `assets/tilesets/test.png`), by tileset name. */
   tilesetImages: { name: string; path: string }[];
 }
@@ -168,6 +174,38 @@ function parseWarp(o: TiledObject, index: number, map: TiledMap, mapFile: string
   };
 }
 
+/** Encounter object properties (after reading them from the Tiled property list). */
+const encounterPropsSchema = z.object({
+  group: z.string().min(1, 'needs a group property'),
+  mode: z.enum(['tiles', 'all'], 'mode must be "tiles" or "all"'),
+});
+
+/** Read one encounter rectangle; throws a message naming it if `group` or `mode` is missing or wrong. */
+function parseEncounter(
+  o: TiledObject,
+  index: number,
+  map: TiledMap,
+  mapFile: string,
+): EncounterRect & { name: string } {
+  const parsed = encounterPropsSchema.safeParse({
+    group: tiledProperty(o.properties, 'group') ?? '',
+    mode: tiledProperty(o.properties, 'mode'),
+  });
+  const label = o.name ? `"${o.name}"` : `#${index}`;
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    throw new Error(`${mapFile}: encounter ${label}: ${issue?.message ?? 'invalid'}`);
+  }
+  return {
+    name: o.name || `#${index}`,
+    x: Math.floor(o.x / map.tilewidth),
+    y: Math.floor(o.y / map.tileheight),
+    width: Math.max(1, Math.round(o.width / map.tilewidth)),
+    height: Math.max(1, Math.round(o.height / map.tileheight)),
+    ...parsed.data,
+  };
+}
+
 /** Tiled stores flip flags in the top 3 bits of a gid; strip them. */
 const GID_MASK = 0x1fffffff;
 
@@ -214,6 +252,14 @@ export function parseTiledMap(json: unknown, mapFile: string): MapInfo {
     (warpLayer.objects as TiledObject[]).forEach((o, i) => warps.push(parseWarp(o, i, map, mapFile)));
   }
 
+  const encounters: MapInfo['encounters'] = [];
+  const encounterLayer = map.layers.find((l) => l.type === 'objectgroup' && l.name === 'encounters');
+  if (encounterLayer && 'objects' in encounterLayer) {
+    (encounterLayer.objects as TiledObject[]).forEach((o, i) =>
+      encounters.push(parseEncounter(o, i, map, mapFile)),
+    );
+  }
+
   return {
     width: map.width,
     height: map.height,
@@ -221,6 +267,7 @@ export function parseTiledMap(json: unknown, mapFile: string): MapInfo {
     encounter,
     spawns,
     warps,
+    encounters,
     tilesetImages: map.tilesets.map((ts) => ({ name: ts.name, path: resolveMapPath(mapFile, ts.image) })),
   };
 }

@@ -30,8 +30,11 @@ Exposed when `import.meta.env.DEV` is true or the build has `VITE_E2E=1`:
 | `window.__E2E__.openChoice(options)` | M5 | Opens a ChoiceBox in the overworld (test helper; real uses come in M7/M9). |
 | `window.__E2E__.choice()` / `choiceResult()` | M5 | Open choice box `{ options, cursor }` or `null`; the last result (index, `null` = cancelled with B, `undefined` = none yet). |
 | `window.__E2E__.startBattle(seed, species?, kind?)` | M6 | Starts a battle from the overworld against a fresh flexymon (`raton`, `wild` by default; `kind` `npc` greys out Huir); the RNG is seeded with `seed` when the battle starts. `false` if refused (locked, mid-step, box open). |
-| `window.__E2E__.battle()` | M6 | The battle screen: `{ kind, phase, result, round, ui ('anim'/'main'/'attack'/'team'/'end'), menu { options[{label, enabled}], cursor }, message, player, opponent }`; each side `{ uid, speciesId, name, hp, maxHp (logic), shownHp (bar), hpText }`. `null` outside a battle. |
+| `window.__E2E__.battle()` | M6 | The battle screen: `{ kind, phase, result, round, ui ('anim'/'main'/'attack'/'team'/'catch'/'end'; `catch` = the Llevármelo/Dejarlo choice after a wild win, M7, shown in `menu`), menu { options[{label, enabled}], cursor }, message, player, opponent }`; each side `{ uid, speciesId, name, hp, maxHp (logic), shownHp (bar), hpText }`. `null` outside a battle. |
 | `window.__E2E__.team()` / `setTeam(members)` | M6 | The team in the game state; replace it with fresh flexymon `[{ speciesId, currentHp? }]`. |
+| `window.__E2E__.party()` | M7 | `{ team, storage, teamSlots }` from the game state (copies). |
+| `window.__E2E__.safeSteps()` | M7 | Steps left without encounter rolls (3 after every map entry and battle); `null` outside the overworld. |
+| `window.__E2E__.encountersEnabled()` / `setEncounters(on)` | M7 | Read / set the debug flag that switches wild encounters off (same as the F2 menu's "Encuentros" option). |
 
 To reach the overworld in a test: wait for `preloadComplete()`, then `page.keyboard.press('Enter')`.
 Keys pressed with Playwright are seen on the next game frame: poll for the expected state

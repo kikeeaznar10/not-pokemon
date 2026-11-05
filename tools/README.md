@@ -15,7 +15,7 @@ dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-ru
 ## `npm run test-map` (`make-test-map.ts`)
 
 Writes the test maps and the art they need (no one can draw in Tiled in a cloud session):
-`public/maps/test.tmj`, `test_house.tmj` and `test_east.tmj` (layouts and warps in `public/maps/README.md`), the
+`public/maps/test.tmj`, `test_house.tmj` and `test_east.tmj` (layouts, warps and, from M7, tall grass and encounter rectangles in `public/maps/README.md`), the
 placeholder tileset `public/assets/tilesets/test.png`
 (8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties) and the placeholder player sheet
 `public/assets/sprites/player.png` (2 columns stand/stride × 4 rows down/left/right/up, 32 × 32 frames).

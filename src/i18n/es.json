@@ -46,5 +46,15 @@
   "battle.team_must": "¿A quién sacas?",
   "battle.hp": "PS {hp}/{max}",
   "battle.tag_active": "en combate",
-  "battle.tag_fainted": "debilitado"
+  "battle.tag_fainted": "debilitado",
+  "catch.question": "¿Te llevas a {name}?",
+  "catch.take": "Llevármelo",
+  "catch.leave": "Dejarlo",
+  "catch.to_team": "¡{name} se une a tu equipo!",
+  "catch.to_storage": "Tu equipo está lleno. {name} se ha enviado a la caja.",
+  "catch.merged": "¡{name} se ha fusionado! {stat} +{n}",
+  "catch.maxed": "{name} ya está al máximo",
+  "debug.options_title": "Opciones",
+  "debug.encounters_on": "Encuentros: sí",
+  "debug.encounters_off": "Encuentros: no"
 }

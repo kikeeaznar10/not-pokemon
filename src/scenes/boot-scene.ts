@@ -1,13 +1,14 @@
 /**
  * BootScene — the first scene. Loads and validates every content JSON and every zone's map
  * (`src/data/loader.ts`, map checks in `src/data/map-checks.ts`).
+ * Load warnings (unused encounter groups, M7) are logged with `warn()` and do not stop the game.
  * On success it stores the {@link GameData} and launches Preload (which stops Boot once loaded, so
  * some scene is always active); on any error it starts the ErrorScene
  * with one `file › path › message` line per problem.
  */
 import Phaser from 'phaser';
 import { events } from '../core/events';
-import { error, log } from '../core/log';
+import { error, log, warn } from '../core/log';
 import { formatDataError } from '../data/errors';
 import { setGameData } from '../data/game-data';
 import { loadGameData } from '../data/loader';
@@ -28,6 +29,7 @@ export class BootScene extends Phaser.Scene {
     const base = import.meta.env.BASE_URL;
     void loadGameData(`${base}data/`, undefined, { mapsBaseUrl: base }).then((result) => {
       if (result.ok) {
+        for (const w of result.warnings ?? []) warn(formatDataError(w));
         setGameData(result.data);
         events.emit('data:loaded');
         // Launch (not start) so Boot stays active while Preload loads; Preload stops Boot when done.

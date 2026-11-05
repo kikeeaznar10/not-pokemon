@@ -12,7 +12,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M4 — Maps, warps and interiors
 - [x] M5 — Dialogue and talking NPCs
 - [x] M6 — Battle scene
-- [ ] M7 — Wild encounters, catching and merging
+- [x] M7 — Wild encounters, catching and merging
 - [ ] M8 — Enemy NPCs
 - [ ] M9 — Items, team, storage, shops and healing
 - [ ] M10 — Start menu and saving
@@ -185,6 +185,31 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   Objeto; Huir greyed and inert against an NPC; voluntary and forced switches; debug menu battle. For M7: start wild
   battles with `OverworldScene.startBattle({ speciesId })` and handle the catch choice on `battle:ended` (`win`).
 
+### M7
+
+- Built: the `encounters` layer is read by `src/data/tiled.ts` (`group` + `mode` per rectangle, both required);
+  load checks: a group missing from zones.json is an error, an unused one a boot warning (`mapWarnings`,
+  `LoadResult.warnings`). The overworld runs `checkStep()` after every completed non-warp step; an encounter halts
+  the player on that tile (a held key's next step is dropped, `haltAt`) and starts a wild battle. After a wild win
+  the BattleScene asks "¿Te llevas a {name}?" (ChoiceBox Llevármelo / Dejarlo, B = Dejarlo) and runs `takeFlexymon()`
+  with the message from `catchMessages()`. Test map: tall grass x 20–23 y 2–5 inside `jardin` (`tiles`) and a crowd
+  rectangle `plaza` (`all`) at x 1–4 y 13–16 (`npm run test-map -- --force` regenerated only `test.tmj`). F2 menu
+  option "Encuentros: sí/no" (`src/core/debug-flags.ts`). Hooks `party`, `safeSteps`, `encountersEnabled`,
+  `setEncounters`; `battle().ui` can be `catch`.
+- Files outside a list (M7 has none in the plan): `src/core/debug-flags.ts`, `src/logic/movement.ts` (`haltAt`),
+  `world/player.ts` (`halt`), `logic/battle-view.ts` (`catchMessages`), `data/loader.ts` + `boot-scene.ts`
+  (warnings), `main.ts` (hooks), `es.json`, READMEs. `tests/data/tiled.test.ts` asserted "no tall grass yet"; it now
+  checks the grass and rectangles. `tests/e2e/m6-battle.spec.ts`'s `advance()` presses B (Dejarlo) on the new catch
+  choice, so the M6 checks run unchanged.
+- Decisions (Open questions › Raised in M7): the catch choice happens on the battle screen, before the fade-out;
+  Dejarlo shows no message; while encounters are switched off, safe steps still count down.
+- Verified with Playwright on all four profiles + screenshots (`tests/e2e/m7-encounters.spec.ts`): with every rate at
+  100 (zones.json intercepted), 3 safe steps after map entry and after each battle, then every grass step starts a
+  battle, plain grass inside a `tiles` rectangle never does, a held key stops on the grass tile; the `all` rectangle
+  rolls on plain grass; a second Ratón merges with "¡Ratón se ha fusionado! {stat} +{n}" and exactly that bonus
+  rises; a new species joins a team with a free slot; with a full team it goes to storage with its message;
+  Dejarlo changes nothing; the debug option stops encounters. For M8: NPC battles skip the catch (`kind` `npc`).
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -196,6 +221,15 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Is it fine to use the names Isaval, Ciruelo and the bars in a game shared internally? Check with the relevant people before M14.
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
+
+### Raised in M7 (safe assumptions in brackets)
+
+- [ ] Where does the catch choice appear? [On the battle screen after the win message, before fading out.] Does B
+  mean Dejarlo? [Yes.] Is there a message after Dejarlo? [No.]
+- [ ] Wording for a new flexymon joining the team or going to storage is not in the plan. [`catch.to_team` "¡{name}
+  se une a tu equipo!", `catch.to_storage` "Tu equipo está lleno. {name} se ha enviado a la caja." in `es.json`.]
+- [ ] Must an encounter rectangle's `mode` be set? [Yes, a missing or unknown mode stops the game at boot.]
+- [ ] With encounters switched off in the debug menu, do safe steps still run down? [Yes; nothing rolls.]
 
 ### Raised in M6 (safe assumptions in brackets)
 

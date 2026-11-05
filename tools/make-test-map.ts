@@ -170,6 +170,23 @@ interface ObjSpec {
   properties?: { name: string; type: 'string' | 'int'; value: string | number }[];
 }
 
+/** An encounter rectangle (tiles): `group` is a key of the zone's `encounters` in zones.json. */
+function encounterRect(
+  name: string,
+  rect: { x: number; y: number; width: number; height: number },
+  group: string,
+  mode: 'tiles' | 'all',
+): ObjSpec {
+  return {
+    name,
+    ...rect,
+    properties: [
+      { name: 'group', type: 'string', value: group },
+      { name: 'mode', type: 'string', value: mode },
+    ],
+  };
+}
+
 /** A step warp rectangle (tiles). `toY`/`toX` left out = keep the player's row/column. */
 function warp(
   name: string,
@@ -189,7 +206,7 @@ function tiledMap(
   w: number,
   h: number,
   layers: { ground: Grid; deco: Grid; above: Grid; collision: Grid },
-  objects: { warps: ObjSpec[]; spawns: ObjSpec[] },
+  objects: { warps: ObjSpec[]; spawns: ObjSpec[]; encounters?: ObjSpec[] },
 ): object {
   const csv = (layer: Grid) => layer.map((id) => (id < 0 ? 0 : id + 1));
   let nextId = 1;
@@ -237,7 +254,7 @@ function tiledMap(
     tileLayer('collision', layers.collision, false),
     tileLayer('above', layers.above),
     objectLayer('warps', objects.warps),
-    objectLayer('encounters', []),
+    objectLayer('encounters', objects.encounters ?? []),
     objectLayer('spawns', objects.spawns),
   ];
   return {
@@ -319,7 +336,15 @@ export function buildTestMap(): object {
     [9, 18],
   ] as const)
     g.set(deco, x, y, TILES.flowers);
+  // Tall grass (M7): encounter tiles inside the `jardin_turia` rectangle (x 19–23, y 1–5), which
+  // also covers plain grass (column 19, row 1) so the `tiles` mode can be seen to need the grass.
+  for (let y = 2; y <= 5; y += 1) for (let x = 20; x <= 23; x += 1) g.set(ground, x, y, TILES.tallgrass);
   return tiledMap(30, 20, g.layers, {
+    encounters: [
+      encounterRect('jardin', { x: 19, y: 1, width: 5, height: 5 }, 'jardin_turia', 'tiles'),
+      // An urban-crowd rectangle: every tile inside rolls, whatever it looks like.
+      encounterRect('plaza', { x: 1, y: 13, width: 4, height: 4 }, 'plaza_ayuntamiento', 'all'),
+    ],
     warps: [
       warp(
         'house_door',

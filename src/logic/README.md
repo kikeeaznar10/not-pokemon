@@ -18,14 +18,14 @@ caller's job (e.g. `parseSave` returns `warnings[]`). Tunable numbers: `constant
 | `merge.ts` | `canCatch()` hook, `takeFlexymon()` (add new or merge: random open stat +`max(1, round(base × 10 %))`, cap 2× base). |
 | `inventory.ts` | Bag `{ itemId: count }` 0–99: count, add (capped), remove. |
 | `economy.ts` | Euro clamp, NPC reward roll, loss penalty, buy (money checked first), sell (`floor(price / 2)`, no keys / `price: null`). |
-| `encounter.ts` | Encounter rectangles (`tiles` / `all`), rate roll + weighted pick, safe steps (`checkStep`). |
+| `encounter.ts` | Encounter rectangles (`tiles` / `all`), rate roll + weighted pick, safe steps (`checkStep`). Used by the overworld from M7. |
 | `npc-state.ts` | `ready` / `cooldown`, sight line with blockers, approach path, cooldown end (Manhattan > 6 or other map), reset all. |
 | `save.ts` | `GameState`, zod `saveSchema`, `serializeSave`, `parseSave` (validate + migrate; never throws). |
 | `names.ts` | Name normalisation for secret names (M1). |
 | `dialogue.ts` | Dialogue box rules (M5): word wrap, strings → pages (a string too long for one box continues on the next), typing at `TEXT_CPS`, voice every `VOICE_EVERY_CHARS` characters (1st, 4th, 7th…), A = reveal / next. |
 | `npc-wander.ts` | NPC movement (M5): random wait in `stepEveryMs`, one random tile inside the wander rectangle, never onto a blocked tile; both tiles count as taken during a step; talking pauses the NPC and turns it to the player. RNG order documented in the file. |
 | `new-game.ts` | New-game state from `start.json` (M6): starter alone at full HP, euros, slots, items, spawn, no NPC states. |
-| `battle-view.ts` | Battle presentation rules (M6): `viewSteps(events, ctx)` → message / sound / show / hit / hp / faint / withdraw / need_switch / end steps (HP only from the events), opponent names "{name} salvaje" / "{name} rival", `mainMenu` / `attackMenu` / `teamMenu` (enabled via `actionError`), `hpColor`. |
+| `battle-view.ts` | Battle presentation rules (M6): `viewSteps(events, ctx)` → message / sound / show / hit / hp / faint / withdraw / need_switch / end steps (HP only from the events), opponent names "{name} salvaje" / "{name} rival", `mainMenu` / `attackMenu` / `teamMenu` (enabled via `actionError`), `hpColor`; `catchMessages(outcome, name, t)` (M7) words a catch: joins the team / sent to storage / merged "{stat} +{n}" / already at the maximum. |
 | `talk.ts` | What an NPC says by type (M5): dialogue; healer = `[curar]` then dialogue; storage = dialogue then `[caja]` (placeholders until M9). |
 
 ## Battle events (`battle.ts`)

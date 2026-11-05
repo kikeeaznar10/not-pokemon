@@ -28,6 +28,11 @@
  *   then launches the BattleScene and puts this scene to sleep (map, player and NPCs keep their state).
  *   On `battle:ended` it wakes up on the same tile, fades in and resets the safe steps. The debug command
  *   `debug:battle` starts a wild battle against a fresh flexymon of any species.
+ * - Wild encounters (M7): after every completed step that is not a warp, `checkStep`
+ *   (`src/logic/encounter.ts`) rolls against the map's `encounters` rectangles and the zone's groups
+ *   in zones.json; on success the player stops on that tile and a wild battle starts. Safe steps:
+ *   `SAFE_STEPS` after every map entry and battle. The debug menu can switch encounters off
+ *   (`src/core/debug-flags.ts`).
  * - Emits `zone:entered` once built (main.ts plays the zone music) and `player:moved` after placing
  *   the player and after every step.
  */
@@ -44,7 +49,8 @@ import { t } from '../i18n';
 import type { BattleKind } from '../logic/battle';
 import { BATTLE_FLASH_MS, WARP_FADE_MS } from '../logic/constants';
 import { createInstance } from '../logic/instance';
-import { resetSafeSteps } from '../logic/encounter';
+import { checkStep, resetSafeSteps } from '../logic/encounter';
+import { debugFlags } from '../core/debug-flags';
 import { FACING_DELTA } from '../logic/npc-state';
 import { talkLines } from '../logic/talk';
 import { blockedWithWarps, insideWarp, warpAt, warpDestination, type WarpTarget } from '../logic/warp';
@@ -103,7 +109,7 @@ export class OverworldScene extends Phaser.Scene {
   /** True during a warp fade: the player cannot move. */
   private locked = false;
   private debugMenuOpen = false;
-  /** Steps left without encounter rolls (used by encounters in M7). */
+  /** Steps left without encounter rolls (`SAFE_STEPS` after every map entry and battle). */
   safeSteps = 0;
 
   constructor() {
@@ -205,6 +211,8 @@ export class OverworldScene extends Phaser.Scene {
         this.warpTo(warpDestination(warp, s));
         return;
       }
+      const end = moves.find((m) => m.type === 'step_end'); // At most one per frame.
+      if (end?.type === 'step_end' && this.encounterStep(end.x, end.y)) return;
     }
     if (!frozen && input.justPressed('a') && !player.state.step) {
       const s = player.state;
@@ -247,6 +255,36 @@ export class OverworldScene extends Phaser.Scene {
       this.scene.sleep();
     });
     return true;
+  }
+
+  /**
+   * Wild encounters (M7): run the encounter rules for a step that just ended on (x, y). On an encounter
+   * the player halts on that tile (a step already started by a held key is dropped) and a wild battle
+   * starts. With the debug flag `encounters` off nothing rolls, but safe steps still run down.
+   * Returns true if a battle started.
+   */
+  private encounterStep(x: number, y: number): boolean {
+    if (!debugFlags.encounters) {
+      this.safeSteps = Math.max(0, this.safeSteps - 1);
+      return false;
+    }
+    const result = checkStep(
+      {
+        safeSteps: this.safeSteps,
+        rects: this.info.encounters,
+        groups: this.zone.encounters,
+        x,
+        y,
+        tileHasEncounter: this.info.encounter[y * this.info.width + x] === true,
+      },
+      rng,
+    );
+    this.safeSteps = result.safeSteps;
+    if (result.speciesId === null || !this.player) return false;
+    this.player.halt(x, y);
+    this.emitMoved();
+    log(`Overworld: wild ${result.speciesId} at ${x},${y}`);
+    return this.startBattle({ speciesId: result.speciesId });
   }
 
   /** Wake up after a battle on the same tile: fade in, reset safe steps, unlock. */

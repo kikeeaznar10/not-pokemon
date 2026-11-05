@@ -123,3 +123,12 @@ export function renderPosition(state: Pick<MoveState, 'x' | 'y' | 'step'>): { x:
 export function walkFrame(state: Pick<MoveState, 'step'>): 0 | 1 {
   return state.step && state.step.elapsed < WALK_MS / 2 ? 1 : 0;
 }
+
+/**
+ * Stop on tile (x, y), keeping the facing (M7: a wild encounter at the end of a step). A step that
+ * already started from that tile in the same frame (the direction was held) is dropped, so the player
+ * stands still on the encounter tile.
+ */
+export function haltAt(state: MoveState, x: number, y: number): MoveState {
+  return createMoveState(x, y, state.facing);
+}

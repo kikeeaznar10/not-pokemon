@@ -10,12 +10,14 @@
  * - {@link mainMenu} says which of Atacar / Objeto / Cambiar / Huir is enabled (Huir only against wild
  *   flexymon, through `actionError`), {@link attackMenu} and {@link teamMenu} list the sub-menu rows.
  * - {@link hpColor} picks the HP bar colour band.
+ * - {@link catchMessages} (M7) words the outcome of taking a beaten wild flexymon.
  * Every visible text comes from `src/i18n/es.json` or the content files.
  */
 import type { Attack, Item, Species } from '../data/schemas';
 import { HP_RED_BELOW, HP_YELLOW_BELOW } from './constants';
 import { actionError, type BattleEvent, type BattleKind, type BattleState, type Side } from './battle';
 import { isFainted, maxHp } from './instance';
+import type { CatchOutcome } from './merge';
 
 /** Translator (`t` from `src/i18n`). */
 export type Translate = (key: string, vars?: Record<string, string | number>) => string;
@@ -302,4 +304,20 @@ export function hpColor(hp: number, max: number): 'green' | 'yellow' | 'red' {
   if (ratio < HP_RED_BELOW) return 'red';
   if (ratio < HP_YELLOW_BELOW) return 'yellow';
   return 'green';
+}
+
+/**
+ * Messages after taking a beaten wild flexymon of species `name` (M7, docs/PLAN.md › Catching and
+ * merging): joined the team, sent to storage because the team is full, merged ("{stat} +{n}", stat name
+ * from `stat.*`), or already at the maximum.
+ */
+export function catchMessages(outcome: CatchOutcome, name: string, t: Translate): string[] {
+  switch (outcome.type) {
+    case 'added':
+      return [t(outcome.to === 'team' ? 'catch.to_team' : 'catch.to_storage', { name })];
+    case 'merged':
+      return [t('catch.merged', { name, stat: t(`stat.${outcome.stat}`), n: outcome.amount })];
+    case 'maxed':
+      return [t('catch.maxed', { name })];
+  }
 }

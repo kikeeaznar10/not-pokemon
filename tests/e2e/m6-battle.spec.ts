@@ -93,6 +93,10 @@ async function advance(page: Page, uis: string[]): Promise<{ messages: string[];
       }
     } else if (uis.includes(v.ui) && v.menu) {
       return { messages, last };
+    } else if (v.ui === 'catch' && v.menu) {
+      // M7: after a wild win the catch choice appears; B = Dejarlo keeps the team as it was.
+      await press(page, 'x');
+      continue;
     } else if (v.message) {
       if (messages.at(-1) !== v.message) messages.push(v.message);
       await press(page, 'z');

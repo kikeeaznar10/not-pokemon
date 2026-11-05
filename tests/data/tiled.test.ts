@@ -35,7 +35,40 @@ describe('Tiled maps', () => {
     expect(isBlocked(info, -1, 0)).toBe(true);
     expect(isBlocked(info, 30, 0)).toBe(true);
     expect(isBlocked(info, 0, 20)).toBe(true);
-    expect(info.encounter.some(Boolean)).toBe(false); // tall grass comes in M7
+  });
+
+  it('the shipped test map has tall grass and two encounter rectangles (M7)', () => {
+    const info = parseTiledMap(shipped(), 'maps/test.tmj');
+    const grass = (x: number, y: number) => info.encounter[y * info.width + x];
+    expect(grass(20, 2)).toBe(true);
+    expect(grass(23, 5)).toBe(true);
+    expect(grass(19, 3)).toBe(false); // inside the rectangle, plain grass
+    expect(grass(15, 10)).toBe(false);
+    expect(info.encounter.filter(Boolean)).toHaveLength(16);
+    expect(info.encounters).toEqual([
+      { name: 'jardin', x: 19, y: 1, width: 5, height: 5, group: 'jardin_turia', mode: 'tiles' },
+      { name: 'plaza', x: 1, y: 13, width: 4, height: 4, group: 'plaza_ayuntamiento', mode: 'all' },
+    ]);
+    expect(isBlocked(info, 20, 2)).toBe(false);
+  });
+
+  it('rejects encounter rectangles without a group or with a bad mode', () => {
+    type Obj = { name: string; properties?: { name: string; value: unknown }[] };
+    const map = buildTestMap() as { layers: { name: string; objects?: Obj[] }[] };
+    const objs = map.layers.find((l) => l.name === 'encounters')!.objects!;
+    objs[0]!.properties = [
+      { name: 'group', value: 'g' },
+      { name: 'mode', value: 'some' },
+    ];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(
+      'maps/x.tmj: encounter "jardin": mode must be "tiles" or "all"',
+    );
+    objs[0]!.properties = [{ name: 'mode', value: 'all' }];
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(/encounter "jardin": needs a group property/);
+    objs[0]!.name = '';
+    expect(() => parseTiledMap(map, 'maps/x.tmj')).toThrow(/encounter #0/);
+    map.layers = map.layers.filter((l) => l.name !== 'encounters');
+    expect(parseTiledMap(map, 'maps/x.tmj').encounters).toEqual([]);
   });
 
   it('the shipped maps are what the tool generates (no hand edits lost)', () => {

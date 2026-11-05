@@ -9,12 +9,16 @@ import type { z } from 'zod';
 import { checkCrossRefs } from './cross-refs';
 import type { DataError } from './errors';
 import { buildGameData, withMaps, type GameData, type LoadedMap, type RawGameData } from './game-data';
-import { checkMaps } from './map-checks';
+import { checkMaps, mapWarnings } from './map-checks';
 import { parseTiledMap, type MapInfo } from './tiled';
 import { DATA_FILES, FILE_SCHEMAS, type DataFileName } from './schemas';
 
-/** Result of loading or validating content. */
-export type LoadResult = { ok: true; data: GameData } | { ok: false; errors: DataError[] };
+/**
+ * Result of loading or validating content. `warnings` (M7: unused encounter groups) do not stop the
+ * game; Boot logs them.
+ */
+export type LoadResult =
+  { ok: true; data: GameData; warnings?: DataError[] } | { ok: false; errors: DataError[] };
 
 /** Raw file contents: already-parsed JSON, or a {@link FileFailure} if it could not be read/parsed. */
 export type RawFiles = Record<DataFileName, unknown>;
@@ -77,7 +81,7 @@ export const fetchText: TextFetcher = async (url) => {
 
 /**
  * Fetch and parse every zone's map from `baseUrl` + `zone.file` (e.g. `./` + `maps/test.tmj`), then run
- * the map checks. A map that cannot be fetched, parsed or read is reported as `maps/x.tmj › (root) › …`.
+ * the map checks (plus the warnings of `mapWarnings`). A map that cannot be fetched, parsed or read is reported as `maps/x.tmj › (root) › …`.
  */
 export async function loadMaps(
   data: GameData,
@@ -107,7 +111,7 @@ export async function loadMaps(
   const infos = new Map<string, MapInfo>([...maps].map(([id, m]) => [id, m.info]));
   errors.push(...checkMaps(data, infos));
   if (errors.length > 0) return { ok: false, errors };
-  return { ok: true, data: withMaps(data, maps) };
+  return { ok: true, data: withMaps(data, maps), warnings: mapWarnings(data, infos) };
 }
 
 /** Options for {@link loadGameData}. */

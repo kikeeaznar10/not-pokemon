@@ -94,6 +94,35 @@ describe('maps at load time (M4)', () => {
     ]);
   });
 
+  it('an encounter rectangle with a group missing from zones.json is an error (M7)', async () => {
+    expect(
+      await load((file, json) => {
+        if (file !== 'maps/test.tmj') return;
+        const layer = json.layers.find((l: Json) => l.name === 'encounters');
+        layer.objects[1].properties[0].value = 'plaza_mayor';
+      }),
+    ).toEqual([
+      'maps/test.tmj › encounters.plaza › unknown encounter group "plaza_mayor" (not in zones.json › test.encounters)',
+    ]);
+  });
+
+  it('a group in zones.json that no rectangle uses is only a warning (M7)', async () => {
+    const fetcher: TextFetcher = async (url) => {
+      const json = JSON.parse(await disk(url)) as Json;
+      if (url === 'data/zones.json') {
+        json[2].encounters = { playa: { rate: 5, flexymon: [{ id: 'raton', weight: 1 }] } };
+      }
+      return JSON.stringify(json);
+    };
+    const result = await loadGameData('data/', fetcher, { mapsBaseUrl: '' });
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.warnings?.map(formatDataError)).toEqual([
+      'zones.json › test_east.encounters.playa › group not used by any rectangle in maps/test_east.tmj',
+    ]);
+    const shipped = await loadGameData('data/', disk, { mapsBaseUrl: '' });
+    expect(shipped.ok && shipped.warnings).toEqual([]);
+  });
+
   it('a missing or broken map file is reported against the map file', async () => {
     const fetcher: TextFetcher = async (url) => {
       if (url.endsWith('test_east.tmj')) throw new Error('HTTP 404');

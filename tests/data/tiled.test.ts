@@ -5,7 +5,9 @@ import { findSpawn, isBlocked, parseTiledMap, resolveMapPath, tiledProperty } fr
 import { buildTestEast, buildTestHouse, buildTestMap } from '../../tools/make-test-map';
 
 const shipped = (name = 'test') =>
-  JSON.parse(readFileSync(join(__dirname, '..', '..', 'public', 'maps', `${name}.tmj`), 'utf8')) as unknown;
+  JSON.parse(
+    readFileSync(join(__dirname, '..', '..', 'public', 'maps', 'test', `${name}.tmj`), 'utf8'),
+  ) as unknown;
 
 describe('Tiled maps', () => {
   it('resolves tileset paths relative to the map', () => {
@@ -19,7 +21,7 @@ describe('Tiled maps', () => {
   });
 
   it('the shipped test map: 30 × 20, walls, water, hidden collision, open path, edges, spawn', () => {
-    const info = parseTiledMap(shipped(), 'maps/test.tmj');
+    const info = parseTiledMap(shipped(), 'maps/test/test.tmj');
     expect(info.width).toBe(30);
     expect(info.height).toBe(20);
     expect(info.tilesetImages).toEqual([{ name: 'test', path: 'assets/tilesets/test.png' }]);
@@ -38,7 +40,7 @@ describe('Tiled maps', () => {
   });
 
   it('the shipped test map has tall grass and two encounter rectangles (M7)', () => {
-    const info = parseTiledMap(shipped(), 'maps/test.tmj');
+    const info = parseTiledMap(shipped(), 'maps/test/test.tmj');
     const grass = (x: number, y: number) => info.encounter[y * info.width + x];
     expect(grass(20, 2)).toBe(true);
     expect(grass(23, 5)).toBe(true);
@@ -78,7 +80,7 @@ describe('Tiled maps', () => {
   });
 
   it('reads warps: door, off-map edge (row kept), interior exit, the Audi (M13)', () => {
-    const test = parseTiledMap(shipped(), 'maps/test.tmj');
+    const test = parseTiledMap(shipped(), 'maps/test/test.tmj');
     expect(test.warps).toEqual([
       {
         name: 'house_door',
@@ -123,9 +125,9 @@ describe('Tiled maps', () => {
     expect(isBlocked(test, 6, 6)).toBe(false); // the door tile is walkable
     expect(isBlocked(test, 8, 11)).toBe(true); // the Audi is solid (both tiles)
     expect(isBlocked(test, 9, 11)).toBe(true);
-    const house = parseTiledMap(shipped('test_house'), 'maps/test_house.tmj');
+    const house = parseTiledMap(shipped('test_house'), 'maps/test/test_house.tmj');
     expect(house.warps[0]).toMatchObject({ x: 4, y: 8, toMap: 'test', toX: 6, toY: 7, toFacing: 'down' });
-    const east = parseTiledMap(shipped('test_east'), 'maps/test_east.tmj');
+    const east = parseTiledMap(shipped('test_east'), 'maps/test/test_east.tmj');
     expect(east.warps[0]).toMatchObject({ x: -1, y: 0, height: 20, toMap: 'test', toX: 29, toY: null });
     expect(east.warps[1]).toMatchObject({ x: 2, y: 9, width: 2, trigger: 'action', car: 'valencia' });
     expect(isBlocked(east, 2, 9) && isBlocked(east, 3, 9)).toBe(true);
@@ -173,7 +175,7 @@ describe('Tiled maps', () => {
     const ground = map.layers.find((l) => l.name === 'ground')!;
     ground.data![0] = 8; // tall grass (local id 7)
     ground.data![1] = (0x80000000 | 3) >>> 0; // flipped wall (local id 2)
-    const info = parseTiledMap(map, 'maps/test.tmj');
+    const info = parseTiledMap(map, 'maps/test/test.tmj');
     expect(info.encounter[0]).toBe(true);
     expect(isBlocked(info, 1, 0)).toBe(true);
   });

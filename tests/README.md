@@ -1,10 +1,25 @@
 # tests
 
-- `tests/core/`, `tests/i18n/`, `tests/tools/`, `tests/data/` (fixture: the shipped `public/data/` via `tests/data/fixture.ts`;
+- `tests/core/`, `tests/i18n/`, `tests/tools/`, `tests/data/` (fixture: since M14 the frozen test world
+  `public/test-world/data/` via `tests/data/fixture.ts`, so rule tests keep their numbers while the real content
+  grows; the real world is checked by `tests/data/world.test.ts`;
   `tests/logic/helpers.ts` adds `gameData()`, `inst()` and `scriptedRng()` for rule tests), `tests/logic/`: Vitest unit
   tests mirroring `src/` (`npm test`; coverage with `npm run coverage`). Vitest only picks up `tests/**/*.test.ts`
   and ignores `tests/e2e/`.
 - `tests/e2e/`: Playwright browser tests (`npx playwright test`). They build with `VITE_E2E=1` and serve `dist/`.
+
+**The test world (M14).** The real world replaced the test maps in M14. The specs written before it (m0–m13) still
+run on the frozen M0–M13 content: `playwright.config.ts` starts every profile with
+`localStorage['flexymon.e2e.world'] = 'test'`, which makes dev / E2E builds load `public/test-world/data/` and the maps
+in `public/maps/test/` (`src/data/world.ts`; `?world=test` in the URL does the same, handy with `npm run dev`). Their
+`page.route('**/data/…json')` interceptions match that folder too. A spec about the real world removes the key
+before the page loads (`page.addInitScript`), like `tests/e2e/m14-world.spec.ts`.
+
+`tests/e2e/m14-world.spec.ts` walks the real world with a small path finder (`walkTo`: it reads the `.tmj` maps,
+re-plans every tile around the NPCs, plays through enemy battles and dialogue) and `visit` (enter a door, check the
+doormat, leave). The two long walks run on `desktop` only. To run it next to another Playwright run, give it its
+own port and build folder:
+`E2E_PORT=4180 E2E_SERVER_CMD="VITE_E2E=1 npx vite build --outDir dist-m14 && npx vite preview --outDir dist-m14 --port 4180 --strictPort" npx playwright test tests/e2e/m14-world.spec.ts`.
 
 ## Test hooks (`src/main.ts`)
 

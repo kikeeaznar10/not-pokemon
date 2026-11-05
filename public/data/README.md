@@ -37,7 +37,27 @@ Validation rules beyond the plan's examples (all from the plan's rules unless ma
   onto are walkable, and no walk enters the other actor's tile. Control starts where the script leaves the player
   (the shipped script: two tiles up from the spawn, (15, 8) on `test`); walk the coworker out of view at the end.
 
-Current content (minimal): 3 flexymon, 6 attacks, 6 items, 5 NPCs (M9 added the office healer
-`recepcionista_oficina`, the storage NPC `informatico_caja` and the shopkeeper `tendero_alboraya`, all in `test_house`), 3 zones (`test`, `test_house`, `test_east`;
-the M4 test maps), 1 shop. Since M4 every zone must have a loadable map and every map point (NPC spawns, start
-spawn/respawn, car endpoints, warp targets) must be a walkable tile; the real zones (`valencia`…) come in M14.
+Current content (M14, the real world): 12 flexymon, 24 attacks, 8 items, 25 NPCs (15 enemies, 6 shopkeepers, the
+office healer and storage, 2 client talkers), 18 zones (8 outdoor: `alboraya`, `huerta_norte`, `valencia`, `playa`,
+`pueblo_sur` on the Valencia side; `murcia`, `vinedos`, `poligono` on the Murcia side — plus 10 interiors), 6 shops
+(one per town and one per bar). Map layouts and landmarks: `public/maps/README.md`. Every zone must have a loadable
+map and every map point (NPC spawns, start spawn/respawn, car endpoints, warp targets) must be a walkable tile.
+
+M14 decisions (also in docs/PROGRESS.md):
+
+- **Audi items:** a new game starts with `llaves_audi` (`start.json › items`); `cafe_doble` is sold at Bar Las Rusas
+  (300 €) and `carnet` at the south town's shop (600 €). Both stay key items (never sold back, never consumed); they
+  now have a price so a shop can list them. `car.json › unlockPairs` is unchanged.
+- **Music:** one loop per region, `assets/audio/music/valencia.ogg` and `murcia.ogg`; every interior plays
+  `interior.ogg`.
+- **Balance:** Valencia species total 60–100 stats, the Murcia species (`servidor`, `router`, `proyector`) 100–140
+  (docs/PLAN.md › Content guide); enemy teams and rewards grow from Alboraya (60–100 €) to the Murcia side
+  (250–420 €).
+
+## The frozen test world (`public/test-world/data/`)
+
+The content of M0–M13 (3 flexymon, the test maps `public/maps/test/*.tmj`…) is kept, unchanged, as a second content
+set for tests and debugging. Dev and E2E builds load it instead of this folder with `?world=test` or
+`localStorage['flexymon.e2e.world'] = 'test'` (`src/data/world.ts`); production builds always load `public/data/`.
+The unit tests in `tests/logic/` and most of `tests/data/` and the browser specs written before M14 use it, so its
+numbers must not change. Do not add real content there.

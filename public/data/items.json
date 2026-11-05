@@ -6,7 +6,34 @@
     "sprite": "assets/sprites/items/cafe.png",
     "price": 50,
     "usableIn": ["battle", "field"],
-    "effect": { "type": "heal", "amount": 20 }
+    "effect": {
+      "type": "heal",
+      "amount": 20
+    }
+  },
+  {
+    "id": "bocadillo",
+    "name": "Bocadillo",
+    "description": "Recupera 50 PS.",
+    "sprite": "assets/sprites/items/bocadillo.png",
+    "price": 120,
+    "usableIn": ["battle", "field"],
+    "effect": {
+      "type": "heal",
+      "amount": 50
+    }
+  },
+  {
+    "id": "ibuprofeno",
+    "name": "Ibuprofeno",
+    "description": "Reanima a un flexymon debilitado con la mitad de sus PS.",
+    "sprite": "assets/sprites/items/ibuprofeno.png",
+    "price": 250,
+    "usableIn": ["battle", "field"],
+    "effect": {
+      "type": "revive",
+      "percent": 50
+    }
   },
   {
     "id": "redbull",
@@ -15,7 +42,12 @@
     "sprite": "assets/sprites/items/lata.png",
     "price": 120,
     "usableIn": ["battle"],
-    "effect": { "type": "buff", "stat": "attack", "percent": 30, "turns": 3 }
+    "effect": {
+      "type": "buff",
+      "stat": "attack",
+      "percent": 30,
+      "turns": 3
+    }
   },
   {
     "id": "regleta",
@@ -24,33 +56,41 @@
     "sprite": "assets/sprites/items/regleta.png",
     "price": 1000,
     "usableIn": ["field"],
-    "effect": { "type": "team_slot" }
+    "effect": {
+      "type": "team_slot"
+    }
   },
   {
     "id": "llaves_audi",
     "name": "Llaves del Audi",
-    "description": "Huelen a ambientador de pino.",
+    "description": "Las llaves del Audi de la oficina. Huelen a ambientador de pino.",
     "sprite": "assets/sprites/items/llaves.png",
     "price": null,
     "usableIn": [],
-    "effect": { "type": "key" }
+    "effect": {
+      "type": "key"
+    }
   },
   {
     "id": "carnet",
     "name": "Carnet de conducir",
-    "description": "Provisional. Sin puntos que perder.",
+    "description": "Provisional. Sin puntos que perder. Se vende en el Pueblo del Sur.",
     "sprite": "assets/sprites/items/carnet.png",
-    "price": null,
+    "price": 600,
     "usableIn": [],
-    "effect": { "type": "key" }
+    "effect": {
+      "type": "key"
+    }
   },
   {
     "id": "cafe_doble",
     "name": "Café doble",
-    "description": "Para conducir hasta Murcia sin parar.",
+    "description": "Para conducir hasta Murcia sin parar. Lo sirven en el Bar Las Rusas.",
     "sprite": "assets/sprites/items/cafe_doble.png",
-    "price": null,
+    "price": 300,
     "usableIn": [],
-    "effect": { "type": "key" }
+    "effect": {
+      "type": "key"
+    }
   }
 ]

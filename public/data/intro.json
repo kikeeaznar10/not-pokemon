@@ -5,15 +5,29 @@
     "name": "Compañera",
     "sprite": "assets/sprites/npcs/companera.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "x": 15,
-    "y": 3,
+    "x": 7,
+    "y": 4,
     "facing": "down"
   },
   "steps": [
-    { "type": "fade_in", "ms": 800 },
-    { "type": "walk", "actor": "player", "path": ["up", "up"] },
-    { "type": "wait", "ms": 300 },
-    { "type": "walk", "actor": "coworker", "path": ["down", "down", "down", "down"] },
+    {
+      "type": "fade_in",
+      "ms": 800
+    },
+    {
+      "type": "walk",
+      "actor": "player",
+      "path": ["up", "up", "up"]
+    },
+    {
+      "type": "wait",
+      "ms": 300
+    },
+    {
+      "type": "walk",
+      "actor": "coworker",
+      "path": ["down", "down", "down", "down"]
+    },
     {
       "type": "say",
       "lines": [
@@ -21,8 +35,20 @@
         "Aquí todos trabajamos con flexymon. Toma, este es para ti."
       ]
     },
-    { "type": "handover" },
-    { "type": "say", "lines": ["Cuídalo bien. ¡Nos vemos por la oficina!"] },
-    { "type": "walk", "actor": "coworker", "path": ["up", "up", "up", "up", "up"] }
+    {
+      "type": "handover"
+    },
+    {
+      "type": "say",
+      "lines": [
+        "Las llaves del Audi están en tu mochila. Para ir a Murcia te hará falta carnet o un café doble.",
+        "Si tu equipo se cansa, la recepcionista lo cura gratis. ¡Nos vemos por la oficina!"
+      ]
+    },
+    {
+      "type": "walk",
+      "actor": "coworker",
+      "path": ["up", "up", "up", "up", "up", "up"]
+    }
   ]
 }

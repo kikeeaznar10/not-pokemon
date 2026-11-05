@@ -1,6 +1,6 @@
 /**
  * `npm run placeholders` — generates placeholder art and sound for every asset path referenced by
- * the content JSON in `public/data/`. It NEVER overwrites an existing file, so running it twice
+ * the content JSON in `public/data/` and (M14) the frozen test world `public/test-world/data/` ({@link DATA_DIRS}). It NEVER overwrites an existing file, so running it twice
  * creates nothing the second time, and real assets dropped at the same paths are left alone.
  *
  * Rules:
@@ -32,6 +32,8 @@ import { minimapCells, minimapPath, type MinimapCell } from '../src/logic/minima
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = join(ROOT, 'public');
 const DATA_DIR = join(PUBLIC_DIR, 'data');
+/** Content folders the tool reads (M14): the real world, then the frozen test world (`src/data/world.ts`). */
+export const DATA_DIRS = [DATA_DIR, join(PUBLIC_DIR, 'test-world', 'data')];
 const FALLBACK_DIR = join(ROOT, 'tools', 'fallback');
 
 const ASSET_PATH = /^assets\/.+\.(png|ogg|mp3)$/i;
@@ -246,12 +248,22 @@ export interface MinimapTarget {
   mapFile: string;
 }
 
-/** Read `zones.json` and list the minimap of every outdoor zone (indoor zones have none). */
-export function readMinimapTargets(dataDir: string = DATA_DIR): MinimapTarget[] {
-  const file = join(dataDir, 'zones.json');
-  if (!existsSync(file)) return [];
-  const zones = JSON.parse(readFileSync(file, 'utf8')) as { id: string; file: string; indoor: boolean }[];
-  return zones.filter((z) => !z.indoor).map((z) => ({ assetPath: minimapPath(z.id), mapFile: z.file }));
+/**
+ * Read `zones.json` in each of `dataDirs` and list the minimap of every outdoor zone (indoor zones have none), in
+ * file order, without duplicates.
+ */
+export function readMinimapTargets(dataDirs: readonly string[] = DATA_DIRS): MinimapTarget[] {
+  const out: MinimapTarget[] = [];
+  for (const dataDir of dataDirs) {
+    const file = join(dataDir, 'zones.json');
+    if (!existsSync(file)) continue;
+    const zones = JSON.parse(readFileSync(file, 'utf8')) as { id: string; file: string; indoor: boolean }[];
+    for (const z of zones.filter((zone) => !zone.indoor)) {
+      if (!out.some((t) => t.assetPath === minimapPath(z.id)))
+        out.push({ assetPath: minimapPath(z.id), mapFile: z.file });
+    }
+  }
+  return out;
 }
 
 /** Stable RGB colour derived from a string. */
@@ -372,14 +384,17 @@ function writeAudio(file: string, ext: (typeof AUDIO_EXTS)[number]): 'beep' | 's
   return 'silent';
 }
 
-/** Read every JSON file in `public/data/` and return the sorted, de-duplicated asset paths. */
-export function readAssetPaths(dataDir: string = DATA_DIR): string[] {
+/** Read every JSON file in each of `dataDirs` (missing folders are skipped) and return the sorted, de-duplicated asset paths. */
+export function readAssetPaths(dataDirs: readonly string[] = DATA_DIRS): string[] {
   const paths = new Set<string>();
-  for (const name of readdirSync(dataDir)
-    .filter((n) => n.endsWith('.json'))
-    .sort()) {
-    const json: unknown = JSON.parse(readFileSync(join(dataDir, name), 'utf8'));
-    collectAssetPaths(json, paths);
+  for (const dataDir of dataDirs) {
+    if (!existsSync(dataDir)) continue;
+    for (const name of readdirSync(dataDir)
+      .filter((n) => n.endsWith('.json'))
+      .sort()) {
+      const json: unknown = JSON.parse(readFileSync(join(dataDir, name), 'utf8'));
+      collectAssetPaths(json, paths);
+    }
   }
   return [...paths].sort();
 }

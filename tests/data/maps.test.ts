@@ -12,10 +12,10 @@ const disk: TextFetcher = async (url) => readFileSync(join(pub, url), 'utf8');
 async function load(edit: (file: string, json: Json) => void = () => undefined): Promise<string[] | 'ok'> {
   const fetcher: TextFetcher = async (url) => {
     const json = JSON.parse(await disk(url)) as Json;
-    edit(url.replace(/^data\//, ''), json);
+    edit(url.replace(/^test-world\/data\//, ''), json);
     return JSON.stringify(json);
   };
-  const result = await loadGameData('data/', fetcher, { mapsBaseUrl: '' });
+  const result = await loadGameData('test-world/data/', fetcher, { mapsBaseUrl: '' });
   return result.ok ? 'ok' : result.errors.map(formatDataError);
 }
 
@@ -28,8 +28,8 @@ const setWarp = (map: Json, name: string, prop: string, value: unknown) => {
 };
 
 describe('maps at load time (M4)', () => {
-  it('the shipped data and maps load, with the parsed maps in GameData', async () => {
-    const result = await loadGameData('data/', disk, { mapsBaseUrl: '' });
+  it('the test-world data and maps load, with the parsed maps in GameData', async () => {
+    const result = await loadGameData('test-world/data/', disk, { mapsBaseUrl: '' });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect([...result.data.maps.keys()]).toEqual(['test', 'test_house', 'test_east']);
@@ -40,27 +40,29 @@ describe('maps at load time (M4)', () => {
   });
 
   it('without mapsBaseUrl, maps are skipped', async () => {
-    const result = await loadGameData('data/', disk);
+    const result = await loadGameData('test-world/data/', disk);
     expect(result.ok && result.data.maps.size).toBe(0);
   });
 
   it('a warp pointing at a wall fails with a clear message', async () => {
     expect(
       await load((file, json) => {
-        if (file === 'maps/test.tmj') {
+        if (file === 'maps/test/test.tmj') {
           setWarp(json, 'house_door', 'toX', 0);
           setWarp(json, 'house_door', 'toY', 0);
         }
       }),
-    ).toEqual(['maps/test.tmj › warps.house_door › target tile (0, 0) on map "test_house" is not walkable']);
+    ).toEqual([
+      'maps/test/test.tmj › warps.house_door › target tile (0, 0) on map "test_house" is not walkable',
+    ]);
   });
 
   it('a warp to an unknown map or outside the target map fails', async () => {
-    expect(await load((f, j) => f === 'maps/test.tmj' && setWarp(j, 'house_door', 'toMap', 'luna'))).toEqual([
-      'maps/test.tmj › warps.house_door › unknown map "luna"',
-    ]);
-    expect(await load((f, j) => f === 'maps/test.tmj' && setWarp(j, 'house_door', 'toY', 8))).toEqual([
-      'maps/test.tmj › warps.house_door › target tile (4, 8) is outside map "test_house" (10 × 8)',
+    expect(
+      await load((f, j) => f === 'maps/test/test.tmj' && setWarp(j, 'house_door', 'toMap', 'luna')),
+    ).toEqual(['maps/test/test.tmj › warps.house_door › unknown map "luna"']);
+    expect(await load((f, j) => f === 'maps/test/test.tmj' && setWarp(j, 'house_door', 'toY', 8))).toEqual([
+      'maps/test/test.tmj › warps.house_door › target tile (4, 8) is outside map "test_house" (10 × 8)',
     ]);
   });
 
@@ -75,12 +77,12 @@ describe('maps at load time (M4)', () => {
 
   it('an edge warp checks every row it can land on', async () => {
     const errors = await load((file, json) => {
-      if (file !== 'maps/test_east.tmj') return;
+      if (file !== 'maps/test/test_east.tmj') return;
       const deco = json.layers.find((l: Json) => l.name === 'deco');
       deco.data[7 * 30 + 0] = 3; // wall at (0, 7): test's east_edge lands there for row 7
     });
     expect(errors).toEqual([
-      'maps/test.tmj › warps.east_edge › target tile (0, 7) on map "test_east" is not walkable',
+      'maps/test/test.tmj › warps.east_edge › target tile (0, 7) on map "test_east" is not walkable',
     ]);
   });
 
@@ -90,7 +92,7 @@ describe('maps at load time (M4)', () => {
         if (file === 'npcs.json') json[0].spawn = { x: 0, y: 0 }; // wall in test_house
         if (file === 'start.json') json.respawn.x = 11; // wall west of the spawn (y 11)
         if (file === 'car.json') json.toMurcia = { map: 'test_east', x: 20, y: 10, facing: 'down' };
-        if (file === 'maps/test.tmj') {
+        if (file === 'maps/test/test.tmj') {
           const spawns = json.layers.find((l: Json) => l.name === 'spawns');
           spawns.objects[0].x = 11 * 32;
         }
@@ -99,36 +101,36 @@ describe('maps at load time (M4)', () => {
       'npcs.json › [0].spawn › tile (0, 0) on map "test_house" is not walkable',
       'start.json › respawn › tile (11, 11) on map "test" is not walkable',
       'car.json › toMurcia › tile (20, 10) on map "test_east" is not walkable',
-      'maps/test.tmj › spawns.default › tile (11, 10) on map "test" is not walkable',
+      'maps/test/test.tmj › spawns.default › tile (11, 10) on map "test" is not walkable',
     ]);
   });
 
   it('an encounter rectangle with a group missing from zones.json is an error (M7)', async () => {
     expect(
       await load((file, json) => {
-        if (file !== 'maps/test.tmj') return;
+        if (file !== 'maps/test/test.tmj') return;
         const layer = json.layers.find((l: Json) => l.name === 'encounters');
         layer.objects[1].properties[0].value = 'plaza_mayor';
       }),
     ).toEqual([
-      'maps/test.tmj › encounters.plaza › unknown encounter group "plaza_mayor" (not in zones.json › test.encounters)',
+      'maps/test/test.tmj › encounters.plaza › unknown encounter group "plaza_mayor" (not in zones.json › test.encounters)',
     ]);
   });
 
   it('a group in zones.json that no rectangle uses is only a warning (M7)', async () => {
     const fetcher: TextFetcher = async (url) => {
       const json = JSON.parse(await disk(url)) as Json;
-      if (url === 'data/zones.json') {
+      if (url === 'test-world/data/zones.json') {
         json[2].encounters = { playa: { rate: 5, flexymon: [{ id: 'raton', weight: 1 }] } };
       }
       return JSON.stringify(json);
     };
-    const result = await loadGameData('data/', fetcher, { mapsBaseUrl: '' });
+    const result = await loadGameData('test-world/data/', fetcher, { mapsBaseUrl: '' });
     expect(result.ok).toBe(true);
     expect(result.ok && result.warnings?.map(formatDataError)).toEqual([
-      'zones.json › test_east.encounters.playa › group not used by any rectangle in maps/test_east.tmj',
+      'zones.json › test_east.encounters.playa › group not used by any rectangle in maps/test/test_east.tmj',
     ]);
-    const shipped = await loadGameData('data/', disk, { mapsBaseUrl: '' });
+    const shipped = await loadGameData('test-world/data/', disk, { mapsBaseUrl: '' });
     expect(shipped.ok && shipped.warnings).toEqual([]);
   });
 
@@ -138,10 +140,10 @@ describe('maps at load time (M4)', () => {
       if (url.endsWith('test_house.tmj')) return '{"orientation":"isometric"}';
       return disk(url);
     };
-    const result = await loadGameData('data/', fetcher, { mapsBaseUrl: '' });
+    const result = await loadGameData('test-world/data/', fetcher, { mapsBaseUrl: '' });
     expect(result.ok ? [] : result.errors.map(formatDataError)).toEqual([
-      'maps/test_house.tmj › (root) › orientation: Invalid input: expected "orthogonal"',
-      'maps/test_east.tmj › (root) › could not load map (HTTP 404)',
+      'maps/test/test_house.tmj › (root) › orientation: Invalid input: expected "orthogonal"',
+      'maps/test/test_east.tmj › (root) › could not load map (HTTP 404)',
     ]);
   });
 

@@ -1,0 +1,21 @@
+{
+  "unlockPairs": [
+    ["llaves_audi", "carnet"],
+    ["llaves_audi", "cafe_doble"]
+  ],
+  "lockedDialogue": ["El Audi está cerrado. Te falta algo..."],
+  "sprite": "assets/sprites/car/audi.png",
+  "sound": "assets/audio/sfx/car_engine.ogg",
+  "toMurcia": {
+    "map": "test_east",
+    "x": 2,
+    "y": 10,
+    "facing": "down"
+  },
+  "toValencia": {
+    "map": "test",
+    "x": 8,
+    "y": 12,
+    "facing": "down"
+  }
+}

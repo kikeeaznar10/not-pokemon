@@ -5,7 +5,7 @@ import { formatDataError, formatPath } from '../../src/data/errors';
 import { getGameData, hasGameData, setGameData } from '../../src/data/game-data';
 import { loadGameData, type TextFetcher } from '../../src/data/loader';
 
-const dir = join(__dirname, '..', '..', 'public', 'data');
+const dir = join(__dirname, '..', '..', 'public', 'test-world', 'data');
 const diskFetcher: TextFetcher = async (url) => readFileSync(join(dir, url.replace('data/', '')), 'utf8');
 
 describe('loader', () => {

@@ -8,7 +8,12 @@
       "icon": "assets/sprites/flexymon/portatil_icon.png"
     },
     "cry": "assets/audio/sfx/cry_portatil.ogg",
-    "stats": { "hp": 40, "attack": 12, "defense": 10, "speed": 11 },
+    "stats": {
+      "hp": 40,
+      "attack": 12,
+      "defense": 10,
+      "speed": 11
+    },
     "attacks": ["compilar", "pantallazo_azul", "actualizacion"]
   },
   {
@@ -20,7 +25,12 @@
       "icon": "assets/sprites/flexymon/raton_icon.png"
     },
     "cry": "assets/audio/sfx/cry_raton.ogg",
-    "stats": { "hp": 30, "attack": 10, "defense": 8, "speed": 14 },
+    "stats": {
+      "hp": 30,
+      "attack": 10,
+      "defense": 8,
+      "speed": 14
+    },
     "attacks": ["pulsacion", "rueda_scroll"]
   },
   {
@@ -32,7 +42,165 @@
       "icon": "assets/sprites/flexymon/teclado_icon.png"
     },
     "cry": "assets/audio/sfx/cry_teclado.ogg",
-    "stats": { "hp": 38, "attack": 11, "defense": 12, "speed": 8 },
+    "stats": {
+      "hp": 38,
+      "attack": 11,
+      "defense": 12,
+      "speed": 8
+    },
     "attacks": ["pulsacion", "atajo_teclado"]
+  },
+  {
+    "id": "monitor",
+    "name": "Monitor",
+    "sprite": {
+      "front": "assets/sprites/flexymon/monitor_front.png",
+      "back": "assets/sprites/flexymon/monitor_back.png",
+      "icon": "assets/sprites/flexymon/monitor_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_monitor.ogg",
+    "stats": {
+      "hp": 42,
+      "attack": 10,
+      "defense": 14,
+      "speed": 7
+    },
+    "attacks": ["destello", "salvapantallas", "pantallazo_azul"]
+  },
+  {
+    "id": "movil",
+    "name": "Móvil",
+    "sprite": {
+      "front": "assets/sprites/flexymon/movil_front.png",
+      "back": "assets/sprites/flexymon/movil_back.png",
+      "icon": "assets/sprites/flexymon/movil_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_movil.ogg",
+    "stats": {
+      "hp": 28,
+      "attack": 12,
+      "defense": 7,
+      "speed": 18
+    },
+    "attacks": ["notificacion", "vibracion", "rueda_scroll"]
+  },
+  {
+    "id": "impresora",
+    "name": "Impresora",
+    "sprite": {
+      "front": "assets/sprites/flexymon/impresora_front.png",
+      "back": "assets/sprites/flexymon/impresora_back.png",
+      "icon": "assets/sprites/flexymon/impresora_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_impresora.ogg",
+    "stats": {
+      "hp": 45,
+      "attack": 13,
+      "defense": 13,
+      "speed": 6
+    },
+    "attacks": ["impresion_doble", "atasco_papel"]
+  },
+  {
+    "id": "cafetera",
+    "name": "Cafetera",
+    "sprite": {
+      "front": "assets/sprites/flexymon/cafetera_front.png",
+      "back": "assets/sprites/flexymon/cafetera_back.png",
+      "icon": "assets/sprites/flexymon/cafetera_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_cafetera.ogg",
+    "stats": {
+      "hp": 36,
+      "attack": 14,
+      "defense": 9,
+      "speed": 12
+    },
+    "attacks": ["chorro_vapor", "descafeinado", "actualizacion"]
+  },
+  {
+    "id": "grapadora",
+    "name": "Grapadora",
+    "sprite": {
+      "front": "assets/sprites/flexymon/grapadora_front.png",
+      "back": "assets/sprites/flexymon/grapadora_back.png",
+      "icon": "assets/sprites/flexymon/grapadora_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_grapadora.ogg",
+    "stats": {
+      "hp": 32,
+      "attack": 15,
+      "defense": 11,
+      "speed": 10
+    },
+    "attacks": ["grapazo", "atajo_teclado"]
+  },
+  {
+    "id": "silla",
+    "name": "Silla ergonómica",
+    "sprite": {
+      "front": "assets/sprites/flexymon/silla_front.png",
+      "back": "assets/sprites/flexymon/silla_back.png",
+      "icon": "assets/sprites/flexymon/silla_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_silla.ogg",
+    "stats": {
+      "hp": 44,
+      "attack": 9,
+      "defense": 15,
+      "speed": 9
+    },
+    "attacks": ["giro_silla", "respaldo"]
+  },
+  {
+    "id": "servidor",
+    "name": "Servidor",
+    "sprite": {
+      "front": "assets/sprites/flexymon/servidor_front.png",
+      "back": "assets/sprites/flexymon/servidor_back.png",
+      "icon": "assets/sprites/flexymon/servidor_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_servidor.ogg",
+    "stats": {
+      "hp": 60,
+      "attack": 22,
+      "defense": 24,
+      "speed": 12
+    },
+    "attacks": ["sobrecarga", "copia_seguridad", "cortafuegos"]
+  },
+  {
+    "id": "router",
+    "name": "Router",
+    "sprite": {
+      "front": "assets/sprites/flexymon/router_front.png",
+      "back": "assets/sprites/flexymon/router_back.png",
+      "icon": "assets/sprites/flexymon/router_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_router.ogg",
+    "stats": {
+      "hp": 46,
+      "attack": 24,
+      "defense": 16,
+      "speed": 30
+    },
+    "attacks": ["ping", "wifi_caido", "notificacion"]
+  },
+  {
+    "id": "proyector",
+    "name": "Proyector",
+    "sprite": {
+      "front": "assets/sprites/flexymon/proyector_front.png",
+      "back": "assets/sprites/flexymon/proyector_back.png",
+      "icon": "assets/sprites/flexymon/proyector_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_proyector.ogg",
+    "stats": {
+      "hp": 55,
+      "attack": 26,
+      "defense": 18,
+      "speed": 16
+    },
+    "attacks": ["presentacion", "deslumbrar", "destello"]
   }
 ]

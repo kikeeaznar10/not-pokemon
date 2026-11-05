@@ -1,0 +1,50 @@
+[
+  {
+    "id": "compilar",
+    "name": "Compilar",
+    "sound": "assets/audio/sfx/compilar.ogg",
+    "accuracy": 95,
+    "target": "enemy",
+    "effect": { "type": "damage", "power": 40 }
+  },
+  {
+    "id": "actualizacion",
+    "name": "Actualización",
+    "sound": "assets/audio/sfx/update.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": { "type": "heal", "percent": 30 }
+  },
+  {
+    "id": "pantallazo_azul",
+    "name": "Pantallazo azul",
+    "sound": "assets/audio/sfx/bsod.ogg",
+    "accuracy": 80,
+    "target": "enemy",
+    "effect": { "type": "debuff", "stat": "defense", "percent": 25, "turns": 3 }
+  },
+  {
+    "id": "pulsacion",
+    "name": "Pulsación",
+    "sound": "assets/audio/sfx/pulsacion.ogg",
+    "accuracy": 100,
+    "target": "enemy",
+    "effect": { "type": "damage", "power": 35 }
+  },
+  {
+    "id": "rueda_scroll",
+    "name": "Rueda de scroll",
+    "sound": "assets/audio/sfx/scroll.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": { "type": "debuff", "stat": "speed", "percent": 20, "turns": 3 }
+  },
+  {
+    "id": "atajo_teclado",
+    "name": "Atajo de teclado",
+    "sound": "assets/audio/sfx/atajo.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": { "type": "buff", "stat": "attack", "percent": 25, "turns": 3 }
+  }
+]

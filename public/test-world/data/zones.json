@@ -1,0 +1,52 @@
+[
+  {
+    "id": "test",
+    "name": "Mapa de prueba",
+    "file": "maps/test/test.tmj",
+    "region": "test",
+    "music": "assets/audio/music/test.ogg",
+    "indoor": false,
+    "encounters": {
+      "jardin_turia": {
+        "rate": 10,
+        "flexymon": [
+          {
+            "id": "raton",
+            "weight": 60
+          },
+          {
+            "id": "teclado",
+            "weight": 40
+          }
+        ]
+      },
+      "plaza_ayuntamiento": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "raton",
+            "weight": 100
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "test_house",
+    "name": "Casa de prueba",
+    "file": "maps/test/test_house.tmj",
+    "region": "test",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "test_east",
+    "name": "Este de prueba",
+    "file": "maps/test/test_east.tmj",
+    "region": "test",
+    "music": "assets/audio/music/test.ogg",
+    "indoor": false,
+    "encounters": {}
+  }
+]

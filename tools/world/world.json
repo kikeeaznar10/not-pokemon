@@ -1,0 +1,203 @@
+{
+  "maps": {
+    "alboraya": {
+      "ground": "grass",
+      "spawn": [7, 9],
+      "doors": [
+        { "x": 7, "y": 8, "to": "oficina_ahora" },
+        { "x": 16, "y": 7, "to": "bar_pacos" },
+        { "x": 24, "y": 7, "to": "bar_las_rusas" },
+        { "x": 21, "y": 17, "to": "tienda_alboraya" }
+      ],
+      "edges": [{ "side": "south", "from": 14, "to": 16, "map": "huerta_norte" }],
+      "car": { "x": 9, "y": 10, "to": "murcia" },
+      "encounters": [
+        {
+          "name": "campo",
+          "x": 3,
+          "y": 15,
+          "width": 8,
+          "height": 6,
+          "group": "campo_alboraya",
+          "mode": "tiles"
+        },
+        {
+          "name": "campo_este",
+          "x": 25,
+          "y": 19,
+          "width": 4,
+          "height": 3,
+          "group": "campo_alboraya",
+          "mode": "tiles"
+        }
+      ]
+    },
+    "huerta_norte": {
+      "ground": "grass",
+      "spawn": [15, 1],
+      "edges": [{ "side": "south", "from": 14, "to": 16, "map": "valencia" }],
+      "encounters": [
+        { "name": "huerta_1", "x": 3, "y": 3, "width": 10, "height": 7, "group": "huerta", "mode": "tiles" },
+        {
+          "name": "huerta_2",
+          "x": 18,
+          "y": 12,
+          "width": 10,
+          "height": 8,
+          "group": "huerta",
+          "mode": "tiles"
+        },
+        { "name": "huerta_3", "x": 3, "y": 14, "width": 9, "height": 7, "group": "huerta", "mode": "tiles" }
+      ]
+    },
+    "valencia": {
+      "ground": "grass",
+      "spawn": [15, 1],
+      "doors": [
+        { "x": 37, "y": 5, "to": "tienda_valencia" },
+        { "x": 39, "y": 27, "to": "agora" }
+      ],
+      "edges": [
+        { "side": "south", "from": 14, "to": 16, "map": "pueblo_sur" },
+        { "side": "east", "from": 16, "to": 18, "map": "playa" }
+      ],
+      "encounters": [
+        {
+          "name": "turia",
+          "x": 2,
+          "y": 8,
+          "width": 45,
+          "height": 6,
+          "group": "jardin_turia",
+          "mode": "tiles"
+        },
+        {
+          "name": "ayuntamiento",
+          "x": 3,
+          "y": 20,
+          "width": 11,
+          "height": 8,
+          "group": "plaza_ayuntamiento",
+          "mode": "all"
+        },
+        {
+          "name": "virgen",
+          "x": 17,
+          "y": 20,
+          "width": 12,
+          "height": 6,
+          "group": "plaza_virgen",
+          "mode": "all"
+        },
+        {
+          "name": "explanada",
+          "x": 33,
+          "y": 28,
+          "width": 13,
+          "height": 3,
+          "group": "explanada_cac",
+          "mode": "all"
+        }
+      ]
+    },
+    "playa": {
+      "ground": "sand",
+      "spawn": [2, 17],
+      "encounters": [
+        {
+          "name": "dunas_norte",
+          "x": 2,
+          "y": 3,
+          "width": 7,
+          "height": 10,
+          "group": "dunas",
+          "mode": "tiles"
+        },
+        { "name": "dunas_sur", "x": 3, "y": 22, "width": 8, "height": 10, "group": "dunas", "mode": "tiles" }
+      ]
+    },
+    "pueblo_sur": {
+      "ground": "grass",
+      "spawn": [15, 2],
+      "doors": [
+        { "x": 7, "y": 8, "to": "isaval" },
+        { "x": 21, "y": 8, "to": "tienda_sur" }
+      ],
+      "encounters": [
+        {
+          "name": "campo_oeste",
+          "x": 3,
+          "y": 13,
+          "width": 10,
+          "height": 5,
+          "group": "campos_sur",
+          "mode": "tiles"
+        },
+        {
+          "name": "campo_este",
+          "x": 18,
+          "y": 13,
+          "width": 10,
+          "height": 5,
+          "group": "campos_sur",
+          "mode": "tiles"
+        }
+      ]
+    },
+    "murcia": {
+      "ground": "desert",
+      "spawn": [14, 6],
+      "doors": [{ "x": 6, "y": 6, "to": "tienda_murcia" }],
+      "edges": [
+        { "side": "east", "from": 10, "to": 12, "map": "vinedos" },
+        { "side": "south", "from": 14, "to": 16, "map": "poligono" }
+      ],
+      "car": { "x": 14, "y": 5, "to": "valencia" },
+      "encounters": [
+        {
+          "name": "dunas_oeste",
+          "x": 3,
+          "y": 12,
+          "width": 9,
+          "height": 8,
+          "group": "desierto",
+          "mode": "tiles"
+        },
+        {
+          "name": "dunas_este",
+          "x": 19,
+          "y": 13,
+          "width": 9,
+          "height": 7,
+          "group": "desierto",
+          "mode": "tiles"
+        }
+      ]
+    },
+    "vinedos": {
+      "ground": "desert",
+      "spawn": [2, 11],
+      "encounters": [
+        { "name": "vinas", "x": 3, "y": 3, "width": 25, "height": 17, "group": "vinas", "mode": "tiles" }
+      ]
+    },
+    "poligono": {
+      "ground": "road",
+      "spawn": [15, 2],
+      "doors": [{ "x": 7, "y": 18, "to": "ciruelo" }],
+      "encounters": [
+        { "name": "muelle", "x": 20, "y": 9, "width": 8, "height": 3, "group": "muelle_carga", "mode": "all" }
+      ]
+    },
+    "oficina_ahora": { "ground": "floor", "indoor": true },
+    "bar_pacos": { "ground": "floor", "indoor": true },
+    "bar_las_rusas": { "ground": "floor", "indoor": true },
+    "tienda_alboraya": { "ground": "floor", "indoor": true },
+    "tienda_valencia": { "ground": "floor", "indoor": true },
+    "tienda_sur": { "ground": "floor", "indoor": true },
+    "tienda_murcia": { "ground": "floor", "indoor": true },
+    "agora": { "ground": "floor", "indoor": true },
+    "isaval": { "ground": "floor", "indoor": true },
+    "ciruelo": { "ground": "floor", "indoor": true }
+  }
+}

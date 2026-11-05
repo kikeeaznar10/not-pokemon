@@ -2,10 +2,11 @@
  * `npm run test-map` — writes the test maps and the art they need, since no human can draw them in
  * Tiled in a cloud session:
  * - `public/assets/tilesets/test.png`: placeholder tileset (8 × 2 tiles of 32 px; see {@link TILES}).
- * - `public/maps/test.tmj` (30 × 20, outdoor), `test_house.tmj` (10 × 8, indoor) and `test_east.tmj`
+ * - `public/maps/test/test.tmj` (30 × 20, outdoor), `test_house.tmj` (10 × 8, indoor) and `test_east.tmj`
  *   (30 × 20, joined to `test` by the east edge): Tiled JSON maps (CSV layers, embedded tileset) with
  *   the layers `ground`, `deco`, `above`, `collision` and the object layers `warps`, `encounters`,
- *   `spawns`. Layouts: `public/maps/README.md`.
+ *   `spawns`. Layouts: `public/maps/README.md`. Since M14 they belong to the frozen test world
+ *   (`public/test-world/data/`, `src/data/world.ts`), not to the real game.
  * - `public/assets/sprites/player.png`: placeholder player sheet, 2 columns (stand, stride) × 4 rows
  *   (down, left, right, up) of 32 × 32 frames.
  *
@@ -324,7 +325,7 @@ function tiledMap(
       {
         firstgid: 1,
         name: 'test',
-        image: '../assets/tilesets/test.png',
+        image: '../../assets/tilesets/test.png',
         imagewidth: 8 * T,
         imageheight: 2 * T,
         tilewidth: T,
@@ -470,9 +471,9 @@ export function makeTestMap(force: boolean): string[] {
   const files: [string, () => Buffer | string][] = [
     ['assets/tilesets/test.png', drawTileset],
     ['assets/sprites/player.png', drawPlayer],
-    ['maps/test.tmj', () => mapJson(buildTestMap())],
-    ['maps/test_house.tmj', () => mapJson(buildTestHouse())],
-    ['maps/test_east.tmj', () => mapJson(buildTestEast())],
+    ['maps/test/test.tmj', () => mapJson(buildTestMap())],
+    ['maps/test/test_house.tmj', () => mapJson(buildTestHouse())],
+    ['maps/test/test_east.tmj', () => mapJson(buildTestEast())],
   ];
   return files.filter(([rel, make]) => write(rel, make(), force)).map(([rel]) => rel);
 }

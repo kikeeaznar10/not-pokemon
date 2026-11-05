@@ -1,14 +1,14 @@
 [
   {
-    "id": "test",
-    "name": "Mapa de prueba",
-    "file": "maps/test.tmj",
-    "region": "test",
-    "music": "assets/audio/music/test.ogg",
+    "id": "alboraya",
+    "name": "Alboraya",
+    "file": "maps/alboraya.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/valencia.ogg",
     "indoor": false,
     "encounters": {
-      "jardin_turia": {
-        "rate": 10,
+      "campo_alboraya": {
+        "rate": 8,
         "flexymon": [
           {
             "id": "raton",
@@ -19,34 +19,329 @@
             "weight": 40
           }
         ]
-      },
-      "plaza_ayuntamiento": {
-        "rate": 6,
+      }
+    }
+  },
+  {
+    "id": "huerta_norte",
+    "name": "Huerta Norte",
+    "file": "maps/huerta_norte.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/valencia.ogg",
+    "indoor": false,
+    "encounters": {
+      "huerta": {
+        "rate": 10,
         "flexymon": [
           {
             "id": "raton",
-            "weight": 100
+            "weight": 30
+          },
+          {
+            "id": "teclado",
+            "weight": 30
+          },
+          {
+            "id": "cafetera",
+            "weight": 25
+          },
+          {
+            "id": "silla",
+            "weight": 15
           }
         ]
       }
     }
   },
   {
-    "id": "test_house",
-    "name": "Casa de prueba",
-    "file": "maps/test_house.tmj",
-    "region": "test",
+    "id": "valencia",
+    "name": "Valencia",
+    "file": "maps/valencia.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/valencia.ogg",
+    "indoor": false,
+    "encounters": {
+      "jardin_turia": {
+        "rate": 10,
+        "flexymon": [
+          {
+            "id": "raton",
+            "weight": 30
+          },
+          {
+            "id": "monitor",
+            "weight": 30
+          },
+          {
+            "id": "grapadora",
+            "weight": 25
+          },
+          {
+            "id": "silla",
+            "weight": 15
+          }
+        ]
+      },
+      "plaza_ayuntamiento": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "movil",
+            "weight": 60
+          },
+          {
+            "id": "impresora",
+            "weight": 40
+          }
+        ]
+      },
+      "plaza_virgen": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "movil",
+            "weight": 50
+          },
+          {
+            "id": "monitor",
+            "weight": 30
+          },
+          {
+            "id": "cafetera",
+            "weight": 20
+          }
+        ]
+      },
+      "explanada_cac": {
+        "rate": 6,
+        "flexymon": [
+          {
+            "id": "impresora",
+            "weight": 50
+          },
+          {
+            "id": "grapadora",
+            "weight": 50
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "playa",
+    "name": "Playa",
+    "file": "maps/playa.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/valencia.ogg",
+    "indoor": false,
+    "encounters": {
+      "dunas": {
+        "rate": 10,
+        "flexymon": [
+          {
+            "id": "movil",
+            "weight": 40
+          },
+          {
+            "id": "cafetera",
+            "weight": 30
+          },
+          {
+            "id": "silla",
+            "weight": 30
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "pueblo_sur",
+    "name": "Pueblo del Sur",
+    "file": "maps/pueblo_sur.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/valencia.ogg",
+    "indoor": false,
+    "encounters": {
+      "campos_sur": {
+        "rate": 8,
+        "flexymon": [
+          {
+            "id": "teclado",
+            "weight": 30
+          },
+          {
+            "id": "impresora",
+            "weight": 30
+          },
+          {
+            "id": "grapadora",
+            "weight": 40
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "murcia",
+    "name": "Murcia",
+    "file": "maps/murcia.tmj",
+    "region": "murcia",
+    "music": "assets/audio/music/murcia.ogg",
+    "indoor": false,
+    "encounters": {
+      "desierto": {
+        "rate": 10,
+        "flexymon": [
+          {
+            "id": "servidor",
+            "weight": 40
+          },
+          {
+            "id": "router",
+            "weight": 60
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "vinedos",
+    "name": "Viñedos",
+    "file": "maps/vinedos.tmj",
+    "region": "murcia",
+    "music": "assets/audio/music/murcia.ogg",
+    "indoor": false,
+    "encounters": {
+      "vinas": {
+        "rate": 12,
+        "flexymon": [
+          {
+            "id": "router",
+            "weight": 40
+          },
+          {
+            "id": "proyector",
+            "weight": 40
+          },
+          {
+            "id": "servidor",
+            "weight": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "poligono",
+    "name": "Polígono",
+    "file": "maps/poligono.tmj",
+    "region": "murcia",
+    "music": "assets/audio/music/murcia.ogg",
+    "indoor": false,
+    "encounters": {
+      "muelle_carga": {
+        "rate": 8,
+        "flexymon": [
+          {
+            "id": "servidor",
+            "weight": 50
+          },
+          {
+            "id": "proyector",
+            "weight": 50
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "oficina_ahora",
+    "name": "Oficina de ahora",
+    "file": "maps/oficina_ahora.tmj",
+    "region": "valencia",
     "music": "assets/audio/music/interior.ogg",
     "indoor": true,
     "encounters": {}
   },
   {
-    "id": "test_east",
-    "name": "Este de prueba",
-    "file": "maps/test_east.tmj",
-    "region": "test",
-    "music": "assets/audio/music/test.ogg",
-    "indoor": false,
+    "id": "bar_pacos",
+    "name": "Bar Pacos",
+    "file": "maps/bar_pacos.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "bar_las_rusas",
+    "name": "Bar Las Rusas",
+    "file": "maps/bar_las_rusas.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "tienda_alboraya",
+    "name": "Tienda de Alboraya",
+    "file": "maps/tienda_alboraya.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "tienda_valencia",
+    "name": "Tienda de Valencia",
+    "file": "maps/tienda_valencia.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "agora",
+    "name": "Àgora",
+    "file": "maps/agora.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "tienda_sur",
+    "name": "Tienda del Sur",
+    "file": "maps/tienda_sur.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "isaval",
+    "name": "Isaval",
+    "file": "maps/isaval.tmj",
+    "region": "valencia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "tienda_murcia",
+    "name": "Tienda de Murcia",
+    "file": "maps/tienda_murcia.tmj",
+    "region": "murcia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
+    "encounters": {}
+  },
+  {
+    "id": "ciruelo",
+    "name": "Ciruelo",
+    "file": "maps/ciruelo.tmj",
+    "region": "murcia",
+    "music": "assets/audio/music/interior.ogg",
+    "indoor": true,
     "encounters": {}
   }
 ]

@@ -1,61 +1,18 @@
 [
   {
-    "id": "camarero_pacos",
-    "type": "talker",
-    "name": "Camarero",
-    "sprite": "assets/sprites/npcs/camarero.png",
-    "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "test_house",
-    "spawn": {
-      "x": 6,
-      "y": 4
-    },
-    "facing": "down",
-    "wander": null,
-    "dialogue": ["¿Lo de siempre?", "Hoy hay bravas."]
-  },
-  {
-    "id": "becario_rio",
-    "type": "enemy",
-    "name": "Becario",
-    "sprite": "assets/sprites/npcs/becario.png",
-    "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "test_east",
-    "spawn": {
-      "x": 10,
-      "y": 13
-    },
-    "facing": "left",
-    "wander": {
-      "x": 7,
-      "y": 12,
-      "width": 8,
-      "height": 5,
-      "stepEveryMs": [1200, 3000]
-    },
-    "sight": 4,
-    "dialogue": ["¡Eh! ¿Tú también eres nuevo?", "¡Vamos a ver quién despliega antes!"],
-    "defeatDialogue": ["Vale, vale... me vuelvo a mi tarea de Jira."],
-    "team": ["raton", "teclado"],
-    "reward": {
-      "min": 80,
-      "max": 140
-    }
-  },
-  {
     "id": "recepcionista_oficina",
     "type": "healer",
     "name": "Recepcionista",
     "sprite": "assets/sprites/npcs/recepcionista.png",
     "voice": "assets/audio/sfx/voice_high.ogg",
-    "map": "test_house",
+    "map": "oficina_ahora",
     "spawn": {
-      "x": 1,
-      "y": 4
+      "x": 5,
+      "y": 9
     },
-    "facing": "right",
+    "facing": "down",
     "wander": null,
-    "dialogue": ["Aquí siempre hay café para todos."]
+    "dialogue": ["Vuelve cuando quieras. Aquí curamos gratis."]
   },
   {
     "id": "informatico_caja",
@@ -63,14 +20,46 @@
     "name": "Informático",
     "sprite": "assets/sprites/npcs/informatico.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "test_house",
+    "map": "oficina_ahora",
     "spawn": {
-      "x": 8,
-      "y": 4
+      "x": 11,
+      "y": 8
     },
     "facing": "left",
     "wander": null,
-    "dialogue": ["Te abro la caja de los flexymon."]
+    "dialogue": ["Aquí guardo los flexymon que no te caben en el equipo."]
+  },
+  {
+    "id": "camarero_pacos",
+    "type": "shopkeeper",
+    "name": "Camarero",
+    "sprite": "assets/sprites/npcs/camarero.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "bar_pacos",
+    "spawn": {
+      "x": 7,
+      "y": 3
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["¿Lo de siempre?"],
+    "shop": "bar_pacos"
+  },
+  {
+    "id": "camarera_rusas",
+    "type": "shopkeeper",
+    "name": "Camarera",
+    "sprite": "assets/sprites/npcs/camarera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "bar_las_rusas",
+    "spawn": {
+      "x": 2,
+      "y": 3
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["¡Hola! ¿Un café doble para el viaje?"],
+    "shop": "bar_las_rusas"
   },
   {
     "id": "tendero_alboraya",
@@ -78,14 +67,476 @@
     "name": "Tendero",
     "sprite": "assets/sprites/npcs/tendero.png",
     "voice": "assets/audio/sfx/voice_low.ogg",
-    "map": "test_house",
+    "map": "tienda_alboraya",
     "spawn": {
-      "x": 8,
-      "y": 6
+      "x": 5,
+      "y": 3
     },
-    "facing": "left",
+    "facing": "down",
     "wander": null,
     "dialogue": ["¡Bienvenido!"],
     "shop": "tienda_alboraya"
+  },
+  {
+    "id": "tendera_valencia",
+    "type": "shopkeeper",
+    "name": "Tendera",
+    "sprite": "assets/sprites/npcs/tendera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "tienda_valencia",
+    "spawn": {
+      "x": 5,
+      "y": 3
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["Bienvenido al centro. Tenemos de todo."],
+    "shop": "tienda_valencia"
+  },
+  {
+    "id": "tendero_sur",
+    "type": "shopkeeper",
+    "name": "Tendero",
+    "sprite": "assets/sprites/npcs/tendero.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "tienda_sur",
+    "spawn": {
+      "x": 5,
+      "y": 3
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["Aquí también vendemos carnets. No preguntes."],
+    "shop": "tienda_sur"
+  },
+  {
+    "id": "tendera_murcia",
+    "type": "shopkeeper",
+    "name": "Tendera",
+    "sprite": "assets/sprites/npcs/tendera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "tienda_murcia",
+    "spawn": {
+      "x": 5,
+      "y": 3
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["¡Bienvenido a Murcia, acho!"],
+    "shop": "tienda_murcia"
+  },
+  {
+    "id": "cliente_isaval",
+    "type": "talker",
+    "name": "Cliente",
+    "sprite": "assets/sprites/npcs/cliente.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "isaval",
+    "spawn": {
+      "x": 6,
+      "y": 5
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": [
+      "¿Venís de ahora? A ver cuándo sale la nueva versión.",
+      "Mientras tanto, yo sigo con mis hojas de cálculo."
+    ]
+  },
+  {
+    "id": "cliente_ciruelo",
+    "type": "talker",
+    "name": "Cliente",
+    "sprite": "assets/sprites/npcs/cliente.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "ciruelo",
+    "spawn": {
+      "x": 6,
+      "y": 5
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": [
+      "En Ciruelo no paramos ni en agosto.",
+      "Si vienes desde Valencia, seguro que has venido en el Audi."
+    ]
+  },
+  {
+    "id": "becario_alboraya",
+    "type": "enemy",
+    "name": "Becario",
+    "sprite": "assets/sprites/npcs/becario.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "alboraya",
+    "spawn": {
+      "x": 12,
+      "y": 17
+    },
+    "facing": "left",
+    "wander": {
+      "x": 11,
+      "y": 16,
+      "width": 3,
+      "height": 4,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["¡Eh! ¿Tú también eres nuevo?", "¡Vamos a ver quién despliega antes!"],
+    "sight": 4,
+    "defeatDialogue": ["Vale, vale... me vuelvo a mi tarea de Jira."],
+    "team": ["raton", "teclado"],
+    "reward": {
+      "min": 60,
+      "max": 100
+    }
+  },
+  {
+    "id": "hortelano_huerta",
+    "type": "enemy",
+    "name": "Hortelano",
+    "sprite": "assets/sprites/npcs/hortelano.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "huerta_norte",
+    "spawn": {
+      "x": 13,
+      "y": 6
+    },
+    "facing": "right",
+    "wander": null,
+    "dialogue": ["¡Fuera de mi huerta! Bueno, primero un combate."],
+    "sight": 4,
+    "defeatDialogue": ["Llévate unas chufas y déjame tranquilo."],
+    "team": ["teclado", "cafetera"],
+    "reward": {
+      "min": 80,
+      "max": 130
+    }
+  },
+  {
+    "id": "recolectora_huerta",
+    "type": "enemy",
+    "name": "Recolectora",
+    "sprite": "assets/sprites/npcs/recolectora.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "huerta_norte",
+    "spawn": {
+      "x": 20,
+      "y": 10
+    },
+    "facing": "down",
+    "wander": {
+      "x": 17,
+      "y": 9,
+      "width": 11,
+      "height": 2,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["Hoy toca recoger alcachofas... y flexymon."],
+    "sight": 4,
+    "defeatDialogue": ["Me vuelvo al campo, que se me pasa la temporada."],
+    "team": ["silla", "raton"],
+    "reward": {
+      "min": 80,
+      "max": 130
+    }
+  },
+  {
+    "id": "turista_turia",
+    "type": "enemy",
+    "name": "Turista",
+    "sprite": "assets/sprites/npcs/turista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 8,
+      "y": 10
+    },
+    "facing": "right",
+    "wander": {
+      "x": 5,
+      "y": 9,
+      "width": 8,
+      "height": 3,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["Perdona, ¿esto es el río? ¡No hay agua!"],
+    "sight": 4,
+    "defeatDialogue": ["Me voy a buscar la paella más cara del centro."],
+    "team": ["monitor", "grapadora"],
+    "reward": {
+      "min": 100,
+      "max": 160
+    }
+  },
+  {
+    "id": "consultor_plaza",
+    "type": "enemy",
+    "name": "Consultor",
+    "sprite": "assets/sprites/npcs/consultor.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 6,
+      "y": 25
+    },
+    "facing": "right",
+    "wander": {
+      "x": 4,
+      "y": 24,
+      "width": 8,
+      "height": 3,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["Tengo una reunión en cinco minutos. Esto será rápido."],
+    "sight": 4,
+    "defeatDialogue": ["Lo apunto como lección aprendida."],
+    "team": ["movil", "impresora"],
+    "reward": {
+      "min": 120,
+      "max": 180
+    }
+  },
+  {
+    "id": "funcionaria_ayuntamiento",
+    "type": "enemy",
+    "name": "Funcionaria",
+    "sprite": "assets/sprites/npcs/funcionaria.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 20,
+      "y": 24
+    },
+    "facing": "down",
+    "wander": {
+      "x": 18,
+      "y": 23,
+      "width": 9,
+      "height": 2,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["¿Tiene cita previa? No pasa nada, combatimos igual."],
+    "sight": 4,
+    "defeatDialogue": ["Vuelva usted mañana."],
+    "team": ["impresora", "silla"],
+    "reward": {
+      "min": 120,
+      "max": 180
+    }
+  },
+  {
+    "id": "repartidor_valencia",
+    "type": "enemy",
+    "name": "Repartidor",
+    "sprite": "assets/sprites/npcs/repartidor.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "valencia",
+    "spawn": {
+      "x": 38,
+      "y": 19
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["¡Paso, paso! Llevo un pedido urgente."],
+    "sight": 4,
+    "defeatDialogue": ["Ya llego tarde. Gracias, eh."],
+    "team": ["movil", "raton", "grapadora"],
+    "reward": {
+      "min": 130,
+      "max": 190
+    }
+  },
+  {
+    "id": "comercial_agora",
+    "type": "enemy",
+    "name": "Comercial",
+    "sprite": "assets/sprites/npcs/comercial.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "agora",
+    "spawn": {
+      "x": 4,
+      "y": 4
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["¿Te interesa una demo? Primero, un combate."],
+    "sight": 4,
+    "defeatDialogue": ["Te paso el PDF por correo."],
+    "team": ["monitor", "impresora"],
+    "reward": {
+      "min": 140,
+      "max": 200
+    }
+  },
+  {
+    "id": "ponente_agora",
+    "type": "enemy",
+    "name": "Ponente",
+    "sprite": "assets/sprites/npcs/ponente.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "agora",
+    "spawn": {
+      "x": 11,
+      "y": 5
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["¡Bienvenido a mi charla sobre productividad!"],
+    "sight": 4,
+    "defeatDialogue": ["Las preguntas, al final. Si queda tiempo."],
+    "team": ["grapadora", "cafetera", "monitor"],
+    "reward": {
+      "min": 150,
+      "max": 220
+    }
+  },
+  {
+    "id": "socorrista_playa",
+    "type": "enemy",
+    "name": "Socorrista",
+    "sprite": "assets/sprites/npcs/socorrista.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "playa",
+    "spawn": {
+      "x": 11,
+      "y": 10
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["¡Prohibido bañarse sin combatir antes!"],
+    "sight": 4,
+    "defeatDialogue": ["Vale, ya puedes pasar. Y ponte crema."],
+    "team": ["silla", "movil"],
+    "reward": {
+      "min": 120,
+      "max": 180
+    }
+  },
+  {
+    "id": "surfera_playa",
+    "type": "enemy",
+    "name": "Surfera",
+    "sprite": "assets/sprites/npcs/surfera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "playa",
+    "spawn": {
+      "x": 6,
+      "y": 19
+    },
+    "facing": "down",
+    "wander": {
+      "x": 4,
+      "y": 19,
+      "width": 7,
+      "height": 2,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["Hoy no hay olas. Mejor un combate."],
+    "sight": 4,
+    "defeatDialogue": ["Ya vendrá el levante."],
+    "team": ["cafetera", "movil"],
+    "reward": {
+      "min": 120,
+      "max": 180
+    }
+  },
+  {
+    "id": "jefe_proyecto_sur",
+    "type": "enemy",
+    "name": "Jefe de proyecto",
+    "sprite": "assets/sprites/npcs/jefe.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "pueblo_sur",
+    "spawn": {
+      "x": 24,
+      "y": 12
+    },
+    "facing": "left",
+    "wander": null,
+    "dialogue": ["¿Cómo va lo tuyo? Enséñame el avance."],
+    "sight": 4,
+    "defeatDialogue": ["Bien. Lo hablamos en la daily."],
+    "team": ["impresora", "grapadora", "teclado"],
+    "reward": {
+      "min": 160,
+      "max": 240
+    }
+  },
+  {
+    "id": "murciano_desierto",
+    "type": "enemy",
+    "name": "Murciano",
+    "sprite": "assets/sprites/npcs/murciano.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "murcia",
+    "spawn": {
+      "x": 24,
+      "y": 9
+    },
+    "facing": "left",
+    "wander": {
+      "x": 20,
+      "y": 8,
+      "width": 8,
+      "height": 3,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["¡Acho! ¿Tú de dónde vienes?", "¡Aquí se combate a pleno sol!"],
+    "sight": 4,
+    "defeatDialogue": ["Pijo, qué bien combates."],
+    "team": ["router", "servidor"],
+    "reward": {
+      "min": 250,
+      "max": 350
+    }
+  },
+  {
+    "id": "enologa_vinedos",
+    "type": "enemy",
+    "name": "Enóloga",
+    "sprite": "assets/sprites/npcs/enologa.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "map": "vinedos",
+    "spawn": {
+      "x": 14,
+      "y": 12
+    },
+    "facing": "down",
+    "wander": null,
+    "dialogue": ["Este año la cosecha viene fuerte. Como mis flexymon."],
+    "sight": 4,
+    "defeatDialogue": ["Brindemos por tu victoria."],
+    "team": ["proyector", "router"],
+    "reward": {
+      "min": 280,
+      "max": 380
+    }
+  },
+  {
+    "id": "encargado_poligono",
+    "type": "enemy",
+    "name": "Encargado",
+    "sprite": "assets/sprites/npcs/encargado.png",
+    "voice": "assets/audio/sfx/voice_low.ogg",
+    "map": "poligono",
+    "spawn": {
+      "x": 15,
+      "y": 11
+    },
+    "facing": "down",
+    "wander": {
+      "x": 14,
+      "y": 9,
+      "width": 4,
+      "height": 4,
+      "stepEveryMs": [1200, 3000]
+    },
+    "dialogue": ["Sin chaleco no se entra en el muelle. Bueno, combatamos."],
+    "sight": 4,
+    "defeatDialogue": ["Vale, vale. Pero el chaleco, la próxima vez."],
+    "team": ["servidor", "proyector", "router"],
+    "reward": {
+      "min": 300,
+      "max": 420
+    }
   }
 ]

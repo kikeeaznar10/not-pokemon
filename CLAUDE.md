@@ -149,6 +149,8 @@ playwright.config.ts       Playwright projects: desktop, android, android-landsc
 - `npm run lint` (ESLint + `prettier --check`) / `npm run format` (Prettier write)
 - `npm run typecheck` / `npm test` (Vitest, `vitest run`) / `npm run coverage` (Vitest + v8 coverage)
 - `npm run placeholders` — generate missing placeholder assets (never overwrites; `-- --dry-run` lists them; see `tools/README.md`)
+- `npm run world` — build the real world's maps from `tools/world/` (M14; never overwrites, `-- --force` regenerates)
+- `npm run dev` then `?world=test` in the URL — the frozen M0–M13 test world (dev / E2E builds only, `src/data/world.ts`)
 - `npx playwright test` — browser tests (builds with `VITE_E2E=1` and serves `dist/` automatically)
 - `npx playwright test --project=iphone` — a single device profile
 

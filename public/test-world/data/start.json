@@ -1,0 +1,20 @@
+{
+  "starter": "portatil",
+  "euros": 200,
+  "teamSlots": 2,
+  "spawn": {
+    "map": "test",
+    "x": 15,
+    "y": 10,
+    "facing": "down"
+  },
+  "respawn": {
+    "map": "test",
+    "x": 15,
+    "y": 11,
+    "facing": "down"
+  },
+  "items": {
+    "cafe": 3
+  }
+}

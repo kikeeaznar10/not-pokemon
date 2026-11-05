@@ -13,7 +13,8 @@
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "placeholders": "tsx tools/make-placeholders.ts",
-    "test-map": "tsx tools/make-test-map.ts"
+    "test-map": "tsx tools/make-test-map.ts",
+    "world": "tsx tools/make-world.ts"
   },
   "dependencies": {
     "phaser": "4.2.1",

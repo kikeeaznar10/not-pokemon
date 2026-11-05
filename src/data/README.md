@@ -11,8 +11,12 @@
 | `map-checks.ts` | `checkMaps()` (M4): NPC spawns, start spawn/respawn, car endpoints and map spawn points are walkable; every warp targets an existing zone and only walkable tiles; every encounter rectangle's `group` exists in its zone's `encounters` (M7); the intro's coworker tile and every tile the script walks onto are walkable, and no walk enters the other actor's tile (M11). `mapWarnings()` (M7): groups in zones.json that no rectangle uses (warnings, logged by Boot; `LoadResult.warnings`). |
 | `assets.ts` | `collectAssets(data)`: every image and sound path in the data, for Preload (M11: the title image, the intro coworker's sprite and voice, the jingle). |
 
-Boot flow: `BootScene` → `loadGameData('./data/')` → success: `setGameData`, launch `PreloadScene` (loads every
+Boot flow: `BootScene` → `loadGameData('./' + dataDir())` (`./data/`, or the test world, see below) → success: `setGameData`, launch `PreloadScene` (loads every
 asset with its JSON path as the Phaser key; sounds try `.ogg` then `.mp3`) → failure: `ErrorScene` (red, one line
 per error, scroll with arrows / wheel / drag).
 
 Messages are in English on purpose: they are developer diagnostics, not game text.
+
+`world.ts` (M14): which content folder Boot loads — `data/` (the real world), or in dev / E2E builds the frozen
+  test world `test-world/data/` with `?world=test` or `localStorage['flexymon.e2e.world'] = 'test'`
+  (`chooseDataDir`, `dataDir`).

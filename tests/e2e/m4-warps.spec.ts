@@ -135,7 +135,7 @@ test('east edge: walking off arrives at the west edge of test_east on the same r
 });
 
 test('a warp pointing at a wall fails at load time with a clear message', async ({ page }) => {
-  await page.route('**/maps/test.tmj', async (route) => {
+  await page.route('**/maps/test/test.tmj', async (route) => {
     const res = await route.fetch();
     const map = JSON.parse(await res.text()) as {
       layers: {
@@ -157,7 +157,7 @@ test('a warp pointing at a wall fails at load time with a clear message', async 
       'Error',
   );
   expect(await hook(page, 'dataErrors')).toEqual([
-    'maps/test.tmj › warps.house_door › target tile (0, 0) on map "test_house" is not walkable',
+    'maps/test/test.tmj › warps.house_door › target tile (0, 0) on map "test_house" is not walkable',
   ]);
 });
 

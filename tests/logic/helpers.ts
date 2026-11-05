@@ -6,14 +6,14 @@ import type { Species } from '../../src/data/schemas';
 import type { FlexymonInstance } from '../../src/logic/instance';
 import { validFiles } from '../data/fixture';
 
-/** The shipped `public/data/` content, validated. */
+/** The frozen test-world content (`public/test-world/data/`, M14), validated. */
 export function gameData(): GameData {
   const result = validateGameData(validFiles());
   if (!result.ok) throw new Error('fixture data is invalid');
   return result.data;
 }
 
-/** A species from the shipped content. */
+/** A species from the test-world content. */
 export function species(id: string): Species {
   const sp = gameData().flexymon.get(id);
   if (!sp) throw new Error(`no species ${id}`);

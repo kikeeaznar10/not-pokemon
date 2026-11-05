@@ -2,7 +2,7 @@
 
 ## `npm run placeholders` (`make-placeholders.ts`)
 
-Scans every JSON file in `public/data/` for asset paths (`assets/….png|ogg|mp3`, relative to `public/`) and
+Scans every JSON file in `public/data/` and (M14) in the frozen test world `public/test-world/data/` for asset paths (`assets/….png|ogg|mp3`, relative to `public/`) and
 creates any missing file. **Never overwrites** an existing file, so a second run creates nothing and real art
 dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-run`) only lists what is missing.
 
@@ -16,7 +16,7 @@ dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-ru
   `ffmpeg` (libvorbis / libmp3lame); a name containing `engine` (M13, `car.json › sound`) gets a 1 s 90 Hz hum instead,
   so it loops well during the car trip. If `ffmpeg` is not on the PATH, it copies the silent files in
   `tools/fallback/` instead and says how many audio files are silent.
-- Minimaps (M12): every outdoor zone in `zones.json` gets `assets/ui/minimap_<zone>.png`, drawn from its `.tmj`
+- Minimaps (M12): every outdoor zone in either `zones.json` gets `assets/ui/minimap_<zone>.png`, drawn from its `.tmj`
   (`parseTiledMap` → `minimapCells`): 3 px per tile (`MINIMAP_TILE_PX`), solid tiles dark blue, `encounter` tiles
   green, the rest sand. These paths are not in the JSON (they follow the zone id), so `--dry-run` lists them too.
   Not overwritten either: delete a minimap after editing its map to redraw it.
@@ -24,7 +24,7 @@ dropped at the same path is kept. `--dry-run` (`npm run placeholders -- --dry-ru
 ## `npm run test-map` (`make-test-map.ts`)
 
 Writes the test maps and the art they need (no one can draw in Tiled in a cloud session):
-`public/maps/test.tmj`, `test_house.tmj` and `test_east.tmj` (layouts, warps and, from M7, tall grass and encounter rectangles in `public/maps/README.md`), the
+`public/maps/test/test.tmj`, `test_house.tmj` and `test_east.tmj` (since M14 in `public/maps/test/`, for the frozen test world) (layouts, warps and, from M7, tall grass and encounter rectangles in `public/maps/README.md`), the
 placeholder tileset `public/assets/tilesets/test.png`
 (8 × 2 tiles of 32 px, with `solid` / `encounter` tile properties; M13 added the two solid Audi tiles and the cars on
 `test` and `test_east`) and the placeholder player sheet
@@ -32,3 +32,33 @@ placeholder tileset `public/assets/tilesets/test.png`
 Never overwrites existing files (so maps edited in Tiled are safe); `npm run test-map -- --force` regenerates all
 all five files. A unit test checks that the shipped maps still equal the generator's output — after editing a map
 in Tiled, update the generator too or drop that comparison.
+
+## `npm run world` (`make-world.ts`, M14)
+
+Builds the real world's maps from plain text, since no one can draw in Tiled in a cloud session:
+`tools/world/<zone>.txt` (one character per tile) and `tools/world/world.json`. Writes
+`public/assets/tilesets/world.png` (8 × 4 tiles; tile ids in `public/maps/README.md`) and `public/maps/<zone>.tmj` for
+every map in `world.json`. Never overwrites existing files; `npm run world -- --force` regenerates everything (after
+editing a layout). Then run `npm run placeholders` (after deleting the zone's minimap, if the map changed).
+
+Layout characters — ground: `.` grass, `:` path, `~` water (solid), `,` tall grass (encounter), `s` sand, `S` dune
+grass (encounter), `v` vineyard (encounter), `d` desert ground, `r` road, `p` plaza paving, `b` bridge, `=` wooden
+floor, `_` doormat (an interior's door, on its bottom row). Drawn over the map's base ground (`world.json › ground`:
+`grass`, `sand`, `desert`, `road`, `floor`): `T` tree (blocked; its top is drawn above, on the tile above), `#` wall,
+`^` roof, `W` white wall, `D` door, `M` mountain, `R` rock, `*` bush, `F` fence, `f` flowers (walkable), `c` cactus,
+`L` fountain, `C` counter, `K` desk, `H` shelf, `A` + `a` the Audi (rear, front). All of these block except `f`
+(flowers) and `D` (door).
+
+`world.json › maps.<zone>`:
+
+| Field | Meaning |
+| --- | --- |
+| `ground` | Base ground under deco characters. |
+| `indoor` | `true` for interiors (needs a `_` doormat on the bottom row). |
+| `spawn` | `[x, y]` of the `default` spawn point (interiors: the doormat). |
+| `doors` | `[{ x, y, to }]`: a `D` tile leading to the interior `to`; the way back is generated. |
+| `edges` | `[{ side, from, to, map }]`: an off-map warp along `side` (`north`/`south`/`east`/`west`) over columns (or rows) `from`–`to`, keeping the column (row); the reverse warp on `map` is generated. |
+| `car` | `{ x, y, to }`: the Audi (`Aa` at (x, y)) with an `action` warp, `to` = `murcia` or `valencia`. |
+| `encounters` | `[{ name, x, y, width, height, group, mode }]`: encounter rectangles (`group` must be in `zones.json`). |
+
+The tool checks the layout (equal row widths, known characters) and that doors and the car stand on `D` / `Aa`.

@@ -2653,7 +2653,7 @@
   {
    "firstgid": 1,
    "name": "test",
-   "image": "../assets/tilesets/test.png",
+   "image": "../../assets/tilesets/test.png",
    "imagewidth": 256,
    "imageheight": 64,
    "tilewidth": 32,

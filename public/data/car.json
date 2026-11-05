@@ -3,19 +3,22 @@
     ["llaves_audi", "carnet"],
     ["llaves_audi", "cafe_doble"]
   ],
-  "lockedDialogue": ["El Audi está cerrado. Te falta algo..."],
+  "lockedDialogue": [
+    "El Audi está cerrado. Tienes las llaves, pero te falta algo...",
+    "Sin carnet o sin un café doble no llegas a Murcia."
+  ],
   "sprite": "assets/sprites/car/audi.png",
   "sound": "assets/audio/sfx/car_engine.ogg",
   "toMurcia": {
-    "map": "test_east",
-    "x": 2,
-    "y": 10,
+    "map": "murcia",
+    "x": 14,
+    "y": 6,
     "facing": "down"
   },
   "toValencia": {
-    "map": "test",
-    "x": 8,
-    "y": 12,
+    "map": "alboraya",
+    "x": 9,
+    "y": 11,
     "facing": "down"
   }
 }

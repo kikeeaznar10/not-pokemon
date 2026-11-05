@@ -1,0 +1,28 @@
+{
+  "titleImage": "assets/ui/title.png",
+  "jingle": "assets/audio/sfx/jingle_starter.ogg",
+  "coworker": {
+    "name": "Compañera",
+    "sprite": "assets/sprites/npcs/companera.png",
+    "voice": "assets/audio/sfx/voice_high.ogg",
+    "x": 15,
+    "y": 3,
+    "facing": "down"
+  },
+  "steps": [
+    { "type": "fade_in", "ms": 800 },
+    { "type": "walk", "actor": "player", "path": ["up", "up"] },
+    { "type": "wait", "ms": 300 },
+    { "type": "walk", "actor": "coworker", "path": ["down", "down", "down", "down"] },
+    {
+      "type": "say",
+      "lines": [
+        "¡Hola, {name}! Bienvenido a ahora.",
+        "Aquí todos trabajamos con flexymon. Toma, este es para ti."
+      ]
+    },
+    { "type": "handover" },
+    { "type": "say", "lines": ["Cuídalo bien. ¡Nos vemos por la oficina!"] },
+    { "type": "walk", "actor": "coworker", "path": ["up", "up", "up", "up", "up"] }
+  ]
+}

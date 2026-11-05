@@ -1,0 +1,38 @@
+[
+  {
+    "id": "portatil",
+    "name": "Portátil",
+    "sprite": {
+      "front": "assets/sprites/flexymon/portatil_front.png",
+      "back": "assets/sprites/flexymon/portatil_back.png",
+      "icon": "assets/sprites/flexymon/portatil_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_portatil.ogg",
+    "stats": { "hp": 40, "attack": 12, "defense": 10, "speed": 11 },
+    "attacks": ["compilar", "pantallazo_azul", "actualizacion"]
+  },
+  {
+    "id": "raton",
+    "name": "Ratón",
+    "sprite": {
+      "front": "assets/sprites/flexymon/raton_front.png",
+      "back": "assets/sprites/flexymon/raton_back.png",
+      "icon": "assets/sprites/flexymon/raton_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_raton.ogg",
+    "stats": { "hp": 30, "attack": 10, "defense": 8, "speed": 14 },
+    "attacks": ["pulsacion", "rueda_scroll"]
+  },
+  {
+    "id": "teclado",
+    "name": "Teclado",
+    "sprite": {
+      "front": "assets/sprites/flexymon/teclado_front.png",
+      "back": "assets/sprites/flexymon/teclado_back.png",
+      "icon": "assets/sprites/flexymon/teclado_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_teclado.ogg",
+    "stats": { "hp": 38, "attack": 11, "defense": 12, "speed": 8 },
+    "attacks": ["pulsacion", "atajo_teclado"]
+  }
+]

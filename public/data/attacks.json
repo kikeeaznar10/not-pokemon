@@ -5,7 +5,10 @@
     "sound": "assets/audio/sfx/compilar.ogg",
     "accuracy": 95,
     "target": "enemy",
-    "effect": { "type": "damage", "power": 40 }
+    "effect": {
+      "type": "damage",
+      "power": 40
+    }
   },
   {
     "id": "actualizacion",
@@ -13,7 +16,10 @@
     "sound": "assets/audio/sfx/update.ogg",
     "accuracy": 100,
     "target": "self",
-    "effect": { "type": "heal", "percent": 30 }
+    "effect": {
+      "type": "heal",
+      "percent": 30
+    }
   },
   {
     "id": "pantallazo_azul",
@@ -21,7 +27,12 @@
     "sound": "assets/audio/sfx/bsod.ogg",
     "accuracy": 80,
     "target": "enemy",
-    "effect": { "type": "debuff", "stat": "defense", "percent": 25, "turns": 3 }
+    "effect": {
+      "type": "debuff",
+      "stat": "defense",
+      "percent": 25,
+      "turns": 3
+    }
   },
   {
     "id": "pulsacion",
@@ -29,7 +40,10 @@
     "sound": "assets/audio/sfx/pulsacion.ogg",
     "accuracy": 100,
     "target": "enemy",
-    "effect": { "type": "damage", "power": 35 }
+    "effect": {
+      "type": "damage",
+      "power": 35
+    }
   },
   {
     "id": "rueda_scroll",
@@ -37,7 +51,12 @@
     "sound": "assets/audio/sfx/scroll.ogg",
     "accuracy": 90,
     "target": "enemy",
-    "effect": { "type": "debuff", "stat": "speed", "percent": 20, "turns": 3 }
+    "effect": {
+      "type": "debuff",
+      "stat": "speed",
+      "percent": 20,
+      "turns": 3
+    }
   },
   {
     "id": "atajo_teclado",
@@ -45,6 +64,223 @@
     "sound": "assets/audio/sfx/atajo.ogg",
     "accuracy": 100,
     "target": "self",
-    "effect": { "type": "buff", "stat": "attack", "percent": 25, "turns": 3 }
+    "effect": {
+      "type": "buff",
+      "stat": "attack",
+      "percent": 25,
+      "turns": 3
+    }
+  },
+  {
+    "id": "destello",
+    "name": "Destello",
+    "sound": "assets/audio/sfx/destello.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 45
+    }
+  },
+  {
+    "id": "salvapantallas",
+    "name": "Salvapantallas",
+    "sound": "assets/audio/sfx/salvapantallas.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "heal",
+      "percent": 25
+    }
+  },
+  {
+    "id": "notificacion",
+    "name": "Notificación",
+    "sound": "assets/audio/sfx/notificacion.ogg",
+    "accuracy": 100,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 30
+    }
+  },
+  {
+    "id": "vibracion",
+    "name": "Vibración",
+    "sound": "assets/audio/sfx/vibracion.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "attack",
+      "percent": 20,
+      "turns": 3
+    }
+  },
+  {
+    "id": "atasco_papel",
+    "name": "Atasco de papel",
+    "sound": "assets/audio/sfx/atasco.ogg",
+    "accuracy": 85,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "speed",
+      "percent": 30,
+      "turns": 3
+    }
+  },
+  {
+    "id": "impresion_doble",
+    "name": "Impresión a doble cara",
+    "sound": "assets/audio/sfx/impresion.ogg",
+    "accuracy": 80,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 55
+    }
+  },
+  {
+    "id": "chorro_vapor",
+    "name": "Chorro de vapor",
+    "sound": "assets/audio/sfx/vapor.ogg",
+    "accuracy": 95,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 45
+    }
+  },
+  {
+    "id": "descafeinado",
+    "name": "Descafeinado",
+    "sound": "assets/audio/sfx/descafeinado.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "attack",
+      "percent": 25,
+      "turns": 3
+    }
+  },
+  {
+    "id": "grapazo",
+    "name": "Grapazo",
+    "sound": "assets/audio/sfx/grapa.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 50
+    }
+  },
+  {
+    "id": "giro_silla",
+    "name": "Giro de silla",
+    "sound": "assets/audio/sfx/giro.ogg",
+    "accuracy": 95,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 40
+    }
+  },
+  {
+    "id": "respaldo",
+    "name": "Respaldo lumbar",
+    "sound": "assets/audio/sfx/respaldo.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "buff",
+      "stat": "defense",
+      "percent": 30,
+      "turns": 3
+    }
+  },
+  {
+    "id": "sobrecarga",
+    "name": "Sobrecarga",
+    "sound": "assets/audio/sfx/sobrecarga.ogg",
+    "accuracy": 85,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 70
+    }
+  },
+  {
+    "id": "copia_seguridad",
+    "name": "Copia de seguridad",
+    "sound": "assets/audio/sfx/backup.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "heal",
+      "percent": 35
+    }
+  },
+  {
+    "id": "cortafuegos",
+    "name": "Cortafuegos",
+    "sound": "assets/audio/sfx/cortafuegos.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "buff",
+      "stat": "defense",
+      "percent": 40,
+      "turns": 3
+    }
+  },
+  {
+    "id": "ping",
+    "name": "Ping",
+    "sound": "assets/audio/sfx/ping.ogg",
+    "accuracy": 100,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 60
+    }
+  },
+  {
+    "id": "wifi_caido",
+    "name": "Wifi caído",
+    "sound": "assets/audio/sfx/wifi.ogg",
+    "accuracy": 85,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "speed",
+      "percent": 35,
+      "turns": 3
+    }
+  },
+  {
+    "id": "presentacion",
+    "name": "Presentación eterna",
+    "sound": "assets/audio/sfx/presentacion.ogg",
+    "accuracy": 85,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 75
+    }
+  },
+  {
+    "id": "deslumbrar",
+    "name": "Deslumbrar",
+    "sound": "assets/audio/sfx/deslumbrar.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "attack",
+      "percent": 30,
+      "turns": 3
+    }
   }
 ]

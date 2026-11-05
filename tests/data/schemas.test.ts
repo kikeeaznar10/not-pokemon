@@ -3,7 +3,7 @@ import { validateGameData } from '../../src/data/loader';
 import { errorsAfter, validFiles } from './fixture';
 
 describe('schemas: valid fixture', () => {
-  it('the shipped public/data passes', () => {
+  it('the test-world fixture passes (the real world: tests/data/world.test.ts)', () => {
     const result = validateGameData(validFiles());
     expect(result.ok ? [] : result.errors).toEqual([]);
   });

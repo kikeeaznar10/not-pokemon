@@ -19,7 +19,7 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [x] M11 — Title screen, intro and secret names
 - [x] M12 — Mobile controls and minimap
 - [x] M13 — The Audi to Murcia
-- [ ] M14 — Build the world
+- [x] M14 — Build the world
 - [ ] M15 — Audio, polish and deployment
 
 ## Milestone notes
@@ -395,6 +395,48 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   in a full run (a D-pad tap landed on the Start menu's opening frame, which ignores input, like the M7 / M10
   notes); it passed 5 / 5 repeated on `iphone`.
 
+### M14
+
+- Built: the real world, 18 zones from the plan's layout table — outdoor `alboraya`, `huerta_norte`, `valencia`,
+  `playa`, `pueblo_sur` (Valencia side) and `murcia`, `vinedos`, `poligono` (Murcia side, below the impassable range,
+  reached only by the Audi); interiors `oficina_ahora`, `bar_pacos`, `bar_las_rusas`, `agora`, `isaval`, `ciruelo` and
+  one shop per town (`tienda_alboraya`, `tienda_valencia`, `tienda_sur`, `tienda_murcia`). Maps come from text
+  layouts (`tools/world/<zone>.txt` + `world.json`) through the new `npm run world` (`tools/make-world.ts`: the 8 × 4
+  `world.png` tileset, doors / edges with generated return warps, the two Audis, encounter rectangles). Content: 12
+  flexymon, 24 attacks, 8 items (new `bocadillo`, `ibuprofeno`), 25 NPCs (15 enemies), 6 shops, region music
+  `valencia` / `murcia` + `interior`, the intro in the real office (walk in from the door, coworker walks back out of
+  view). Layout and landmarks: `public/maps/README.md`; content notes: `public/data/README.md`.
+- Decisions: the Audi items' source (plan M13 task 5) — a new game starts with `llaves_audi`, `cafe_doble` is sold at
+  Bar Las Rusas (300 €), `carnet` at the south town's shop (600 €); both keep `effect: key` (never consumed, never
+  sold back) but got a price. Bars have their own shops (`bar_pacos`, `bar_las_rusas`, "bars sell healing items").
+  Murcia has no healer (healing is free only at the office, per the plan); its shop sells Bocadillo and Ibuprofeno.
+- **The test maps became a frozen test world** instead of being deleted (plan task 5): `public/maps/test/*.tmj` plus
+  `public/test-world/data/` (the M13 content, unchanged). Dev / E2E builds load it with `?world=test` or
+  `localStorage['flexymon.e2e.world'] = 'test'` (`src/data/world.ts`; production ignores both).
+  `playwright.config.ts` sets that key for every profile, so the m0–m13 specs keep their tile coordinates; the unit
+  tests' fixture (`tests/data/fixture.ts`, `tests/logic/helpers.ts`) and the map / loader tests read the test world
+  too. Changed on purpose: test map paths `maps/test.tmj` → `maps/test/test.tmj` in `tests/data/{maps,tiled}.test.ts`,
+  `tests/tools/make-placeholders.test.ts` (which now also lists the real minimaps) and the expected error line in
+  `tests/e2e/m4-warps.spec.ts`. No check was weakened.
+- Files outside the M14 list (it has none besides content): `src/data/world.ts`, `src/scenes/boot-scene.ts` (loads
+  `dataDir()`), `tools/make-world.ts` + `tools/world/` + `npm run world`, `tools/make-test-map.ts` (writes to
+  `maps/test/`), `tools/make-placeholders.ts` (reads both content folders), `playwright.config.ts`,
+  `eslint.config.js` + `.gitignore` (ignore `dist-*/`, the second build folder used to run one spec beside
+  another run), `CLAUDE.md` (commands), READMEs.
+- Verified: `tests/data/world.test.ts` loads the real world with zero errors and zero warnings, checks the content
+  counts and the balance guide, and walks the whole world (path search over step warps): every Valencia zone and
+  interior is reachable from the new-game spawn, the Murcia side only from the car, every NPC can be talked to.
+  Playwright (`tests/e2e/m14-world.spec.ts`): on all four profiles the real world boots with no data errors, no load
+  warnings and no failed assets, and the intro plays in the office (player (7, 9), keys in the bag, interior music).
+  On desktop, two long walks with screenshots: office → Alboraya (both bars, the shop, the office again) → Huerta
+  Norte → Valencia (shop, Àgora, the beach and back) → the south town (Isaval; buys the licence in its shop) → back
+  north to the office Audi → Murcia; and in Murcia its shop, the vineyards, the industrial estate and Ciruelo, then
+  the car back to the office car. Enemies met on the way are fought for real; wild encounters are switched off with
+  the `setEncounters` hook and euros for the licence are topped up with `setEuros` (no debug menu is opened).
+- For M15: the region music files are still placeholders (`valencia.ogg`, `murcia.ogg`); `docs/CONTENT.md` should
+  take `tools/README.md` › `npm run world` (legend and `world.json` fields) and `public/maps/README.md`. The
+  real-device check of M12 is still open.
+
 ## Open questions
 
 ### From the plan (none block M0–M12)
@@ -407,10 +449,23 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
 - [ ] Which static host, and does the link need a password? (Decide by M15.)
 - [ ] Who draws the real art and sound, and in what order? Suggested: title office, player, Portátil, tilesets, then flexymon.
 
+### Raised in M14 (safe assumptions in brackets)
+
+- [ ] Where do the Audi items come from? [Keys at the start, Café doble at Bar Las Rusas 300 €, Carnet at the south
+  town's shop 600 €. A tester needs to earn some euros in battles first.]
+- [ ] Should the test maps be deleted? [No: kept as a frozen test world for the older tests and for debugging, not
+  listed in the real `zones.json`.]
+- [ ] Is there a healer on the Murcia side? [No, healing is free only at the office (plan); Murcia sells healing
+  and revive items. Losing there wakes you at the office, on the other side of the range.]
+- [ ] Names of real places and companies (Isaval, Ciruelo, the bars, the CAC / Àgora) are used as the plan lists them;
+  the plan's open question about permission still stands.
+- [ ] The plan asks for "many NPCs" in Valencia within a 25-NPC total. [Valencia + Àgora have 6 enemies; the rest are
+  spread so every outdoor zone has at least one.]
+
 ### Raised in M13 (safe assumptions in brackets)
 
-- [ ] Where does the player get `llaves_audi`, `carnet` and `cafe_doble`? [Not given anywhere yet; the plan defers
-  the source to M14.] The pairs themselves are still the plan's placeholders (see "From the plan").
+- [x] Where does the player get `llaves_audi`, `carnet` and `cafe_doble`? [Not given anywhere yet; the plan defers
+  the source to M14.] **Resolved in M14:** keys at the start, Café doble at Bar Las Rusas, Carnet at the south town's shop. The pairs themselves are still the plan's placeholders (see "From the plan").
 - [ ] Does the Murcia car also ask "¿Subir al Audi?"? [Yes, both cars ask Sí / No, so a stray A never starts a
   trip.] Default answer? [Cursor on Sí; B = No.]
 - [ ] How long is the trip? [5 s (`CAR_TRIP_MS`), the middle of the plan's 4–6 s.] Which buttons skip it? [Any game

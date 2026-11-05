@@ -21,6 +21,8 @@ npx playwright test     # optional: the browser tests (they build their own copy
 Build with plain `npm run build` for the real site. **Do not set `VITE_E2E=1`** for a deployment: that switch adds
 the test hooks (`window.__E2E__`) and lets the URL load the frozen test world.
 
+`npm start` does the install, the build and the preview in one go.
+
 To try the build on a phone on the same Wi-Fi: `npm run preview -- --host`, then open the printed network address.
 
 ## 2. Sub-paths

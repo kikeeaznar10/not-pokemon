@@ -4,6 +4,7 @@
 // team; Mochila uses a Café and a Regleta; Opciones change and survive a reload; every save point shows
 // "Guardando…"; the debug command deletes the save.
 import { test, expect, type Page } from '@playwright/test';
+import { neutralIntro } from './neutral-intro';
 
 interface Tile {
   map: string;
@@ -76,6 +77,8 @@ async function startAt(page: Page, spawn: object): Promise<void> {
     const start = (await res.json()) as Record<string, unknown>;
     await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
   });
+  // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+  await neutralIntro(page, (spawn as { map: string }).map);
 }
 
 /** Collect page errors and console errors from now on. */

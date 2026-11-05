@@ -320,7 +320,9 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   `quickStart`, `nameEntry`, `intro`, `playerName`), `tools/make-placeholders.ts` (title image), `es.json`, READMEs.
   Tests changed on purpose: every e2e helper that pressed Enter on the old Preload title now calls `quickStart()`
   (same behaviour: continue the save or new game at the spawn, no intro); `m0-title` reads the logo / hint from the
-  Title scene (new positions), `m1-data` expects `Title` after Preload; `assets.test.ts` counts the new assets.
+  Title scene (new positions), `m1-data` expects `Title` after Preload; `assets.test.ts` counts the new assets; tests that move
+  `start.json › spawn` also serve a neutral intro (`tests/e2e/neutral-intro.ts`), since the boot checks reject an
+  intro that does not fit the spawn's map.
 - Verified with Playwright on all four profiles + screenshots (`tests/e2e/m11-title-intro.spec.ts`): title → name
   "Ana" → intro → free movement in about 9–23 s (under 60 s), starting state from `start.json` and saved; "PACO" gets
   +10 Cafés and the message, "Pacoo" does not; Continuar hidden with no save and restores position and euros;
@@ -347,6 +349,8 @@ When a milestone is merged, tick it here and add a 3–5 line summary under "Mil
   with an intro-only coworker defined in `intro.json`; the plan's "walk into the office" waits for M14's real office.
   The intro starts on the spawn tile and control begins where the script leaves the player.]
 - [ ] Where is the title image path configured? [`intro.json › titleImage`, so it is content, not code.]
+- [ ] The intro is tied to the spawn: moving `start.json › spawn` without updating `intro.json` (coworker tile, walks)
+  stops the game at boot with an `intro.json › …` error. [Kept: a broken intro would otherwise hang a new game.]
 - [ ] The letter grid mixes upper-case A–Z / Ñ with lower-case á é í ó ú, as the plan lists them. [Kept literally; the
   physical keyboard types any case. A Mayús/minús key would be easy to add.]
 - [ ] Physical keyboard vs. the A/B keys in the name screen. [Letter keys type, including Z and X, so on a keyboard

@@ -60,6 +60,11 @@ To reach the overworld in a test: wait for `preloadComplete()`, then call `quick
 (`page.waitForFunction(() => window.__E2E__.quickStart())`; M11 — the title needs a frame to start). To test the
 real flow, press Enter on the title and choose from its menu (`tests/e2e/m11-title-intro.spec.ts`). In the name
 screen letter keys (Z and X too) type text, so press Enter for OK.
+
+`tests/e2e/neutral-intro.ts` (M11): the boot checks reject an `intro.json` whose coworker or walks do not fit the
+`start.json › spawn` map. A test that moves the spawn (intercepting `start.json`) also calls `neutralIntro(page, map)`,
+which serves an intro with no walks and the coworker on a free tile of that map (the helpers `startAt` / `patchData`
+in the M5, M7–M10 specs do this).
 Keys pressed with Playwright are seen on the next game frame: poll for the expected state
 (`expect.poll(...)`) instead of reading it right after the key press, and wait for one press to take effect
 before the next (two presses in one frame count once). After a warp, also wait for `overworldLocked()` to be false

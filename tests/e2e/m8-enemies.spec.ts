@@ -6,6 +6,7 @@
 // Enemies and stronger stats are injected by intercepting npcs.json / flexymon.json (no shipped data changes):
 // Portátil hits hard enough to win in one blow (when it does not miss); the boss's Ratón always wins.
 import { test, expect, type Page } from '@playwright/test';
+import { neutralIntro } from './neutral-intro';
 
 interface Tile {
   map: string;
@@ -106,6 +107,8 @@ async function patchData(page: Page, extra: object[], spawn?: object): Promise<v
       const start = (await res.json()) as Record<string, unknown>;
       await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
     });
+    // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+    await neutralIntro(page, (spawn as { map: string }).map);
   }
 }
 

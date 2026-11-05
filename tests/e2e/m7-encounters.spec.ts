@@ -4,6 +4,7 @@
 // on tall grass, a new species joins the team, and the debug option switches encounters off.
 // Rates and the start position are changed by intercepting zones.json / start.json (no code change).
 import { test, expect, type Page } from '@playwright/test';
+import { neutralIntro } from './neutral-intro';
 
 interface Tile {
   map: string;
@@ -84,6 +85,8 @@ async function patchData(page: Page, rate: number | null, spawn?: object): Promi
       const start = (await res.json()) as Record<string, unknown>;
       await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
     });
+    // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+    await neutralIntro(page, (spawn as { map: string }).map);
   }
 }
 

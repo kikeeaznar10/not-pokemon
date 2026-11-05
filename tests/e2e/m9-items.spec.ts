@@ -4,6 +4,7 @@
 // step, the shop and the healer ask for an auto-save, the healer heals team and storage.
 // The player starts inside `test_house` next to the NPC under test (start.json served with another spawn).
 import { test, expect, type Page } from '@playwright/test';
+import { neutralIntro } from './neutral-intro';
 
 interface Tile {
   map: string;
@@ -69,6 +70,8 @@ async function startAt(page: Page, spawn: object): Promise<void> {
     const start = (await res.json()) as Record<string, unknown>;
     await route.fulfill({ response: res, body: JSON.stringify({ ...start, spawn }) });
   });
+  // M11: the intro must fit the spawn's map at boot (see neutral-intro.ts).
+  await neutralIntro(page, (spawn as { map: string }).map);
 }
 
 async function enterOverworld(page: Page, expected: Partial<Tile>): Promise<string[]> {

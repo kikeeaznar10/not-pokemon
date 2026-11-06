@@ -59,10 +59,15 @@ Upload the **contents** of `dist/` (so `index.html` is at the top). The folders 
 
 ### GitHub Pages
 
-- Settings › Pages › Source: *GitHub Actions*, with a workflow that runs `npm ci && npm run build` on Node 22 and
-  publishes `dist/` (`actions/upload-pages-artifact` + `actions/deploy-pages`). The site is
+- The repository already has the workflow: `.github/workflows/deploy-pages.yml`. On every push to `main` (or by
+  hand: Actions › *Deploy to GitHub Pages* › *Run workflow*) it runs `npm ci`, `npm run lint`, `npm test` and
+  `npm run build` on the Node version of `.nvmrc`, then publishes `dist/` (`actions/upload-pages-artifact` +
+  `actions/deploy-pages`). A failing check stops the deploy, so the live site keeps the last good build. The
+  Playwright tests are not run there (run them locally before pushing).
+- One-time setup: Settings › Pages › Build and deployment › Source: *GitHub Actions*. The site is then
   `https://<owner>.github.io/<repo>/`, a sub-path, which `base: './'` already handles.
-- GitHub Pages sites are public on most plans (private Pages need GitHub Enterprise Cloud).
+- GitHub Pages sites are public. A private repository can only publish Pages on a paid plan (Pro, Team or
+  Enterprise), and the site is still public unless the plan is Enterprise Cloud.
 
 ### Company web server
 

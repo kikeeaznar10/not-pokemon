@@ -59,13 +59,22 @@ Upload the **contents** of `dist/` (so `index.html` is at the top). The folders 
 
 ### GitHub Pages
 
-- The repository already has the workflow: `.github/workflows/deploy-pages.yml`. On every push to `main` (or by
-  hand: Actions › *Deploy to GitHub Pages* › *Run workflow*) it runs `npm ci`, `npm run lint`, `npm test` and
-  `npm run build` on the Node version of `.nvmrc`, then publishes `dist/` (`actions/upload-pages-artifact` +
-  `actions/deploy-pages`). A failing check stops the deploy, so the live site keeps the last good build. The
-  Playwright tests are not run there (run them locally before pushing).
-- One-time setup: Settings › Pages › Build and deployment › Source: *GitHub Actions*. The site is then
-  `https://<owner>.github.io/<repo>/`, a sub-path, which `base: './'` already handles.
+- The repository has the workflow `.github/workflows/deploy-pages.yml`. It runs **only when the `pages` branch is
+  pushed** (or by hand: Actions › *Deploy to GitHub Pages* › *Run workflow*, choosing `pages`): `npm ci`,
+  `npm run lint`, `npm test` and `npm run build` on the Node version of `.nvmrc`, then it publishes `dist/`
+  (`actions/upload-pages-artifact` + `actions/deploy-pages`). A failing check stops the deploy, so the live site
+  keeps the last good build. The Playwright tests are not run there (run them locally first). Pushes to `main` or
+  any other branch publish nothing.
+- To publish, push the commit you want live to `pages`, normally the current `main`:
+  `git push origin main:pages`. Use a plain push (no `--force`): `pages` only moves forward along `main`.
+- One-time setup in the repository settings:
+  1. Settings › Pages › Build and deployment › Source: *GitHub Actions* (not *Deploy from a branch*). Without it the
+     run fails at `actions/configure-pages` with "Get Pages site failed … Not Found".
+  2. Settings › Environments › `github-pages` › Deployment branches and tags: allow `pages`. By default only the
+     default branch (`main`) may deploy, and the run fails with "Branch "pages" is not allowed to deploy".
+  3. Settings › Rules › Rulesets (or Branches) › protect `pages`: block force pushes and deletion, and restrict who
+     can push to it, so only maintainers can publish.
+- The site is `https://<owner>.github.io/<repo>/`, a sub-path, which `base: './'` already handles.
 - GitHub Pages sites are public. A private repository can only publish Pages on a paid plan (Pro, Team or
   Enterprise), and the site is still public unless the plan is Enterprise Cloud.
 

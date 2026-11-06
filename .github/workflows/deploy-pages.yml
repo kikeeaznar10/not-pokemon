@@ -1,10 +1,10 @@
-# Publishes the game to GitHub Pages on every push to main (and on demand from the Actions tab).
-# One-time setup: Settings › Pages › Build and deployment › Source: "GitHub Actions". See docs/DEPLOY.md.
+# Publishes the game to GitHub Pages when the `pages` branch is pushed (release: push main's commit to `pages`).
+# Pushes to any other branch do not run it. See docs/DEPLOY.md for the one-time setup.
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [pages]
   workflow_dispatch:
 
 permissions:
@@ -12,13 +12,15 @@ permissions:
   pages: write
   id-token: write
 
-# Only one deployment at a time; a newer push cancels a queued one but never an in-progress deploy.
+# Only one deployment at a time; a newer push waits for the one in progress (never cancels it).
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
   build:
+    # A manual run from the Actions tab also deploys only when started on `pages`.
+    if: github.ref == 'refs/heads/pages'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

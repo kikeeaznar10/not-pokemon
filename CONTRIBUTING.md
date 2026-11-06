@@ -9,13 +9,20 @@ Thanks for helping! New flexymon, NPCs, zones, art, bug fixes and tests are all 
 - code: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/GAME-RULES.md](docs/GAME-RULES.md)
 - tests: [docs/TESTING.md](docs/TESTING.md)
 
+## Branches
+
+- **`develop`**: where all work lands. Branch from it and open pull requests against it.
+- **`main`**: the published game. Every push to `main` deploys it to GitHub Pages
+  ([docs/DEPLOY.md](docs/DEPLOY.md)). Nothing is pushed or merged to `main` except a release: a maintainer brings
+  `main` up to `develop` (a pull request from `develop` to `main`, or a fast-forward push).
+
 ## Workflow
 
-1. Fork, create a branch (`add-flexymon-impresora`, `fix-shop-quantity`…).
+1. Fork, create a branch from `develop` (`add-flexymon-impresora`, `fix-shop-quantity`…).
 2. Make one focused change. Small commits in English, imperative mood ("Add the Impresora flexymon").
 3. **Update the documentation in the same change** (see below).
 4. Run every check below and try the change in the running game.
-5. Open a pull request using the template. Say how you checked it.
+5. Open a pull request **against `develop`** using the template. Say how you checked it.
 
 Design changes (anything in [GAME-RULES.md](docs/GAME-RULES.md) › Design pillars, or a rule change) are best
 discussed in an issue first.

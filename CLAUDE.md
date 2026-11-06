@@ -22,7 +22,9 @@ Folder `README.md` files are the file-by-file reference (`src/*/README.md`, `pub
 ## How to work (every session)
 
 1. Before writing code, read this file, `CONTRIBUTING.md` and the docs relevant to the task.
-2. Develop on the branch the harness assigned (or a short descriptive branch). Commit there while working.
+2. Develop on the branch the harness assigned (or a short descriptive branch made from `develop`). Commit there while
+   working. Branches: `develop` collects finished work; `main` is the published game (every push to `main` deploys
+   it to GitHub Pages, `docs/DEPLOY.md`).
 3. Keep the change focused on what was asked.
 4. Never hard-code game content (creature names, numbers, dialogue, prices) in TypeScript. Content lives in
    `public/data/*.json`; UI strings live in `src/i18n/es.json`; tunable rule numbers live in
@@ -40,13 +42,17 @@ Folder `README.md` files are the file-by-file reference (`src/*/README.md`, `pub
    - any doc made wrong by the change is fixed, even if not listed above;
    - if this file (`CLAUDE.md`) or `CONTRIBUTING.md` no longer matches how the project works, update them too.
    Don't write change logs or history ("added in…") into docs or comments: describe how things work now.
-7. **Test before pushing to `main`.** A change may only reach `main` when every check of the Definition of done
-   passes. If anything fails, fix it first; never push a red build to `main`, and never skip, disable or weaken a test
-   to get green (a test that pins something changed on purpose is updated, and the reason told to the user).
-8. **When a change is finished and tested, push it to `main`.** Bring the branch up to date with `origin/main` first
-   (`git fetch origin main`, then rebase or merge), re-run the checks if anything changed, then
-   `git push origin HEAD:main`. Also push the working branch. `main` must always contain only finished, tested,
-   documented work.
+7. **Test before pushing to `develop`.** A change may only reach `develop` when every check of the Definition of done
+   passes. If anything fails, fix it first; never push a red build to `develop` or `main`, and never skip, disable or
+   weaken a test to get green (a test that pins something changed on purpose is updated, and the reason told to the
+   user).
+8. **When a change is finished and tested, push it to `develop`.** Bring the branch up to date with `origin/develop`
+   first (`git fetch origin develop`, then rebase or merge), re-run the checks if anything changed, then
+   `git push origin HEAD:develop`. Also push the working branch. `develop` must always contain only finished,
+   tested, documented work.
+9. **Never push to `main` unless the user asks to publish.** Pushing to `main` publishes the game. To publish, bring
+   `main` up to `develop` (`git fetch origin develop main`, then `git push origin origin/develop:main`, a
+   fast-forward; never force-push `main`). If `main` has commits `develop` lacks, merge `main` into `develop` first.
 
 ### Definition of done (every change)
 
@@ -57,7 +63,7 @@ Folder `README.md` files are the file-by-file reference (`src/*/README.md`, `pub
 - No `console.log` except through `log()` in `src/core/log.ts`.
 - No new hard-coded content; no Spanish text inside `.ts` files.
 - Documentation updated in the same commit (rule 6).
-- Pushed to `main` (rule 8).
+- Pushed to `develop` (rule 8); `main` only when the user asks to publish (rule 9).
 
 ## Design pillars (summary — full table in `docs/GAME-RULES.md`)
 

@@ -1,3 +1,5 @@
+<!-- Pull requests go to `develop`. Only a release (develop → main) targets `main`, and merging it publishes the game. -->
+
 ## What changed
 
 -
@@ -10,6 +12,7 @@
 
 ## Checklist
 
+- [ ] Targets `develop` (or is a release from `develop` to `main`)
 - [ ] `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` pass
 - [ ] `npx playwright test` passes
 - [ ] Checked in the running game (how: by hand, or Playwright + screenshots)

@@ -59,21 +59,22 @@ Upload the **contents** of `dist/` (so `index.html` is at the top). The folders 
 
 ### GitHub Pages
 
-- The repository has the workflow `.github/workflows/deploy-pages.yml`. It runs **only when the `pages` branch is
-  pushed** (or by hand: Actions › *Deploy to GitHub Pages* › *Run workflow*, choosing `pages`): `npm ci`,
-  `npm run lint`, `npm test` and `npm run build` on the Node version of `.nvmrc`, then it publishes `dist/`
-  (`actions/upload-pages-artifact` + `actions/deploy-pages`). A failing check stops the deploy, so the live site
-  keeps the last good build. The Playwright tests are not run there (run them locally first). Pushes to `main` or
-  any other branch publish nothing.
-- To publish, push the commit you want live to `pages`, normally the current `main`:
-  `git push origin main:pages`. Use a plain push (no `--force`): `pages` only moves forward along `main`.
+- The repository has the workflow `.github/workflows/deploy-pages.yml`. It runs **on every push to `main`** (or by
+  hand: Actions › *Deploy to GitHub Pages* › *Run workflow* on `main`): `npm ci`, `npm run lint`, `npm test` and
+  `npm run build` on the Node version of `.nvmrc`, then it publishes `dist/` (`actions/upload-pages-artifact` +
+  `actions/deploy-pages`). A failing check stops the deploy, so the live site keeps the last good build. The
+  Playwright tests are not run there (run them before a change reaches `develop`). Other branches publish nothing.
+- Work lands on `develop` (`CONTRIBUTING.md` › Branches). To publish, bring `main` up to `develop`: merge a pull
+  request from `develop` into `main`, or fast-forward it with `git push origin origin/develop:main`. Never
+  force-push `main`.
 - One-time setup in the repository settings:
   1. Settings › Pages › Build and deployment › Source: *GitHub Actions* (not *Deploy from a branch*). Without it the
      run fails at `actions/configure-pages` with "Get Pages site failed … Not Found".
-  2. Settings › Environments › `github-pages` › Deployment branches and tags: allow `pages`. By default only the
-     default branch (`main`) may deploy, and the run fails with "Branch "pages" is not allowed to deploy".
-  3. Settings › Rules › Rulesets (or Branches) › protect `pages`: block force pushes and deletion, and restrict who
-     can push to it, so only maintainers can publish.
+  2. Settings › Environments › `github-pages` › Deployment branches and tags: `main` only (the default). Another
+     branch is refused with "Branch "…" is not allowed to deploy to github-pages".
+  3. Settings › General › Default branch: `develop`, so pull requests target it by default.
+  4. Settings › Rules › Rulesets (or Branches): protect `main` (block force pushes and deletion; optionally require a
+     pull request) and `develop` (block force pushes and deletion).
 - The site is `https://<owner>.github.io/<repo>/`, a sub-path, which `base: './'` already handles.
 - GitHub Pages sites are public. A private repository can only publish Pages on a paid plan (Pro, Team or
   Enterprise), and the site is still public unless the plan is Enterprise Cloud.

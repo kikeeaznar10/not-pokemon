@@ -3,7 +3,9 @@
 A browser monster-collecting RPG in the style of the Game Boy Color classics, set in a cartoon version of the
 Valencia region (Spain). Wander the huerta, the city, the beach and, if you get the right items for the office Audi,
 the Murcia desert. Meet wild **flexymon**, fight enemy trainers in turn-based battles, collect and merge creatures,
-earn euros and buy items. There is no story and no ending: just wander and collect.
+earn euros and buy items. The main game has no story and no ending: just wander and collect. For a quick game, a
+mystery door in the office leads to the **Modo historia**: pick a team of four, spend a fixed budget on items, and
+beat seven bosses in a row on a board-game map of Valencia's landmarks.
 
 - Plays in any modern browser, on desktop and on phones (landscape, on-screen controls).
 - A fully static site: no server, no accounts; the game saves in the browser.
@@ -49,6 +51,7 @@ for the debug menu (teleport, battles, items, reload data).
 | [docs/CONTENT.md](docs/CONTENT.md) | Adding flexymon, attacks, items, NPCs and dialogue, enemy trainers, encounters, shops… |
 | [docs/MAPS.md](docs/MAPS.md) | Editing and expanding the world: layouts, new zones, buildings, doors, encounter areas. |
 | [docs/ART.md](docs/ART.md) | The art style, the code-drawn art pipeline, sizes, sounds and music. |
+| [docs/SPRITES.md](docs/SPRITES.md) | The brief for artists: every sprite file, its size, layout and delivery. |
 | [docs/TESTING.md](docs/TESTING.md) | Unit and browser tests, test hooks, the frozen test world. |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Building and hosting the static site; the offline single-file build. |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Workflow, conventions and the checklist every change must pass. |

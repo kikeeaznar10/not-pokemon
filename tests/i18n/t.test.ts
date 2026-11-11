@@ -8,7 +8,7 @@ describe('t()', () => {
   });
 
   it('reads es.json', () => {
-    expect(t('app.title')).toBe('Flexymon');
+    expect(t('app.title')).toBe('felxygon vKike');
   });
 
   it('fills vars', () => {

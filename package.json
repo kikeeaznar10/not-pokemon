@@ -19,7 +19,8 @@
     "world": "tsx tools/make-world.ts",
     "atlas": "tsx tools/make-atlas.ts",
     "offline": "npm run build && tsx tools/make-offline.ts",
-    "art": "tsx tools/make-art.ts"
+    "art": "tsx tools/make-art.ts",
+    "buildings": "tsx tools/make-buildings.ts"
   },
   "dependencies": {
     "phaser": "4.2.1",

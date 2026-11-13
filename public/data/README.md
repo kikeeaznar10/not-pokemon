@@ -9,7 +9,7 @@ Every creature, attack, item, NPC, zone, shop and the new-game setup, as JSON. *
 | `attacks.json` | Every attack: name, sound, accuracy, target, effect. |
 | `items.json` | Every item: name, description, sprite, price, where usable, effect. |
 | `npcs.json` | Every NPC: type, sprite, voice, map, spawn, wander area, dialogue; team and reward for enemies; shop for shopkeepers. |
-| `zones.json` | Every map: file, name, region, music, indoor, wild encounter groups. |
+| `zones.json` | Every map: file, name, region, music, indoor, wild encounter groups, optional building skins. |
 | `shops.json` | Shop id → item ids sold. |
 | `start.json` | New game: starter, euros, team slots, items, spawn, respawn after losing. |
 | `secret-names.json` | Player names that grant bonus items. |
@@ -38,6 +38,8 @@ Validated at boot by the zod schemas in `src/data/schemas/` (one per file), then
   walkable.
 - `zones.json`: `encounters` is required (`{}` for none); rate 1–100; weights whole ≥ 1; every group must be used by
   an encounter rectangle on the map (else a warning).
+- `zones.json`: `buildings` is optional; each skin needs a snake_case `id`, an `assets/….png` image, whole `x` / `y` ≥ 0,
+  `width` / `height` ≥ 1, and must lie inside the map (docs/MAPS.md › Building skins).
 - `start.json`: euros 0–999 999, `teamSlots` 1–6, item counts 1–99, spawn/respawn `{ map, x, y, facing }` walkable.
 - `secret-names.json`: names may not collide after normalising (case, accents, spaces; ñ is kept).
 - `car.json`: at least one pair of two item ids; arrival points walkable.

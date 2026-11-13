@@ -39,6 +39,7 @@ export function collectAssets(data: GameData): AssetList {
     sounds.add(z.music);
     // Outdoor zones have a pre-drawn minimap (`npm run placeholders` draws it from the map).
     if (!z.indoor) images.add(minimapPath(z.id));
+    for (const b of z.buildings ?? []) images.add(b.image);
   }
   // The title image, the intro coworker and the handover jingle.
   images.add(data.intro.titleImage).add(data.intro.coworker.sprite);

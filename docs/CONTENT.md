@@ -35,7 +35,7 @@ status bar. Both use the same numbers: x from the left, y from the top, starting
 | Attacks | `public/data/attacks.json` | `src/data/schemas/attacks.ts` |
 | Items | `public/data/items.json` | `src/data/schemas/items.ts` |
 | NPCs (talkers, enemies, shopkeepers, healer, storage) | `public/data/npcs.json` | `src/data/schemas/npcs.ts` |
-| Zones: map file, name, region, music, wild encounters | `public/data/zones.json` | `src/data/schemas/zones.ts` |
+| Zones: map file, name, region, music, wild encounters, building skins (`buildings`, [MAPS.md](MAPS.md) › Building skins) | `public/data/zones.json` | `src/data/schemas/zones.ts` |
 | Shop stock | `public/data/shops.json` | `src/data/schemas/shops.ts` |
 | New-game state | `public/data/start.json` | `src/data/schemas/start.ts` |
 | Secret names | `public/data/secret-names.json` | `src/data/schemas/secret-names.ts` |

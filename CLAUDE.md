@@ -140,6 +140,7 @@ tests/                       Vitest unit tests mirroring src/ and tools/; e2e/ P
 - `npm run preview` / `npm start` — serve `dist/` / install + build + serve
 - `npm run offline` — one self-contained `dist-offline/flexymon.html` + zip
 - `npm run lint` / `npm run format` / `npm run typecheck` / `npm test` / `npm run coverage`
+- `npm run buildings` — list the buildings and write reference pictures for skins
 - `npm run art` / `npm run world` / `npm run placeholders` / `npm run atlas` / `npm run test-map` — generators
   (never overwrite; `-- --force` regenerates; see `tools/README.md`)
 - `npx playwright test` — browser tests (builds with `VITE_E2E=1` and serves `dist/` automatically);

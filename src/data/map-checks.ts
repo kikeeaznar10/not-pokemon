@@ -6,6 +6,7 @@
  * - every warp points at an existing zone, and every tile it can land on there is walkable (for edge
  *   warps that keep the row/column, every tile of the rectangle is checked). Car warps have no target
  *   of their own: they use the car.json endpoints checked above. Portal warps (the mystery door) have none either.
+ * - every building skin (`zones.json › buildings`) lies inside its map.
  * - every encounter rectangle's `group` exists in its zone's `encounters` in zones.json.
  * - the intro (`intro.json`) plays on the `start.json › spawn` map: the coworker's start tile and every
  *   tile either actor walks onto are walkable, and no walk enters the tile where the other actor stands.
@@ -109,6 +110,14 @@ export function checkMaps(data: GameData, maps: ReadonlyMap<string, MapInfo>): D
       const problem = tileProblem(maps, zone.id, sp.x, sp.y);
       if (problem) errors.push({ file: zone.file, path: ['spawns', sp.name], message: problem });
     }
+    (zone.buildings ?? []).forEach((b, i) => {
+      if (b.x + b.width > info.width || b.y + b.height > info.height)
+        errors.push({
+          file: 'zones.json',
+          path: [zone.id, 'buildings', i],
+          message: `building "${b.id}" (${b.x}, ${b.y}, ${b.width} × ${b.height}) is outside map "${zone.id}" (${info.width} × ${info.height})`,
+        });
+    });
     info.encounters.forEach((rect) => {
       if (!Object.hasOwn(zone.encounters, rect.group)) {
         errors.push({

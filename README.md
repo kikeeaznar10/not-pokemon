@@ -71,6 +71,7 @@ Each source folder also has a `README.md` with a file-by-file reference.
 | `npm run typecheck` | `tsc --noEmit`. |
 | `npm test` / `npm run coverage` | Vitest unit tests / with coverage. |
 | `npx playwright test` | Browser tests (builds with test hooks and serves `dist/` itself). |
+| `npm run buildings` | List the buildings and write reference pictures to paint skins from (`tools/buildings/`). |
 | `npm run art` | Draw sprites, NPCs, flexymon, items, the car and the title (`-- --force` to redraw). |
 | `npm run world` | Build the world maps and tileset from `tools/world/` (`-- --force` to rebuild). |
 | `npm run placeholders` | Create any missing asset (sounds, minimaps…); never overwrites. |

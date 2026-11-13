@@ -87,6 +87,13 @@ neighbours (roof ridge / eave / edges and one of four roof colours per building,
 wall face / top, cliff face, grass borders on `:` `r` `p` `s`, shore foam on `~`). A variant keeps its base tile's
 `solid` / `encounter` property, so only the picture changes; the rules are in `autotile`'s doc comment.
 
+## `npm run buildings` (`make-buildings.ts`)
+
+Lists the buildings of the outdoor maps (zone, top-left tile, size in tiles and pixels) and writes a reference picture
+of each to `tools/buildings/<zone>_<x>_<y>.png` (git-ignored), to paint replacement skins from. `-- <zone>` lists one
+zone. Reads `tools/world/*.txt` and `public/maps/*.tmj`; never touches `public/`. Using a skin: docs/MAPS.md ›
+Building skins.
+
 ## `npm run art` (`make-art.ts`)
 
 Draws the game's sprites in the style of `docs/ART.md` at the paths the content JSON names (both content

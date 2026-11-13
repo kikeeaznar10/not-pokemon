@@ -185,6 +185,13 @@ tile order or tile art changes):
 
 ![World tileset, every tile numbered by id](images/tileset-reference.png)
 
+## Building skins (optional)
+
+Any outdoor building can be repainted as a single picture instead of its tiles: `public/assets/buildings/<id>.png`,
+`width × 32` by `height × 32` px for the building's rectangle (e.g. 320 × 96 for 10 × 3 tiles), transparent where the
+ground should show. `npm run buildings` lists the buildings and gives a reference picture of each; how to hook a
+skin up: [MAPS.md](MAPS.md) › Building skins. Not part of the delivery count below.
+
 ## Title screen, car and minimaps
 
 | File | Size | Design at | Notes |

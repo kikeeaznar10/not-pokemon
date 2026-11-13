@@ -327,6 +327,28 @@ the CAC, the mystery door and the story map's stop…), each its own base: `enco
 
 Changing how tiles look: [ART.md](ART.md).
 
+## Building skins
+
+A building can be repainted as **one picture** instead of its tiles, without touching the map, its collision or its
+doors. This is how hand-made or generated art replaces the tile-built buildings.
+
+1. `npm run buildings` (optionally `-- alboraya`) lists the buildings found in the outdoor layouts
+   (`tools/world/<zone>.txt`: groups of one material family, plus the doors touching them) and writes, for each, a
+   picture of how it looks now to `tools/buildings/<zone>_<x>_<y>.png` (git-ignored). The rectangles are a guess:
+   check them against the picture and adjust, e.g. a group that is not rectangular, or two buildings of the same
+   material that touch, come out as one.
+2. Paint the skin at exactly `width × 32` by `height × 32` px (a 10 × 3 building = 320 × 96), PNG; transparent pixels
+   show the ground. Use the reference picture as the guide for the footprint, the door position and the style.
+3. Save it as `public/assets/buildings/<id>.png` and add it to the zone in `public/data/zones.json`:
+   `"buildings": [{ "id": "oficina", "image": "assets/buildings/oficina.png", "x": 75, "y": 5, "width": 10, "height": 3 }]`
+   (`x`, `y` = top-left tile; the rectangle must lie inside the map).
+4. The game draws the picture over the rectangle (depth 1.5: over the ground, under the player) and empties the
+   `deco` and `above` tiles in it. The `collision` layer is untouched, so keep the door where the map has it: the
+   player stands on the door tile (drawn over the picture) when entering.
+
+Only list a skin once its PNG exists; a listed skin whose image fails to load is reported on the console and the
+tiles stay. Interiors have no skins.
+
 ## Minimaps
 
 Every outdoor zone has `public/assets/ui/minimap_<zone>.png`, drawn by `npm run placeholders` from the map's

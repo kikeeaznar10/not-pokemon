@@ -22,7 +22,11 @@ describe('content: ferri', () => {
       attacks: ['vas_al_bano', 'culebra', 'punalada_trapera'],
     });
 
-    const total = (ferri?.stats.hp ?? 0) + (ferri?.stats.attack ?? 0) + (ferri?.stats.defense ?? 0) + (ferri?.stats.speed ?? 0);
+    const total =
+      (ferri?.stats.hp ?? 0) +
+      (ferri?.stats.attack ?? 0) +
+      (ferri?.stats.defense ?? 0) +
+      (ferri?.stats.speed ?? 0);
     expect(total).toBeGreaterThan(90);
     expect(total).toBeLessThan(140);
 

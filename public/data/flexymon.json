@@ -202,5 +202,22 @@
       "speed": 16
     },
     "attacks": ["presentacion", "deslumbrar", "destello"]
+  },
+  {
+    "id": "ferri",
+    "name": "Ferri",
+    "sprite": {
+      "front": "assets/sprites/flexymon/ferri_front.png",
+      "back": "assets/sprites/flexymon/ferri_back.png",
+      "icon": "assets/sprites/flexymon/ferri_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_ferri.ogg",
+    "stats": {
+      "hp": 50,
+      "attack": 18,
+      "defense": 16,
+      "speed": 20
+    },
+    "attacks": ["rascada_hueval", "culebra", "punalada_trapera"]
   }
 ]

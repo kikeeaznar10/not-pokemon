@@ -282,5 +282,51 @@
       "percent": 30,
       "turns": 3
     }
+  },
+  {
+    "id": "rascada_hueval",
+    "name": "Rascada hueval",
+    "sound": "assets/audio/sfx/rascada_hueval.ogg",
+    "accuracy": 95,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 38
+    }
+  },
+  {
+    "id": "culebra",
+    "name": "Culebra",
+    "sound": "assets/audio/sfx/culebra.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "speed",
+      "percent": 25,
+      "turns": 3
+    }
+  },
+  {
+    "id": "vas_al_bano",
+    "name": "¿Vas al baño?",
+    "sound": "assets/audio/sfx/vas_al_bano.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "heal",
+      "percent": 28
+    }
+  },
+  {
+    "id": "punalada_trapera",
+    "name": "Puñalada trapera",
+    "sound": "assets/audio/sfx/punalada_trapera.ogg",
+    "accuracy": 85,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 54
+    }
   }
 ]

@@ -90,6 +90,8 @@ JSON (content text is not duplicated in `es.json`).
    colour and a beep for its cry. For a real look, either drop PNGs at those paths (front / back 64 × 64, icon
    16 × 16) or add a drawing for the id to `SPECIES` in `tools/art/flexymon.ts` and run `npm run art -- --force`
    (see [ART.md](ART.md)).
+   PNGs made outside the code (like `ferri`) must also list their id in `SUPPLIED_SPECIES` in
+   `tools/art/flexymon.ts`, so the art test accepts them and `npm run art -- --force` never overwrites them.
 4. **Make it appear**, otherwise nobody can get it:
    - in the wild: add `{ "id": "impresora", "weight": 30 }` to an encounter group in `zones.json`
      (see *Wild encounters*);

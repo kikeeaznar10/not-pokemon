@@ -284,17 +284,6 @@
     }
   },
   {
-    "id": "rascada_hueval",
-    "name": "Rascada hueval",
-    "sound": "assets/audio/sfx/rascada_hueval.ogg",
-    "accuracy": 95,
-    "target": "enemy",
-    "effect": {
-      "type": "damage",
-      "power": 38
-    }
-  },
-  {
     "id": "culebra",
     "name": "Culebra",
     "sound": "assets/audio/sfx/culebra.ogg",

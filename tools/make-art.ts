@@ -15,7 +15,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { drawCharacterSheet, lookFor, PLAYER_LOOK } from './art/characters';
-import { drawFlexymon, drawFlexymonIcon } from './art/flexymon';
+import { drawFlexymon, drawFlexymonIcon, SUPPLIED_SPECIES } from './art/flexymon';
 import { drawCar, drawItem, drawTitle } from './art/sprites';
 import { readAssetPaths, TITLE_IMAGE } from './make-placeholders';
 
@@ -42,12 +42,18 @@ export function artFor(assetPath: string): Buffer | null {
   return null;
 }
 
+/** True for a flexymon sprite whose PNG was supplied by hand: it is never regenerated, not even with `--force`. */
+function isSuppliedFlexymon(assetPath: string): boolean {
+  const m = /^assets\/sprites\/flexymon\/(.*)_(front|back|icon)\.png$/.exec(assetPath);
+  return m !== null && SUPPLIED_SPECIES.has(m[1]!);
+}
+
 /** Run the tool; returns the asset paths written (or that would be written with `dryRun`). */
 export function makeArt(force: boolean, dryRun = false): string[] {
   const written: string[] = [];
   for (const assetPath of [PLAYER_PATH, ...readAssetPaths()]) {
     const file = join(PUBLIC_DIR, assetPath);
-    if (existsSync(file) && !force) continue;
+    if (existsSync(file) && (!force || isSuppliedFlexymon(assetPath))) continue;
     const png = artFor(assetPath);
     if (!png) continue;
     written.push(assetPath);

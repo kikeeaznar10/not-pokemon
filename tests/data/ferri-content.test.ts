@@ -19,7 +19,7 @@ describe('content: ferri', () => {
     expect(ferri).toMatchObject({
       id: 'ferri',
       name: 'Ferri',
-      attacks: ['rascada_hueval', 'culebra', 'punalada_trapera'],
+      attacks: ['vas_al_bano', 'culebra', 'punalada_trapera'],
     });
 
     const total = (ferri?.stats.hp ?? 0) + (ferri?.stats.attack ?? 0) + (ferri?.stats.defense ?? 0) + (ferri?.stats.speed ?? 0);

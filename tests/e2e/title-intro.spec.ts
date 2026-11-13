@@ -150,7 +150,7 @@ test('a first-time player goes title → name → intro → free movement in und
     ui: 'press',
     hasSave: false,
     brokenSave: false,
-    logo: 'Flexymon',
+    logo: 'felxygon vKike',
     hint: 'Pulsa START',
   });
   await page.screenshot({ path: testInfo.outputPath(`title-${testInfo.project.name}.png`) });

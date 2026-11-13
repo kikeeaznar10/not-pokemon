@@ -25,7 +25,7 @@ The flexymon are office objects brought to life (laptops, printers, chairs…). 
 Advance–era handheld RPG, but everything must be original: never copy, trace or recreate characters, buildings or
 logos from existing games, and never use Nintendo assets or the word "Pokémon".
 
-## Flexymon (12 creatures × 3 files = 36 files)
+## Flexymon (13 creatures × 3 files = 39 files)
 
 Each creature needs a front, a back and a small icon. Design on a 32 × 32 canvas and export it doubled to 64 × 64.
 
@@ -52,6 +52,7 @@ The front shows a face (eyes, mouth, blush); the back shows the object's rear (c
 | `servidor` | Servidor | Server rack |
 | `router` | Router | Wi-Fi router |
 | `proyector` | Proyector | Projector |
+| `ferri` | Ferri | A person (hand-made art, not code-drawn) |
 
 Folder: `public/assets/sprites/flexymon/`, e.g. `raton_front.png`, `raton_back.png`, `raton_icon.png`.
 
@@ -209,7 +210,7 @@ minimaps). Files can arrive in any order and in batches; anything not delivered 
 
 Suggested order, by how often players see it:
 
-1. Player sheet and the 12 flexymon (front, back, icon)
+1. Player sheet and the 13 flexymon (front, back, icon)
 2. Tileset base tiles 0–31, then their borders and variants
 3. Title screen
 4. NPC sheets, starting with the bosses (`jefe`, `mp`) and `companera`

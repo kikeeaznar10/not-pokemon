@@ -25,6 +25,10 @@
           {
             "id": "silla",
             "weight": 15
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -38,6 +42,10 @@
           {
             "id": "grapadora",
             "weight": 50
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -55,6 +63,10 @@
           {
             "id": "silla",
             "weight": 30
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       }
@@ -86,6 +98,10 @@
           {
             "id": "silla",
             "weight": 15
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -99,6 +115,10 @@
           {
             "id": "impresora",
             "weight": 40
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -116,6 +136,10 @@
           {
             "id": "cafetera",
             "weight": 20
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -129,6 +153,10 @@
           {
             "id": "grapadora",
             "weight": 50
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -146,6 +174,10 @@
           {
             "id": "silla",
             "weight": 30
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       }
@@ -173,6 +205,10 @@
           {
             "id": "grapadora",
             "weight": 40
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       }
@@ -196,6 +232,10 @@
           {
             "id": "proyector",
             "weight": 50
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -213,6 +253,10 @@
           {
             "id": "servidor",
             "weight": 20
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -226,6 +270,10 @@
           {
             "id": "router",
             "weight": 60
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       },
@@ -239,6 +287,10 @@
           {
             "id": "proyector",
             "weight": 50
+          },
+          {
+            "id": "ferri",
+            "weight": 15
           }
         ]
       }

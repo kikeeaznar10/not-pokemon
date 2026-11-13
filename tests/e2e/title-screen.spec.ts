@@ -54,7 +54,7 @@ test('shows "Flexymon" centred on a 16:9 canvas that scales with the window', as
   // The TitleScene shows the logo near the top and the "Pulsa START" hint near the bottom, both centred
   // (over the office picture).
   expect(state.texts).toEqual([
-    { text: 'Flexymon', x: 256, y: 48 },
+    { text: 'felxygon vKike', x: 256, y: 48 },
     { text: 'Pulsa START', x: 256, y: 248 },
   ]);
 

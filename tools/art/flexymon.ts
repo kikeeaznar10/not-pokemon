@@ -331,9 +331,15 @@ function body(id: string, front: boolean): { pix: Pix; outline: Rgba } {
   return { pix, outline: s.outline };
 }
 
-/** True if `id` has hand-made art (otherwise {@link drawFlexymon} uses the generic blob). */
+/**
+ * Species whose PNGs were drawn outside the code (dropped in `public/assets/sprites/flexymon/`). The generator never
+ * overwrites their files, not even with `--force`.
+ */
+export const SUPPLIED_SPECIES: ReadonlySet<string> = new Set(['ferri']);
+
+/** True if `id` has hand-made art, in {@link SPECIES} or supplied as PNGs (otherwise the generic blob is used). */
 export function hasFlexymonArt(id: string): boolean {
-  return id in SPECIES;
+  return id in SPECIES || SUPPLIED_SPECIES.has(id);
 }
 
 /** The 64 × 64 front or back sprite of a species. */

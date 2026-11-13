@@ -95,7 +95,7 @@ folders), plus `assets/sprites/player.png`:
 | Path | Drawn by | Size |
 | --- | --- | --- |
 | `player.png`, `sprites/npcs/<name>.png` | `art/characters.ts` (look per name in `NPC_LOOKS`; unknown names get one from the name) | 64 × 128 walk sheet |
-| `sprites/flexymon/<id>_front/_back.png`, `_icon.png` | `art/flexymon.ts` (hand-made per id; unknown ids get a round creature) | 64 × 64, 16 × 16 |
+| `sprites/flexymon/<id>_front/_back.png`, `_icon.png` | `art/flexymon.ts` (hand-made per id; unknown ids get a round creature; ids in `SUPPLIED_SPECIES` keep their own PNGs, even with `--force`) | 64 × 64, 16 × 16 |
 | `sprites/items/<id>.png` | `art/sprites.ts` (unknown ids get a parcel) | 16 × 16 |
 | `sprites/car/*.png` | `art/sprites.ts` | 96 × 40 |
 | the title (`intro.json › titleImage`) | `art/sprites.ts` (built from the world tiles) | 512 × 288 |

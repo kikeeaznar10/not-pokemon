@@ -285,8 +285,8 @@ test.describe('the real world', () => {
     await expect.poll(() => scene(page), { timeout: 20_000 }).toBe('Title');
     expect(await hook<string[]>(page, 'dataErrors')).toEqual([]);
     expect(await hook(page, 'dataSummary')).toMatchObject({
-      flexymon: 12,
-      attacks: 24,
+      flexymon: 13,
+      attacks: 27,
       items: 8,
       npcs: 73,
       zones: 20,

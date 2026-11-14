@@ -219,5 +219,22 @@
       "speed": 20
     },
     "attacks": ["vas_al_bano", "culebra", "punalada_trapera"]
+  },
+  {
+    "id": "ferrando",
+    "name": "Ferrando",
+    "sprite": {
+      "front": "assets/sprites/flexymon/ferrando_front.png",
+      "back": "assets/sprites/flexymon/ferrando_back.png",
+      "icon": "assets/sprites/flexymon/ferrando_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_ferrando.ogg",
+    "stats": {
+      "hp": 52,
+      "attack": 17,
+      "defense": 19,
+      "speed": 18
+    },
+    "attacks": ["puerta", "ceo", "cesiiall"]
   }
 ]

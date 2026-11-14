@@ -317,5 +317,42 @@
       "type": "damage",
       "power": 54
     }
+  },
+  {
+    "id": "puerta",
+    "name": "Puerta",
+    "sound": "assets/audio/sfx/puerta.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "buff",
+      "stat": "defense",
+      "percent": 35,
+      "turns": 3
+    }
+  },
+  {
+    "id": "ceo",
+    "name": "CEO",
+    "sound": "assets/audio/sfx/ceo.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 65
+    }
+  },
+  {
+    "id": "cesiiall",
+    "name": "CesiiAll",
+    "sound": "assets/audio/sfx/cesiiall.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "attack",
+      "percent": 30,
+      "turns": 3
+    }
   }
 ]

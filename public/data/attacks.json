@@ -368,7 +368,7 @@
   },
   {
     "id": "menos_600_euros",
-    "name": "-600 euros",
+    "name": "600 euros",
     "sound": "assets/audio/sfx/menos_600_euros.ogg",
     "accuracy": 90,
     "target": "enemy",

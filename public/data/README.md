@@ -29,7 +29,8 @@ Validated at boot by the zod schemas in `src/data/schemas/` (one per file), then
   with the same name are loaded; zone `file` matches `maps/….tmj`.
 - `flexymon.json`: stats whole 1–999, 1–3 attacks.
 - `attacks.json`: accuracy 1–100; damage power 1–200; heal percent 1–100; buff/debuff stat
-  attack|defense|speed, percent 1–100, turns 1–9; heal/buff target `self`, damage/debuff target `enemy`.
+  attack|defense|speed, percent 1–100, turns 1–9; heal/buff target `self`, damage/debuff target `enemy`;
+  `effectMessage` (optional, non-empty text) only on buff/debuff attacks.
 - `items.json`: `price` whole 0–999 999 or `null`; `usableIn` ⊂ {battle, field}, no duplicates; effects heal
   (`amount` 1–999), heal_full, revive (`percent` 1–100), buff, team_slot, key, catch. Shops may only list items with
   a price.

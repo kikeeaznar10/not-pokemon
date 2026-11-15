@@ -236,5 +236,22 @@
       "speed": 18
     },
     "attacks": ["puerta", "ceo", "cesiiall"]
+  },
+  {
+    "id": "manu",
+    "name": "Manu",
+    "sprite": {
+      "front": "assets/sprites/flexymon/manu_front.png",
+      "back": "assets/sprites/flexymon/manu_back.png",
+      "icon": "assets/sprites/flexymon/manu_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_manu.ogg",
+    "stats": {
+      "hp": 48,
+      "attack": 24,
+      "defense": 14,
+      "speed": 22
+    },
+    "attacks": ["figamolla", "menos_600_euros", "pais_valencia"]
   }
 ]

@@ -43,6 +43,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       },
@@ -63,6 +67,10 @@
           },
           {
             "id": "ferrando",
+            "weight": 15
+          },
+          {
+            "id": "manu",
             "weight": 15
           }
         ]
@@ -88,6 +96,10 @@
           },
           {
             "id": "ferrando",
+            "weight": 15
+          },
+          {
+            "id": "manu",
             "weight": 15
           }
         ]
@@ -128,6 +140,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       },
@@ -148,6 +164,10 @@
           },
           {
             "id": "ferrando",
+            "weight": 15
+          },
+          {
+            "id": "manu",
             "weight": 15
           }
         ]
@@ -174,6 +194,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       },
@@ -194,6 +218,10 @@
           },
           {
             "id": "ferrando",
+            "weight": 15
+          },
+          {
+            "id": "manu",
             "weight": 15
           }
         ]
@@ -219,6 +247,10 @@
           },
           {
             "id": "ferrando",
+            "weight": 15
+          },
+          {
+            "id": "manu",
             "weight": 15
           }
         ]
@@ -255,6 +287,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       }
@@ -286,6 +322,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       },
@@ -311,6 +351,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       },
@@ -332,6 +376,10 @@
           {
             "id": "ferrando",
             "weight": 15
+          },
+          {
+            "id": "manu",
+            "weight": 15
           }
         ]
       },
@@ -352,6 +400,10 @@
           },
           {
             "id": "ferrando",
+            "weight": 15
+          },
+          {
+            "id": "manu",
             "weight": 15
           }
         ]

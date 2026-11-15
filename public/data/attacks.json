@@ -354,5 +354,43 @@
       "percent": 30,
       "turns": 3
     }
+  },
+  {
+    "id": "figamolla",
+    "name": "Figamolla",
+    "sound": "assets/audio/sfx/figamolla.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 60
+    }
+  },
+  {
+    "id": "menos_600_euros",
+    "name": "-600 euros",
+    "sound": "assets/audio/sfx/menos_600_euros.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "defense",
+      "percent": 30,
+      "turns": 3
+    },
+    "effectMessage": "A nadie le importa Manu, pero igualmente el becario bajó su defensa {turns} turnos"
+  },
+  {
+    "id": "pais_valencia",
+    "name": "País Valenciá",
+    "sound": "assets/audio/sfx/pais_valencia.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "buff",
+      "stat": "attack",
+      "percent": 35,
+      "turns": 3
+    }
   }
 ]

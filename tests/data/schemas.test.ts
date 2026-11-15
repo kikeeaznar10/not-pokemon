@@ -63,6 +63,13 @@ describe('schemas: one broken fixture per rule', () => {
     );
   });
 
+  it('attacks: effectMessage is only for buff and debuff attacks', () => {
+    expect(errorsAfter((f) => (f['attacks.json'][2].effectMessage = 'Texto propio'))).toEqual([]);
+    expect(errorsAfter((f) => (f['attacks.json'][0].effectMessage = 'Texto propio'))[0]).toMatch(
+      /\[0\]\.effectMessage › only a buff or debuff attack/,
+    );
+  });
+
   it('attacks: heal/buff must target self, damage/debuff must target enemy', () => {
     expect(errorsAfter((f) => (f['attacks.json'][0].target = 'self'))).toEqual([
       'attacks.json › [0].target › a damage attack must target "enemy"',

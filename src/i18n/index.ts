@@ -11,6 +11,13 @@ export type TextVars = Record<string, string | number>;
 /** A string table: flat key → text with optional `{var}` placeholders. */
 export type Strings = Record<string, string>;
 
+/** Replace `{var}` placeholders in `text`; a placeholder with no matching var is left as-is. */
+export function fillText(text: string, vars: TextVars): string {
+  return text.replace(/\{(\w+)\}/g, (whole, name: string) =>
+    Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : whole,
+  );
+}
+
 /**
  * Create a translator over a string table. A missing key returns `⟦key⟧` and logs a warning;
  * a placeholder with no matching var is left as-is (`{name}`).
@@ -22,10 +29,7 @@ export function createT(strings: Strings): (key: string, vars?: TextVars) => str
       warn(`Missing i18n key "${key}"`);
       return `⟦${key}⟧`;
     }
-    if (!vars) return text;
-    return text.replace(/\{(\w+)\}/g, (whole, name: string) =>
-      Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : whole,
-    );
+    return vars ? fillText(text, vars) : text;
   };
 }
 

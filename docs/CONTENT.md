@@ -119,6 +119,10 @@ JSON (content text is not duplicated in `es.json`).
 | `buff` | `stat` (`attack` / `defense` / `speed`), `percent` 1–100, `turns` 1–9 | `self` |
 | `debuff` | same as `buff` | `enemy` |
 
+A `buff` or `debuff` attack may add `"effectMessage"`: the text shown when its effect lands, instead of the generic
+"¡Defensa de X baja!". `{name}` (the flexymon affected), `{stat}` (the stat's name) and `{turns}` (how many turns it
+lasts) are filled in. Only buff and debuff attacks may have it.
+
 `accuracy` is 1–100 (percent chance to hit). How these numbers turn into damage: [GAME-RULES.md](GAME-RULES.md) ›
 Hit and damage. Every attack must be known by at least one species (world test). Run `npm run placeholders` for
 its sound.

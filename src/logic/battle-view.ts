@@ -26,6 +26,7 @@ import {
   type BattleState,
   type Side,
 } from './battle';
+import { fillText } from '../i18n';
 import { isFainted, maxHp } from './instance';
 import type { CatchOutcome } from './merge';
 
@@ -125,8 +126,10 @@ export function viewSteps(events: readonly BattleEvent[], ctx: ViewContext): Vie
     for (const m of ctx.state[who].team) hp[who].set(m.uid, m.currentHp);
   }
   const steps: ViewStep[] = [];
+  let previous: BattleEvent | undefined;
   for (const event of events) {
-    steps.push(...eventSteps(event, ctx, hp));
+    steps.push(...eventSteps(event, ctx, hp, previous));
+    previous = event;
     if (event.type === 'damage' || event.type === 'heal' || event.type === 'revive') {
       hp[event.who].set(event.uid, event.hp);
     }
@@ -135,7 +138,7 @@ export function viewSteps(events: readonly BattleEvent[], ctx: ViewContext): Vie
 }
 
 /** The steps of one event (see {@link viewSteps}). */
-function eventSteps(event: BattleEvent, ctx: ViewContext, hp: HpTrack): ViewStep[] {
+function eventSteps(event: BattleEvent, ctx: ViewContext, hp: HpTrack, previous?: BattleEvent): ViewStep[] {
   const { t, data } = ctx;
   switch (event.type) {
     case 'appear': {
@@ -172,15 +175,23 @@ function eventSteps(event: BattleEvent, ctx: ViewContext, hp: HpTrack): ViewStep
         { type: 'hp', who: event.who, hp: event.hp, maxHp: event.maxHp },
         msg(t('battle.revived', { name: displayName(ctx, event.who, event.uid) })),
       ];
-    case 'modifier':
+    case 'modifier': {
+      const vars = {
+        stat: t(`stat.${event.stat}`),
+        name: displayName(ctx, event.who, event.uid),
+        turns: event.turns,
+      };
+      // The modifier an attack just applied may have its own text (`attacks.json › effectMessage`).
+      const own =
+        previous?.type === 'attack' ? data.attacks.get(previous.attackId)?.effectMessage : undefined;
       return [
         msg(
-          t(event.kind === 'buff' ? 'battle.stat_up' : 'battle.stat_down', {
-            stat: t(`stat.${event.stat}`),
-            name: displayName(ctx, event.who, event.uid),
-          }),
+          own !== undefined
+            ? fillText(own, vars)
+            : t(event.kind === 'buff' ? 'battle.stat_up' : 'battle.stat_down', vars),
         ),
       ];
+    }
     case 'modifier_end':
       return [
         msg(

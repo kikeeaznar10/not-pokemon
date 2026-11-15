@@ -92,6 +92,27 @@ describe('battle-view: a round', () => {
     ]);
   });
 
+  it('a buff or debuff attack can word its own effect message, with the turns filled in', () => {
+    const s = createBattle([inst('portatil', 'p')], [inst('raton', 'w')], 'wild');
+    const base = data.attacks.get('pantallazo_azul')!;
+    const own = { ...base, effectMessage: 'Nadie lo pidió, pero {name} bajó su {stat} {turns} turnos' };
+    const custom: ViewContext = {
+      ...ctx(s),
+      data: { ...data, attacks: new Map(data.attacks).set(base.id, own) },
+    };
+    const evs: BattleEvent[] = [
+      { type: 'attack', who: 'player', uid: 'p', attackId: base.id },
+      { type: 'modifier', who: 'opponent', uid: 'w', kind: 'debuff', stat: 'defense', percent: 25, turns: 3 },
+      // A modifier that does not follow an attack (an item, say) keeps the generic message.
+      { type: 'modifier', who: 'opponent', uid: 'w', kind: 'debuff', stat: 'defense', percent: 25, turns: 3 },
+    ];
+    expect(texts(viewSteps(evs, custom))).toEqual([
+      `¡Portátil usa ${base.name}!`,
+      'Nadie lo pidió, pero Ratón salvaje bajó su Defensa 3 turnos',
+      '¡Defensa de Ratón salvaje baja!',
+    ]);
+  });
+
   it('heal, revive, item and flee messages', () => {
     const s = createBattle([inst('portatil', 'p')], [inst('raton', 'w')], 'wild');
     const evs: BattleEvent[] = [

@@ -1,7 +1,8 @@
 /**
  * Schema for `public/data/attacks.json`. Effect types: damage (power 1–200), heal (percent 1–100),
  * buff/debuff (stat, percent 1–100, turns 1–9). Rule: heal and buff target `self`; damage and debuff
- * target `enemy`.
+ * target `enemy`. A buff/debuff attack may carry an `effectMessage`: the text shown instead of the generic
+ * "stat sube / baja" message when the effect lands (`{name}`, `{stat}` and `{turns}` are filled in).
  */
 import { z } from 'zod';
 import { idSchema, modStatSchema, soundPathSchema, textSchema } from './common';
@@ -39,8 +40,20 @@ export const attackSchema = z
     accuracy: z.int().min(1).max(100),
     target: z.enum(['enemy', 'self']),
     effect: attackEffectSchema,
+    effectMessage: textSchema.optional(),
   })
   .superRefine((attack, ctx) => {
+    if (
+      attack.effectMessage !== undefined &&
+      attack.effect.type !== 'buff' &&
+      attack.effect.type !== 'debuff'
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['effectMessage'],
+        message: 'only a buff or debuff attack can have an effectMessage',
+      });
+    }
     const required = REQUIRED_TARGET[attack.effect.type];
     if (attack.target !== required) {
       ctx.addIssue({

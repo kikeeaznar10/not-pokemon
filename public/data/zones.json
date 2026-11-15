@@ -47,6 +47,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       },
@@ -71,6 +75,10 @@
           },
           {
             "id": "manu",
+            "weight": 15
+          },
+          {
+            "id": "fran",
             "weight": 15
           }
         ]
@@ -100,6 +108,10 @@
           },
           {
             "id": "manu",
+            "weight": 15
+          },
+          {
+            "id": "fran",
             "weight": 15
           }
         ]
@@ -144,6 +156,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       },
@@ -168,6 +184,10 @@
           },
           {
             "id": "manu",
+            "weight": 15
+          },
+          {
+            "id": "fran",
             "weight": 15
           }
         ]
@@ -198,6 +218,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       },
@@ -222,6 +246,10 @@
           },
           {
             "id": "manu",
+            "weight": 15
+          },
+          {
+            "id": "fran",
             "weight": 15
           }
         ]
@@ -251,6 +279,10 @@
           },
           {
             "id": "manu",
+            "weight": 15
+          },
+          {
+            "id": "fran",
             "weight": 15
           }
         ]
@@ -291,6 +323,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       }
@@ -326,6 +362,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       },
@@ -355,6 +395,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       },
@@ -380,6 +424,10 @@
           {
             "id": "manu",
             "weight": 15
+          },
+          {
+            "id": "fran",
+            "weight": 15
           }
         ]
       },
@@ -404,6 +452,10 @@
           },
           {
             "id": "manu",
+            "weight": 15
+          },
+          {
+            "id": "fran",
             "weight": 15
           }
         ]

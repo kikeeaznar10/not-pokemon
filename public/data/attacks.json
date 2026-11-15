@@ -392,5 +392,42 @@
       "percent": 35,
       "turns": 3
     }
+  },
+  {
+    "id": "buencha",
+    "name": "Buencha",
+    "sound": "assets/audio/sfx/buencha.ogg",
+    "accuracy": 100,
+    "target": "self",
+    "effect": {
+      "type": "buff",
+      "stat": "defense",
+      "percent": 35,
+      "turns": 3
+    }
+  },
+  {
+    "id": "te_meto_una",
+    "name": "Te meto una",
+    "sound": "assets/audio/sfx/te_meto_una.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "damage",
+      "power": 62
+    }
+  },
+  {
+    "id": "al_uso_bro",
+    "name": "Al uso bro",
+    "sound": "assets/audio/sfx/al_uso_bro.ogg",
+    "accuracy": 90,
+    "target": "enemy",
+    "effect": {
+      "type": "debuff",
+      "stat": "defense",
+      "percent": 30,
+      "turns": 3
+    }
   }
 ]

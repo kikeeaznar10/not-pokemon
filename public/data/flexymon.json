@@ -253,5 +253,22 @@
       "speed": 22
     },
     "attacks": ["figamolla", "menos_600_euros", "pais_valencia"]
+  },
+  {
+    "id": "fran",
+    "name": "Fran",
+    "sprite": {
+      "front": "assets/sprites/flexymon/fran_front.png",
+      "back": "assets/sprites/flexymon/fran_back.png",
+      "icon": "assets/sprites/flexymon/fran_icon.png"
+    },
+    "cry": "assets/audio/sfx/cry_fran.ogg",
+    "stats": {
+      "hp": 50,
+      "attack": 22,
+      "defense": 16,
+      "speed": 18
+    },
+    "attacks": ["buencha", "te_meto_una", "al_uso_bro"]
   }
 ]
